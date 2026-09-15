@@ -151,18 +151,23 @@ class Section(BaseModel):
 
     type: SectionType
     number: int | None = None
+    variant: str = ""
     raw_label: str = ""
     lines: list[Line] = Field(default_factory=list)
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
 
     @property
     def label(self) -> str:
-        """``Verse 2``, ``Chorus``, or the user's own label for a MISC section."""
+        """``Verse 2``, ``Chorus 2A``, or the user's own label for a MISC section.
+
+        ``variant`` keeps charts that distinguish ``Chorus 2A`` from ``Chorus 2B``
+        from collapsing into one group.
+        """
         if self.type is SectionType.MISC and self.raw_label:
             return self.raw_label
         if self.number is None:
             return str(self.type)
-        return f"{self.type} {self.number}"
+        return f"{self.type} {self.number}{self.variant}"
 
     @property
     def lyric_lines(self) -> list[Line]:
