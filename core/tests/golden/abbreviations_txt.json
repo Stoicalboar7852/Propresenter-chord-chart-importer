@@ -1,0 +1,135 @@
+{
+  "title": "Short Labels",
+  "artist": null,
+  "ccli_number": null,
+  "copyright": null,
+  "key": null,
+  "tempo": null,
+  "sections": [
+    {
+      "type": "Verse",
+      "number": 1,
+      "variant": "",
+      "raw_label": "V1",
+      "lines": [
+        {
+          "lyrics": "Here is the very first verse",
+          "chords": [
+            {
+              "chord": "C",
+              "char_index": 0,
+              "raw": "C"
+            },
+            {
+              "chord": "G",
+              "char_index": 7,
+              "raw": "G"
+            },
+            {
+              "chord": "Am",
+              "char_index": 14,
+              "raw": "Am"
+            },
+            {
+              "chord": "F",
+              "char_index": 21,
+              "raw": "F"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.7
+    },
+    {
+      "type": "Pre-Chorus",
+      "number": null,
+      "variant": "",
+      "raw_label": "PC",
+      "lines": [
+        {
+          "lyrics": "Building to the top",
+          "chords": [
+            {
+              "chord": "Am",
+              "char_index": 0,
+              "raw": "Am"
+            },
+            {
+              "chord": "F",
+              "char_index": 12,
+              "raw": "F"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.7
+    },
+    {
+      "type": "Chorus",
+      "number": null,
+      "variant": "",
+      "raw_label": "CH",
+      "lines": [
+        {
+          "lyrics": "Sing it out loud",
+          "chords": [
+            {
+              "chord": "C",
+              "char_index": 0,
+              "raw": "C"
+            },
+            {
+              "chord": "G",
+              "char_index": 6,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.7
+    },
+    {
+      "type": "Verse",
+      "number": 2,
+      "variant": "",
+      "raw_label": "V2",
+      "lines": [
+        {
+          "lyrics": "Here is the second verse now",
+          "chords": [
+            {
+              "chord": "C",
+              "char_index": 0,
+              "raw": "C"
+            },
+            {
+              "chord": "G",
+              "char_index": 7,
+              "raw": "G"
+            },
+            {
+              "chord": "Am",
+              "char_index": 14,
+              "raw": "Am"
+            },
+            {
+              "chord": "F",
+              "char_index": 21,
+              "raw": "F"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.7
+    }
+  ],
+  "warnings": [
+    "These sections were guessed rather than read from a label: Verse 1, Pre-Chorus, Chorus, Verse 2. Check them before exporting."
+  ],
+  "source_path": "<fixtures>/adversarial/abbreviations.txt",
+  "source_format": "txt"
+}

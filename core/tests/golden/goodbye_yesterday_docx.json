@@ -1,0 +1,1023 @@
+{
+  "title": "GOODBYE YESTERDAY",
+  "artist": null,
+  "ccli_number": null,
+  "copyright": null,
+  "key": null,
+  "tempo": null,
+  "sections": [
+    {
+      "type": "Verse",
+      "number": 1,
+      "variant": "",
+      "raw_label": "[Verse 1]",
+      "lines": [
+        {
+          "lyrics": "Goodbye yesterday",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I'm living in the light of a new day",
+          "chords": [
+            {
+              "chord": "Asus",
+              "char_index": 0,
+              "raw": "Asus"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I won't waste another minute in my old ways",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Praise the Lord, I've been born again",
+          "chords": [
+            {
+              "chord": "A4",
+              "char_index": 0,
+              "raw": "A4"
+            }
+          ],
+          "annotation": "REPEAT V1 HOLD \"G\" / Hold G X 8 BARS"
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Chorus",
+      "number": 1,
+      "variant": "",
+      "raw_label": "[Chorus 1]",
+      "lines": [
+        {
+          "lyrics": "Again and again and again and again",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "You rescued me out of the mess I was in",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "You traded my sorrow for something to sing",
+          "chords": [
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Verse",
+      "number": 2,
+      "variant": "",
+      "raw_label": "[Verse 2]",
+      "lines": [
+        {
+          "lyrics": "Goodbye yesterday",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I'm living in the light of a new day",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I won't waste another minute in my old ways",
+          "chords": [
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Praise the Lord I've been born again",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Goodbye yesterday",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "The Spirit of the Lord is upon me",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I've got resurrection in my veins",
+          "chords": [
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Praise the Lord I've been born",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Chorus",
+      "number": 2,
+      "variant": "A",
+      "raw_label": "[Chorus 2A] (x2)",
+      "lines": [
+        {
+          "lyrics": "Again and again and again and again",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "E",
+              "char_index": 11,
+              "raw": "E"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 21,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "You rescued me out of the mess I was in",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "E",
+              "char_index": 15,
+              "raw": "E"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 26,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "You traded my sorrow for something to sing",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "E",
+              "char_index": 14,
+              "raw": "E"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 26,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            },
+            {
+              "chord": "E",
+              "char_index": 49,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Interlude",
+      "number": null,
+      "variant": "",
+      "raw_label": "[Interlude]",
+      "lines": [
+        {
+          "lyrics": "",
+          "chords": [],
+          "annotation": "AX 1 BAR"
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Bridge",
+      "number": 1,
+      "variant": "",
+      "raw_label": "[Bridge 1]",
+      "lines": [
+        {
+          "lyrics": "I have decided",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "To follow Jesus",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "The world behind, the cross before",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 3,
+              "raw": "Bm"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 23,
+              "raw": "F#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 33,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "And I won't turn back",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I have decided",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "To follow Jesus",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "The world behind, the cross before",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 3,
+              "raw": "Bm"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 23,
+              "raw": "F#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 33,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "And I won't turn back",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Bridge",
+      "number": 2,
+      "variant": "",
+      "raw_label": "[Bridge 2] (x2)",
+      "lines": [
+        {
+          "lyrics": "I won't turn back",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I won't turn back",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": "HOLD"
+        },
+        {
+          "lyrics": "The world behind, the cross before",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 34,
+              "raw": "F#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 34,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "And I won't turn back",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Chorus",
+      "number": 3,
+      "variant": "",
+      "raw_label": "[Chorus 3]",
+      "lines": [
+        {
+          "lyrics": "Again and again and again and again",
+          "chords": [
+            {
+              "chord": "N.C.",
+              "char_index": 0,
+              "raw": "N.C."
+            },
+            {
+              "chord": "E/G#",
+              "char_index": 35,
+              "raw": "E/G#"
+            },
+            {
+              "chord": "A",
+              "char_index": 35,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "You rescued me out of the mess I was in",
+          "chords": [
+            {
+              "chord": "N.C.",
+              "char_index": 0,
+              "raw": "N.C."
+            },
+            {
+              "chord": "Bm",
+              "char_index": 39,
+              "raw": "Bm"
+            },
+            {
+              "chord": "A",
+              "char_index": 39,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "You traded my sorrow for something to sing",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "E",
+              "char_index": 14,
+              "raw": "E"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 25,
+              "raw": "F#m"
+            },
+            {
+              "chord": "E/G#",
+              "char_index": 42,
+              "raw": "E/G#"
+            },
+            {
+              "chord": "A",
+              "char_index": 42,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            },
+            {
+              "chord": "E",
+              "char_index": 37,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Chorus",
+      "number": 2,
+      "variant": "B",
+      "raw_label": "[Chorus 2B]",
+      "lines": [
+        {
+          "lyrics": "Again and again and again and again",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "E",
+              "char_index": 11,
+              "raw": "E"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 21,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "You rescued me out of the mess I was in",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "E",
+              "char_index": 16,
+              "raw": "E"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 26,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "You traded my sorrow for something to sing",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "E",
+              "char_index": 15,
+              "raw": "E"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 26,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            },
+            {
+              "chord": "E",
+              "char_index": 36,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Post-Chorus",
+      "number": null,
+      "variant": "",
+      "raw_label": "[Post-Chorus]",
+      "lines": [
+        {
+          "lyrics": "Oh",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "E",
+              "char_index": 2,
+              "raw": "E"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 2,
+              "raw": "F#m"
+            },
+            {
+              "chord": "E/G#",
+              "char_index": 2,
+              "raw": "E/G#"
+            },
+            {
+              "chord": "A",
+              "char_index": 2,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Praise the Lord, I've been born ag-",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "E",
+              "char_index": 8,
+              "raw": "E"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 14,
+              "raw": "F#m"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 27,
+              "raw": "Bm"
+            },
+            {
+              "chord": "A",
+              "char_index": 31,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "-ain",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "E",
+              "char_index": 4,
+              "raw": "E"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 4,
+              "raw": "F#m"
+            },
+            {
+              "chord": "E/G#",
+              "char_index": 4,
+              "raw": "E/G#"
+            },
+            {
+              "chord": "A",
+              "char_index": 4,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Praise the Lord, I've been born again",
+          "chords": [
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            },
+            {
+              "chord": "E",
+              "char_index": 17,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Vamp",
+      "number": 1,
+      "variant": "",
+      "raw_label": "[Vamp 1]",
+      "lines": [
+        {
+          "lyrics": "Now I'm dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Vamp",
+      "number": 2,
+      "variant": "",
+      "raw_label": "[Vamp 2]",
+      "lines": [
+        {
+          "lyrics": "Dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Vamp",
+      "number": 3,
+      "variant": "",
+      "raw_label": "[Vamp 3]",
+      "lines": [
+        {
+          "lyrics": "Dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "A/E",
+              "char_index": 0,
+              "raw": "A/E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Ending",
+      "number": null,
+      "variant": "",
+      "raw_label": "[Ending]",
+      "lines": [
+        {
+          "lyrics": "Praise the Lord, I've been born again",
+          "chords": [
+            {
+              "chord": "F#m",
+              "char_index": 0,
+              "raw": "F#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 14,
+              "raw": "E"
+            },
+            {
+              "chord": "D",
+              "char_index": 22,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    }
+  ],
+  "warnings": [
+    "Removed an indent of 64 spaces shared by every line."
+  ],
+  "source_path": "<fixtures>/GOODBYE YESTERDAY A.docx",
+  "source_format": "docx"
+}

@@ -1,0 +1,554 @@
+{
+  "title": "IN THE RIVER",
+  "artist": null,
+  "ccli_number": null,
+  "copyright": null,
+  "key": null,
+  "tempo": null,
+  "sections": [
+    {
+      "type": "Intro",
+      "number": null,
+      "variant": "",
+      "raw_label": "A   F#m   C#m   E",
+      "lines": [
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 0,
+              "raw": "F#m"
+            },
+            {
+              "chord": "C#m",
+              "char_index": 0,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 0,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.7
+    },
+    {
+      "type": "Verse",
+      "number": 1,
+      "variant": "",
+      "raw_label": "Verse1",
+      "lines": [
+        {
+          "lyrics": "There is a river where goodness flows",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 11,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 25,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "There is a fountain that drowns sorrows",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 11,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 27,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "There is an ocean deeper than fear",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 12,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 19,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "The tide is rising, rising",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 12,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 26,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Verse",
+      "number": 2,
+      "variant": "",
+      "raw_label": "Verse2",
+      "lines": [
+        {
+          "lyrics": "There is a current stirring deep inside",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 11,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 29,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "It's overflowing from the heart of God",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 9,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 28,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "The flood of heaven crashing over us",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 13,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 30,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "The tide is rising, rising",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 12,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 26,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Pre-Chorus",
+      "number": null,
+      "variant": "",
+      "raw_label": "Prechorus",
+      "lines": [
+        {
+          "lyrics": "Bursting, bursting",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 11,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Up from the ground, we feel it now",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 0,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 22,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Bursting, bursting",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 11,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Up from the ground, we feel it now",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 0,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 22,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Chorus",
+      "number": null,
+      "variant": "",
+      "raw_label": "Chorus",
+      "lines": [
+        {
+          "lyrics": "We come alive in the river",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 9,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 26,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "We come alive in the river",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 9,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 26,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "We come alive in the river",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 9,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 26,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "We come alive in the river",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 9,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 26,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Bridge",
+      "number": null,
+      "variant": "",
+      "raw_label": "Bridge",
+      "lines": [
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 0,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": "Break open prison doors"
+        },
+        {
+          "lyrics": "Set all the captives free",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 12,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 25,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Spring up a well, spring up a well",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 12,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 31,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Spring up a well in me",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 12,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 22,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 0,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": "Nothing can stop this joy"
+        },
+        {
+          "lyrics": "We're dancing in the streets",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 14,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 28,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Spring up a well, spring up a well",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 12,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 31,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Spring up a well in me",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 12,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 22,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Tag",
+      "number": null,
+      "variant": "",
+      "raw_label": "Tag",
+      "lines": [
+        {
+          "lyrics": "Spring up a well",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 12,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 16,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Spring up a well",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 12,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 16,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Spring up a well, spring up a well",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 12,
+              "raw": "A"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 32,
+              "raw": "F#m"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Spring up a well in me",
+          "chords": [
+            {
+              "chord": "C#m",
+              "char_index": 12,
+              "raw": "C#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 22,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    }
+  ],
+  "warnings": [
+    "Removed an indent of 64 spaces shared by every line.",
+    "The document's main font (Arial) is not fixed-pitch, so chord positions were read from spacing rather than exact columns.",
+    "These sections were guessed rather than read from a label: Intro. Check them before exporting."
+  ],
+  "source_path": "<fixtures>/IN THE RIVER.docx",
+  "source_format": "docx"
+}

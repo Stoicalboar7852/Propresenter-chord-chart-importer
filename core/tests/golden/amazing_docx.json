@@ -1,0 +1,677 @@
+{
+  "title": "AMAZING!",
+  "artist": "ELEVATION RHYTHM& J QUEEN",
+  "ccli_number": null,
+  "copyright": null,
+  "key": null,
+  "tempo": null,
+  "sections": [
+    {
+      "type": "Intro",
+      "number": null,
+      "variant": "",
+      "raw_label": "[INTRO]",
+      "lines": [
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "G",
+              "char_index": 0,
+              "raw": "G"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "G",
+              "char_index": 0,
+              "raw": "G"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "Gsus",
+              "char_index": 0,
+              "raw": "Gsus"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "Gsus",
+              "char_index": 0,
+              "raw": "Gsus"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Verse",
+      "number": 1,
+      "variant": "",
+      "raw_label": "[VERSE 1]",
+      "lines": [
+        {
+          "lyrics": "I was headed for hell until He rescued me",
+          "chords": [
+            {
+              "chord": "G",
+              "char_index": 41,
+              "raw": "G"
+            },
+            {
+              "chord": "Gsus",
+              "char_index": 41,
+              "raw": "Gsus"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I was stuck in my shame but now l've been set free",
+          "chords": [
+            {
+              "chord": "G",
+              "char_index": 50,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now heavens my home for all eterni - ty",
+          "chords": [
+            {
+              "chord": "Gsus",
+              "char_index": 39,
+              "raw": "Gsus"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I once was blind but now I see",
+          "chords": [
+            {
+              "chord": "G",
+              "char_index": 30,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Verse",
+      "number": 2,
+      "variant": "",
+      "raw_label": "[VERSE 2]",
+      "lines": [
+        {
+          "lyrics": "I was headed for hell until He rescued me",
+          "chords": [
+            {
+              "chord": "G",
+              "char_index": 41,
+              "raw": "G"
+            },
+            {
+              "chord": "C",
+              "char_index": 41,
+              "raw": "C"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I was stuck in my shame but now l've been set free",
+          "chords": [
+            {
+              "chord": "G",
+              "char_index": 50,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now heavens my home for all eterni - ty",
+          "chords": [
+            {
+              "chord": "C",
+              "char_index": 39,
+              "raw": "C"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I once was blind but now I see",
+          "chords": [
+            {
+              "chord": "Em",
+              "char_index": 30,
+              "raw": "Em"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Chorus",
+      "number": 1,
+      "variant": "",
+      "raw_label": "[CHORUS 1]",
+      "lines": [
+        {
+          "lyrics": "I be - lieve in Jesus name, I be - lieve He died to save",
+          "chords": [
+            {
+              "chord": "Em",
+              "char_index": 56,
+              "raw": "Em"
+            },
+            {
+              "chord": "D",
+              "char_index": 56,
+              "raw": "D"
+            },
+            {
+              "chord": "C",
+              "char_index": 56,
+              "raw": "C"
+            },
+            {
+              "chord": "G",
+              "char_index": 56,
+              "raw": "G"
+            },
+            {
+              "chord": "Em",
+              "char_index": 56,
+              "raw": "Em"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "On the cross He cleared my name, isn't that a - mazing grace?",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 61,
+              "raw": "D"
+            },
+            {
+              "chord": "C",
+              "char_index": 61,
+              "raw": "C"
+            },
+            {
+              "chord": "G",
+              "char_index": 61,
+              "raw": "G"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 61,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "Em",
+              "char_index": 61,
+              "raw": "Em"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I be - lieve on that third day, that He walked right out that grave",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 67,
+              "raw": "D"
+            },
+            {
+              "chord": "C",
+              "char_index": 67,
+              "raw": "C"
+            },
+            {
+              "chord": "G",
+              "char_index": 67,
+              "raw": "G"
+            },
+            {
+              "chord": "Em",
+              "char_index": 67,
+              "raw": "Em"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Full of life with Him I'm raised, isn't that amazing?",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 53,
+              "raw": "D"
+            },
+            {
+              "chord": "C",
+              "char_index": 53,
+              "raw": "C"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Chorus",
+      "number": 2,
+      "variant": "",
+      "raw_label": "[CHORUS 2]",
+      "lines": [
+        {
+          "lyrics": "I be - lieve in Jesus name, I be - lieve He died to save",
+          "chords": [
+            {
+              "chord": "Em",
+              "char_index": 56,
+              "raw": "Em"
+            },
+            {
+              "chord": "D",
+              "char_index": 56,
+              "raw": "D"
+            },
+            {
+              "chord": "C",
+              "char_index": 56,
+              "raw": "C"
+            },
+            {
+              "chord": "G",
+              "char_index": 56,
+              "raw": "G"
+            },
+            {
+              "chord": "Em",
+              "char_index": 56,
+              "raw": "Em"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "EmOn the cross He cleared my name, isn't that a - mazing grace?",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "C",
+              "char_index": 0,
+              "raw": "C"
+            },
+            {
+              "chord": "G",
+              "char_index": 0,
+              "raw": "G"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 0,
+              "raw": "D/F#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Isn't that amazing grace? Isn't that amazing grace?",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 51,
+              "raw": "D"
+            },
+            {
+              "chord": "C",
+              "char_index": 51,
+              "raw": "C"
+            },
+            {
+              "chord": "G",
+              "char_index": 51,
+              "raw": "G"
+            },
+            {
+              "chord": "Em",
+              "char_index": 51,
+              "raw": "Em"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Isn't that amazing grace? Isn't that amazing?",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 45,
+              "raw": "D"
+            },
+            {
+              "chord": "C",
+              "char_index": 45,
+              "raw": "C"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Bridge",
+      "number": 1,
+      "variant": "",
+      "raw_label": "[BRIDGE 1] [x4]",
+      "lines": [
+        {
+          "lyrics": "Hallelujah to the man on the middle cross",
+          "chords": [
+            {
+              "chord": "G",
+              "char_index": 41,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Cause He didn't owe the debt but He paid it off",
+          "chords": [
+            {
+              "chord": "G9/B",
+              "char_index": 47,
+              "raw": "G9/B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "And He rolled away the stone, now I'm gettin' up",
+          "chords": [
+            {
+              "chord": "Em",
+              "char_index": 48,
+              "raw": "Em"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I'm gettin' up, I'm gettin' up",
+          "chords": [
+            {
+              "chord": "C",
+              "char_index": 30,
+              "raw": "C"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Bridge",
+      "number": 2,
+      "variant": "",
+      "raw_label": "[BRIDGE 2]",
+      "lines": [
+        {
+          "lyrics": "Yeah I'm gettin' up",
+          "chords": [
+            {
+              "chord": "Am",
+              "char_index": 19,
+              "raw": "Am"
+            },
+            {
+              "chord": "G/B",
+              "char_index": 19,
+              "raw": "G/B"
+            },
+            {
+              "chord": "C",
+              "char_index": 19,
+              "raw": "C"
+            }
+          ],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "I'm gettin' up",
+          "chords": [],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "Yeah I'm gettin' up",
+          "chords": [
+            {
+              "chord": "Em",
+              "char_index": 19,
+              "raw": "Em"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 19,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 19,
+              "raw": "G"
+            }
+          ],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "I'm gettin' up",
+          "chords": [],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "Yeah I'm gettin' up",
+          "chords": [
+            {
+              "chord": "Am",
+              "char_index": 19,
+              "raw": "Am"
+            },
+            {
+              "chord": "G/B",
+              "char_index": 19,
+              "raw": "G/B"
+            },
+            {
+              "chord": "C",
+              "char_index": 19,
+              "raw": "C"
+            }
+          ],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "I'm gettin' up",
+          "chords": [],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "Yeah I'm gettin' up",
+          "chords": [
+            {
+              "chord": "Em",
+              "char_index": 19,
+              "raw": "Em"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 19,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 19,
+              "raw": "G"
+            }
+          ],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "I'm gettin' up",
+          "chords": [],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "Yeah I'm gettin' up",
+          "chords": [
+            {
+              "chord": "Am",
+              "char_index": 19,
+              "raw": "Am"
+            },
+            {
+              "chord": "G/B",
+              "char_index": 19,
+              "raw": "G/B"
+            },
+            {
+              "chord": "C",
+              "char_index": 19,
+              "raw": "C"
+            }
+          ],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "I'm gettin' up",
+          "chords": [],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "Yeah I'm gettin' up",
+          "chords": [
+            {
+              "chord": "Em",
+              "char_index": 19,
+              "raw": "Em"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 19,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 19,
+              "raw": "G"
+            }
+          ],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "I'm gettin' up",
+          "chords": [],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "Yeah I'm gettin' up",
+          "chords": [
+            {
+              "chord": "Am",
+              "char_index": 19,
+              "raw": "Am"
+            },
+            {
+              "chord": "G/B",
+              "char_index": 19,
+              "raw": "G/B"
+            },
+            {
+              "chord": "C",
+              "char_index": 19,
+              "raw": "C"
+            }
+          ],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "I'm gettin' up",
+          "chords": [],
+          "annotation": "I'm gettin' up"
+        },
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "Em",
+              "char_index": 0,
+              "raw": "Em"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 0,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 0,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    }
+  ],
+  "warnings": [
+    "The document's main font (Arial Nova Cond) is not fixed-pitch, so chord positions were read from spacing rather than exact columns."
+  ],
+  "source_path": "<fixtures>/AMAZING.docx",
+  "source_format": "docx"
+}

@@ -1,0 +1,958 @@
+{
+  "title": "The Prodigal",
+  "artist": "Josiah Queen",
+  "ccli_number": null,
+  "copyright": null,
+  "key": null,
+  "tempo": null,
+  "sections": [
+    {
+      "type": "Intro",
+      "number": null,
+      "variant": "",
+      "raw_label": "INTRO: x2",
+      "lines": [
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 0,
+              "raw": "G#m7"
+            },
+            {
+              "chord": "F#/A#",
+              "char_index": 0,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 0,
+              "raw": "B"
+            },
+            {
+              "chord": "E",
+              "char_index": 0,
+              "raw": "E"
+            },
+            {
+              "chord": "B",
+              "char_index": 0,
+              "raw": "B"
+            },
+            {
+              "chord": "F#/A#",
+              "char_index": 0,
+              "raw": "F#/A#"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Verse",
+      "number": 1,
+      "variant": "",
+      "raw_label": "VERSE 1:",
+      "lines": [
+        {
+          "lyrics": "I've been sick and tired",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 24,
+              "raw": "G#m7"
+            },
+            {
+              "chord": "F#/A#",
+              "char_index": 24,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 24,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Of being sick and tired",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 23,
+              "raw": "G#m7"
+            },
+            {
+              "chord": "F#/A#",
+              "char_index": 23,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 23,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Searching far and wide",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 22,
+              "raw": "G#m7"
+            },
+            {
+              "chord": "F#/A#",
+              "char_index": 22,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 22,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "For something that feels real",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 29,
+              "raw": "G#m7"
+            },
+            {
+              "chord": "F#/A#",
+              "char_index": 29,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 29,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "For something that feels real",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 29,
+              "raw": "G#m7"
+            },
+            {
+              "chord": "F#/A#",
+              "char_index": 29,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 29,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Pre-Chorus",
+      "number": 1,
+      "variant": "",
+      "raw_label": "PRE-CHORUS:",
+      "lines": [
+        {
+          "lyrics": "I don't want to lose my soul",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 28,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Chasing after things that don't",
+          "chords": [
+            {
+              "chord": "F#/A#",
+              "char_index": 31,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 31,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Lead me straight to You",
+          "chords": [
+            {
+              "chord": "F#",
+              "char_index": 23,
+              "raw": "F#"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Chorus",
+      "number": 1,
+      "variant": "",
+      "raw_label": "CHORUS:",
+      "lines": [
+        {
+          "lyrics": "Oh oh, I'm lost in the feeling",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 30,
+              "raw": "E"
+            },
+            {
+              "chord": "B",
+              "char_index": 30,
+              "raw": "B"
+            },
+            {
+              "chord": "F#",
+              "char_index": 30,
+              "raw": "F#"
+            },
+            {
+              "chord": "G#m7",
+              "char_index": 30,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Oh oh, I ain't from this world",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 30,
+              "raw": "E"
+            },
+            {
+              "chord": "B",
+              "char_index": 30,
+              "raw": "B"
+            },
+            {
+              "chord": "F#",
+              "char_index": 30,
+              "raw": "F#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Going back to Eden",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 18,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Ain't gonna be easy",
+          "chords": [
+            {
+              "chord": "B",
+              "char_index": 19,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "But it leads me straight to You",
+          "chords": [
+            {
+              "chord": "B",
+              "char_index": 31,
+              "raw": "B"
+            },
+            {
+              "chord": "F#",
+              "char_index": 31,
+              "raw": "F#"
+            },
+            {
+              "chord": "G#m7",
+              "char_index": 31,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm running home",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 20,
+              "raw": "E"
+            },
+            {
+              "chord": "F#",
+              "char_index": 20,
+              "raw": "F#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Like the Prodigal",
+          "chords": [
+            {
+              "chord": "B",
+              "char_index": 17,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Verse",
+      "number": 2,
+      "variant": "",
+      "raw_label": "VERSE 2:",
+      "lines": [
+        {
+          "lyrics": "I don't need the money",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 22,
+              "raw": "G#m7"
+            },
+            {
+              "chord": "F#/A#",
+              "char_index": 22,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 22,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I don't want the fame",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 21,
+              "raw": "G#m7"
+            },
+            {
+              "chord": "F#/A#",
+              "char_index": 21,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 21,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I don't want what I can't take",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 30,
+              "raw": "G#m7"
+            },
+            {
+              "chord": "F#/A#",
+              "char_index": 30,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 30,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "With me in the grave",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 20,
+              "raw": "G#m7"
+            },
+            {
+              "chord": "F#/A#",
+              "char_index": 20,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 20,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Pre-Chorus",
+      "number": 2,
+      "variant": "",
+      "raw_label": "PRE-CHORUS:",
+      "lines": [
+        {
+          "lyrics": "Oh, and I don't want to lose my soul",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 36,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Chasing after things that don't",
+          "chords": [
+            {
+              "chord": "F#/A#",
+              "char_index": 31,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 31,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Lead me straight to You",
+          "chords": [
+            {
+              "chord": "F#",
+              "char_index": 23,
+              "raw": "F#"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Chorus",
+      "number": 1,
+      "variant": "",
+      "raw_label": "CHORUS:",
+      "lines": [
+        {
+          "lyrics": "Oh oh, I'm lost in the feeling",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 30,
+              "raw": "E"
+            },
+            {
+              "chord": "B",
+              "char_index": 30,
+              "raw": "B"
+            },
+            {
+              "chord": "F#",
+              "char_index": 30,
+              "raw": "F#"
+            },
+            {
+              "chord": "G#m7",
+              "char_index": 30,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Oh oh, I ain't from this world",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 30,
+              "raw": "E"
+            },
+            {
+              "chord": "B",
+              "char_index": 30,
+              "raw": "B"
+            },
+            {
+              "chord": "F#",
+              "char_index": 30,
+              "raw": "F#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Going back to Eden",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 18,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Ain't gonna be easy",
+          "chords": [
+            {
+              "chord": "B",
+              "char_index": 19,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "But it leads me straight to You",
+          "chords": [
+            {
+              "chord": "B",
+              "char_index": 31,
+              "raw": "B"
+            },
+            {
+              "chord": "F#",
+              "char_index": 31,
+              "raw": "F#"
+            },
+            {
+              "chord": "G#m7",
+              "char_index": 31,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm running home",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 20,
+              "raw": "E"
+            },
+            {
+              "chord": "F#",
+              "char_index": 20,
+              "raw": "F#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Like the Prodigal",
+          "chords": [
+            {
+              "chord": "B",
+              "char_index": 17,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Bridge",
+      "number": null,
+      "variant": "",
+      "raw_label": "BRIDGE:",
+      "lines": [
+        {
+          "lyrics": "I don't want to lose my soul",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 28,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Chasing after things that don't",
+          "chords": [
+            {
+              "chord": "F#/A#",
+              "char_index": 31,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 31,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Lead me straight to You",
+          "chords": [
+            {
+              "chord": "F#",
+              "char_index": 23,
+              "raw": "F#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I don't want to lose my gaze",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 28,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "When I meet You face to face",
+          "chords": [
+            {
+              "chord": "F#/A#",
+              "char_index": 28,
+              "raw": "F#/A#"
+            },
+            {
+              "chord": "B",
+              "char_index": 28,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Well done, welcome home",
+          "chords": [
+            {
+              "chord": "F#",
+              "char_index": 23,
+              "raw": "F#"
+            },
+            {
+              "chord": "G#m7",
+              "char_index": 23,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm running home",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 20,
+              "raw": "E"
+            },
+            {
+              "chord": "F#",
+              "char_index": 20,
+              "raw": "F#"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Chorus",
+      "number": 2,
+      "variant": "",
+      "raw_label": "CHORUS:",
+      "lines": [
+        {
+          "lyrics": "Oh oh, I'm lost in the feeling",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 30,
+              "raw": "E"
+            },
+            {
+              "chord": "B",
+              "char_index": 30,
+              "raw": "B"
+            },
+            {
+              "chord": "F#",
+              "char_index": 30,
+              "raw": "F#"
+            },
+            {
+              "chord": "G#m7",
+              "char_index": 30,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Oh oh, I ain't from this world",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 30,
+              "raw": "E"
+            },
+            {
+              "chord": "B",
+              "char_index": 30,
+              "raw": "B"
+            },
+            {
+              "chord": "F#",
+              "char_index": 30,
+              "raw": "F#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Going back to Eden",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 18,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Ain't gonna be easy",
+          "chords": [
+            {
+              "chord": "B",
+              "char_index": 19,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "But it leads me straight to You",
+          "chords": [
+            {
+              "chord": "B",
+              "char_index": 31,
+              "raw": "B"
+            },
+            {
+              "chord": "F#",
+              "char_index": 31,
+              "raw": "F#"
+            },
+            {
+              "chord": "G#m7",
+              "char_index": 31,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm running home",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 20,
+              "raw": "E"
+            },
+            {
+              "chord": "F#",
+              "char_index": 20,
+              "raw": "F#"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Tag",
+      "number": null,
+      "variant": "",
+      "raw_label": "TAG:",
+      "lines": [
+        {
+          "lyrics": "Oh oh, I'm lost in the feeling",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 30,
+              "raw": "E"
+            },
+            {
+              "chord": "B",
+              "char_index": 30,
+              "raw": "B"
+            },
+            {
+              "chord": "F#",
+              "char_index": 30,
+              "raw": "F#"
+            },
+            {
+              "chord": "G#m7",
+              "char_index": 30,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Oh oh, I ain't from this world",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 30,
+              "raw": "E"
+            },
+            {
+              "chord": "B",
+              "char_index": 30,
+              "raw": "B"
+            },
+            {
+              "chord": "F#",
+              "char_index": 30,
+              "raw": "F#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Going back to Eden",
+          "chords": [
+            {
+              "chord": "G#m7",
+              "char_index": 18,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Ain't gonna be easy",
+          "chords": [
+            {
+              "chord": "B",
+              "char_index": 19,
+              "raw": "B"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "But it leads me straight to You",
+          "chords": [
+            {
+              "chord": "B",
+              "char_index": 31,
+              "raw": "B"
+            },
+            {
+              "chord": "F#",
+              "char_index": 31,
+              "raw": "F#"
+            },
+            {
+              "chord": "G#m7",
+              "char_index": 31,
+              "raw": "G#m7"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm running home",
+          "chords": [
+            {
+              "chord": "E",
+              "char_index": 20,
+              "raw": "E"
+            },
+            {
+              "chord": "F#",
+              "char_index": 20,
+              "raw": "F#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Like the Prodigal",
+          "chords": [
+            {
+              "chord": "N.C.",
+              "char_index": 17,
+              "raw": "N.C."
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    }
+  ],
+  "warnings": [],
+  "source_path": "<fixtures>/PRODIGAL.docx",
+  "source_format": "docx"
+}

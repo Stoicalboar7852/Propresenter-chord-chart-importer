@@ -1,0 +1,119 @@
+{
+  "title": "Instrumental Opening",
+  "artist": null,
+  "ccli_number": null,
+  "copyright": null,
+  "key": null,
+  "tempo": null,
+  "sections": [
+    {
+      "type": "Intro",
+      "number": null,
+      "variant": "",
+      "raw_label": "Intro",
+      "lines": [
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "Am",
+              "char_index": 0,
+              "raw": "Am"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "F",
+              "char_index": 0,
+              "raw": "F"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "C",
+              "char_index": 0,
+              "raw": "C"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "G",
+              "char_index": 0,
+              "raw": "G"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "x2",
+              "char_index": 0,
+              "raw": "x2"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Verse",
+      "number": 1,
+      "variant": "",
+      "raw_label": "Verse 1",
+      "lines": [
+        {
+          "lyrics": "Quiet in the morning",
+          "chords": [
+            {
+              "chord": "Am",
+              "char_index": 0,
+              "raw": "Am"
+            },
+            {
+              "chord": "F",
+              "char_index": 14,
+              "raw": "F"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Waiting for the light",
+          "chords": [
+            {
+              "chord": "C",
+              "char_index": 0,
+              "raw": "C"
+            },
+            {
+              "chord": "G",
+              "char_index": 14,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    }
+  ],
+  "warnings": [],
+  "source_path": "<fixtures>/adversarial/chord_only_intro.txt",
+  "source_format": "txt"
+}

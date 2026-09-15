@@ -1,0 +1,117 @@
+{
+  "title": "Man Of Sorrows",
+  "artist": null,
+  "ccli_number": null,
+  "copyright": null,
+  "key": null,
+  "tempo": null,
+  "sections": [
+    {
+      "type": "Verse",
+      "number": 1,
+      "variant": "",
+      "raw_label": "",
+      "lines": [
+        {
+          "lyrics": "A man of sorrows, and acquainted with grief",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 12,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 24,
+              "raw": "Bm"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "He was despised, we held him not",
+          "chords": [
+            {
+              "chord": "G",
+              "char_index": 0,
+              "raw": "G"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 15,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "A",
+              "char_index": 25,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.3
+    },
+    {
+      "type": "Verse",
+      "number": 2,
+      "variant": "",
+      "raw_label": "",
+      "lines": [
+        {
+          "lyrics": "Oh that rugged cross, my salvation",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 13,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 26,
+              "raw": "Bm"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Where your love poured out over me",
+          "chords": [
+            {
+              "chord": "G",
+              "char_index": 0,
+              "raw": "G"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 12,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "A",
+              "char_index": 24,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.3
+    }
+  ],
+  "warnings": [
+    "These sections were guessed rather than read from a label: Verse 1, Verse 2. Check them before exporting."
+  ],
+  "source_path": "<fixtures>/adversarial/no_headers.txt",
+  "source_format": "txt"
+}

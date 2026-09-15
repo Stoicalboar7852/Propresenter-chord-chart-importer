@@ -27,6 +27,7 @@ from pcci.ir import (
 from pcci.parse.chords import parse_chord
 from pcci.parse.sections import (
     CONFIDENCE_DIRECTIVE,
+    CONFIDENCE_FALLBACK,
     assign_section_numbers,
     parse_section_label,
 )
@@ -242,7 +243,9 @@ def parse_chordpro(document: RawDocument) -> Song:
         lyrics, placements = _split_chords(raw_line)
         lyrics = lyrics.strip()
         if current is None:
-            current = section_for(SectionType.MISC, "", CONFIDENCE_DIRECTIVE)
+            # Content before any environment directive. Treat it the way the heuristic
+            # path treats an unlabelled stanza rather than inventing a "Misc" group.
+            current = section_for(SectionType.VERSE, "", CONFIDENCE_FALLBACK)
         if not lyrics and placements:
             current.lines.append(
                 Line(

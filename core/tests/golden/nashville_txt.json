@@ -1,0 +1,104 @@
+{
+  "title": "Nashville Numbers",
+  "artist": null,
+  "ccli_number": null,
+  "copyright": null,
+  "key": null,
+  "tempo": null,
+  "sections": [
+    {
+      "type": "Verse",
+      "number": 1,
+      "variant": "",
+      "raw_label": "Verse 1",
+      "lines": [
+        {
+          "lyrics": "Great is your faithfulness to me",
+          "chords": [
+            {
+              "chord": "1",
+              "char_index": 0,
+              "raw": "1"
+            },
+            {
+              "chord": "5/7",
+              "char_index": 9,
+              "raw": "5/7"
+            },
+            {
+              "chord": "6m",
+              "char_index": 18,
+              "raw": "6m"
+            },
+            {
+              "chord": "4",
+              "char_index": 27,
+              "raw": "4"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Morning by morning",
+          "chords": [
+            {
+              "chord": "1",
+              "char_index": 0,
+              "raw": "1"
+            },
+            {
+              "chord": "5",
+              "char_index": 9,
+              "raw": "5"
+            },
+            {
+              "chord": "4",
+              "char_index": 18,
+              "raw": "4"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Chorus",
+      "number": null,
+      "variant": "",
+      "raw_label": "Chorus",
+      "lines": [
+        {
+          "lyrics": "Holy, holy, holy Lord",
+          "chords": [
+            {
+              "chord": "4",
+              "char_index": 0,
+              "raw": "4"
+            },
+            {
+              "chord": "5",
+              "char_index": 6,
+              "raw": "5"
+            },
+            {
+              "chord": "6m",
+              "char_index": 12,
+              "raw": "6m"
+            },
+            {
+              "chord": "1",
+              "char_index": 18,
+              "raw": "1"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    }
+  ],
+  "warnings": [],
+  "source_path": "<fixtures>/adversarial/nashville.txt",
+  "source_format": "txt"
+}

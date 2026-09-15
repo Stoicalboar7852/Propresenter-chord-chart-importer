@@ -1,0 +1,954 @@
+{
+  "title": "WASHED",
+  "artist": "ELEVATION",
+  "ccli_number": null,
+  "copyright": null,
+  "key": null,
+  "tempo": null,
+  "sections": [
+    {
+      "type": "Chorus",
+      "number": 1,
+      "variant": "",
+      "raw_label": "[CHORUS]",
+      "lines": [
+        {
+          "lyrics": "I've been washed in the water, washed in the blood",
+          "chords": [
+            {
+              "chord": "N.C.",
+              "char_index": 0,
+              "raw": "N.C."
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I'm as good as new, oh hallelujah",
+          "chords": [],
+          "annotation": null
+        },
+        {
+          "lyrics": "I've been washed in the water, washed in the blood",
+          "chords": [],
+          "annotation": null
+        },
+        {
+          "lyrics": "All because of You, oh hallelujah",
+          "chords": [],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Instrumental",
+      "number": 1,
+      "variant": "",
+      "raw_label": "[TURN 1]",
+      "lines": [
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 0,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 0,
+              "raw": "G"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 0,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 0,
+              "raw": "G"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Verse",
+      "number": 1,
+      "variant": "",
+      "raw_label": "[VERSE 1]",
+      "lines": [
+        {
+          "lyrics": "I'm clean,    sin   was stained on me",
+          "chords": [
+            {
+              "chord": "D/F#",
+              "char_index": 4,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 11,
+              "raw": "G"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 16,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 22,
+              "raw": "Bm"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 37,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 37,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Shame was running deep    but love  was spilled on Calvary",
+          "chords": [
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 6,
+              "raw": "Bm"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 18,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 24,
+              "raw": "G"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 30,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 36,
+              "raw": "Bm"
+            },
+            {
+              "chord": "Em",
+              "char_index": 51,
+              "raw": "Em"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Oh hallelujah I'm clean,    God   how can it be?",
+          "chords": [
+            {
+              "chord": "Asus",
+              "char_index": 0,
+              "raw": "Asus"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 18,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 25,
+              "raw": "G"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 33,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 39,
+              "raw": "Bm"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 48,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 48,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I'm ran - somed and relieved     standing in Your victory",
+          "chords": [
+            {
+              "chord": "A/C#",
+              "char_index": 4,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 10,
+              "raw": "Bm"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 22,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 30,
+              "raw": "G"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 35,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 41,
+              "raw": "Bm"
+            },
+            {
+              "chord": "Em",
+              "char_index": 52,
+              "raw": "Em"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Oh hallelujah",
+          "chords": [
+            {
+              "chord": "Asus",
+              "char_index": 0,
+              "raw": "Asus"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Chorus",
+      "number": 2,
+      "variant": "",
+      "raw_label": "[CHORUS]",
+      "lines": [
+        {
+          "lyrics": "I've been washed in the water, washed in the blood",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 10,
+              "raw": "D"
+            },
+            {
+              "chord": "G",
+              "char_index": 50,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I'm as good as new, oh  hallelujah",
+          "chords": [
+            {
+              "chord": "Bm",
+              "char_index": 7,
+              "raw": "Bm"
+            },
+            {
+              "chord": "Asus",
+              "char_index": 34,
+              "raw": "Asus"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I've been washed in the water, washed in the blood",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 23,
+              "raw": "D"
+            },
+            {
+              "chord": "G",
+              "char_index": 50,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "All because of You, oh  hallelujah",
+          "chords": [
+            {
+              "chord": "Bm",
+              "char_index": 6,
+              "raw": "Bm"
+            },
+            {
+              "chord": "Asus",
+              "char_index": 34,
+              "raw": "Asus"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Verse",
+      "number": 2,
+      "variant": "",
+      "raw_label": "[VERSE 2]",
+      "lines": [
+        {
+          "lyrics": "I'm free,   it's not what I have done",
+          "chords": [
+            {
+              "chord": "D/F#",
+              "char_index": 4,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 10,
+              "raw": "G"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 16,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 22,
+              "raw": "Bm"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 37,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 37,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "But what  you've done for me,       You laid  it  all upon that tree",
+          "chords": [
+            {
+              "chord": "A/C#",
+              "char_index": 4,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 10,
+              "raw": "Bm"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 28,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 34,
+              "raw": "G"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 40,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 46,
+              "raw": "Bm"
+            },
+            {
+              "chord": "Em",
+              "char_index": 54,
+              "raw": "Em"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Oh hallelujah I'm clean,   Your love has overcome",
+          "chords": [
+            {
+              "chord": "Asus",
+              "char_index": 0,
+              "raw": "Asus"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 18,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 25,
+              "raw": "G"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 32,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 38,
+              "raw": "Bm"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 49,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 49,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Your mer - cy is supreme   I'm danc - ing in Your victory",
+          "chords": [
+            {
+              "chord": "A/C#",
+              "char_index": 5,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 11,
+              "raw": "Bm"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 19,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 25,
+              "raw": "G"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 39,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 46,
+              "raw": "Bm"
+            },
+            {
+              "chord": "Em",
+              "char_index": 57,
+              "raw": "Em"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Oh hallelujah",
+          "chords": [
+            {
+              "chord": "Asus",
+              "char_index": 0,
+              "raw": "Asus"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Instrumental",
+      "number": 2,
+      "variant": "",
+      "raw_label": "[TURN 2]",
+      "lines": [
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Bridge",
+      "number": 1,
+      "variant": "",
+      "raw_label": "[BRIDGE 1] [x4]",
+      "lines": [
+        {
+          "lyrics": "You took away my shame and You nailed it to the cross",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 40,
+              "raw": "D"
+            },
+            {
+              "chord": "G",
+              "char_index": 53,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Got me running out the grave, hallelujah here I come",
+          "chords": [
+            {
+              "chord": "Bm",
+              "char_index": 44,
+              "raw": "Bm"
+            },
+            {
+              "chord": "G",
+              "char_index": 52,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Bridge",
+      "number": 2,
+      "variant": "",
+      "raw_label": "[BRIDGE 2]",
+      "lines": [
+        {
+          "lyrics": "Hallelujah here I come, hallelujah here I come",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 36,
+              "raw": "D"
+            },
+            {
+              "chord": "G",
+              "char_index": 46,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Hallelujah here I come, hallelujah here I come",
+          "chords": [
+            {
+              "chord": "Bm",
+              "char_index": 27,
+              "raw": "Bm"
+            },
+            {
+              "chord": "G",
+              "char_index": 46,
+              "raw": "G"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Instrumental",
+      "number": 3,
+      "variant": "",
+      "raw_label": "[TURN 3] [x2]",
+      "lines": [
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 0,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 0,
+              "raw": "G"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 0,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 0,
+              "raw": "G"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "D/F#",
+              "char_index": 0,
+              "raw": "D/F#"
+            },
+            {
+              "chord": "G",
+              "char_index": 0,
+              "raw": "G"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 0,
+              "raw": "Bm"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "/",
+              "char_index": 0,
+              "raw": "/"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "Em",
+              "char_index": 0,
+              "raw": "Em"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "Asus",
+              "char_index": 0,
+              "raw": "Asus"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Ending",
+      "number": null,
+      "variant": "",
+      "raw_label": "[END]",
+      "lines": [
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            },
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            },
+            {
+              "chord": "|",
+              "char_index": 0,
+              "raw": "|"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    }
+  ],
+  "warnings": [
+    "The document's main font (unknown) is not fixed-pitch, so chord positions were read from spacing rather than exact columns."
+  ],
+  "source_path": "<fixtures>/WASHED D.docx",
+  "source_format": "docx"
+}

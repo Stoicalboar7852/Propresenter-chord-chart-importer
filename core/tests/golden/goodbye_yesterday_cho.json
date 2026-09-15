@@ -1,0 +1,328 @@
+{
+  "title": "Goodbye Yesterday",
+  "artist": "Test Worship",
+  "ccli_number": "7654321",
+  "copyright": "2024 Test Music",
+  "key": "A",
+  "tempo": 140,
+  "sections": [
+    {
+      "type": "Verse",
+      "number": 1,
+      "variant": "",
+      "raw_label": "Verse 1",
+      "lines": [
+        {
+          "lyrics": "Goodbye yesterday",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I'm living in the light of a new day",
+          "chords": [
+            {
+              "chord": "Asus",
+              "char_index": 0,
+              "raw": "Asus"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I won't waste another minute in my old ways",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Praise the Lord, I've been born again",
+          "chords": [
+            {
+              "chord": "A4",
+              "char_index": 0,
+              "raw": "A4"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "",
+          "chords": [],
+          "annotation": "Hold G X 8 BARS"
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "type": "Chorus",
+      "number": 1,
+      "variant": "",
+      "raw_label": "Chorus 1",
+      "lines": [
+        {
+          "lyrics": "Again and again and again and again",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "You rescued me out of the mess I was in",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "You traded my sorrow for something to sing",
+          "chords": [
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "type": "Verse",
+      "number": 2,
+      "variant": "",
+      "raw_label": "Verse 2",
+      "lines": [
+        {
+          "lyrics": "Goodbye yesterday",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "The Spirit of the Lord is upon me",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "I've got resurrection in my veins",
+          "chords": [
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Praise the Lord I've been born",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "type": "Interlude",
+      "number": null,
+      "variant": "",
+      "raw_label": "Interlude",
+      "lines": [
+        {
+          "lyrics": "",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 0.95
+    },
+    {
+      "type": "Bridge",
+      "number": 1,
+      "variant": "",
+      "raw_label": "Bridge 1",
+      "lines": [
+        {
+          "lyrics": "I have decided",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 7,
+              "raw": "Bm"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "To follow Jesus",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 10,
+              "raw": "Bm"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "The world behind, the cross before",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            },
+            {
+              "chord": "Bm",
+              "char_index": 12,
+              "raw": "Bm"
+            },
+            {
+              "chord": "F#m",
+              "char_index": 22,
+              "raw": "F#m"
+            },
+            {
+              "chord": "E",
+              "char_index": 30,
+              "raw": "E"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "And I won't turn back",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 1.0
+    },
+    {
+      "type": "Chorus",
+      "number": 1,
+      "variant": "",
+      "raw_label": "Chorus 1",
+      "lines": [
+        {
+          "lyrics": "Again and again and again and again",
+          "chords": [
+            {
+              "chord": "A",
+              "char_index": 0,
+              "raw": "A"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "You rescued me out of the mess I was in",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "You traded my sorrow for something to sing",
+          "chords": [
+            {
+              "chord": "A/C#",
+              "char_index": 0,
+              "raw": "A/C#"
+            }
+          ],
+          "annotation": null
+        },
+        {
+          "lyrics": "Now I'm dancing on the grave that I once lived in",
+          "chords": [
+            {
+              "chord": "D",
+              "char_index": 0,
+              "raw": "D"
+            }
+          ],
+          "annotation": null
+        }
+      ],
+      "confidence": 1.0
+    }
+  ],
+  "warnings": [],
+  "source_path": "<fixtures>/chordpro/goodbye_yesterday.cho",
+  "source_format": "chordpro"
+}

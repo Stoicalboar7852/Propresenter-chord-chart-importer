@@ -15,9 +15,16 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Final
 
-from pcci.ir import Section, SectionType
+from pcci.ir import PositionedLine, RawDocument, Section, SectionType
+from pcci.parse.chords import (
+    LineClass,
+    classify_line,
+    find_inline_lyric_start,
+    is_chord_token,
+)
 
 #: Confidence attached to each detection route, per the spec's priority ladder.
 CONFIDENCE_DIRECTIVE: Final[float] = 1.0
@@ -47,6 +54,9 @@ _TYPE_BY_KEYWORD: Final[dict[str, SectionType]] = {
     "reprise": SectionType.MISC,
     "channel": SectionType.MISC,
     "link": SectionType.MISC,
+    # Seen in the real charts: [TURN 1], [END]
+    "turn": SectionType.INSTRUMENTAL,
+    "end": SectionType.ENDING,
 }
 
 #: Short forms that appear as bare labels in hand-written charts.
@@ -68,23 +78,26 @@ _TYPE_BY_ABBREVIATION: Final[dict[str, SectionType]] = {
 
 _LABEL_RE: Final[re.Pattern[str]] = re.compile(
     r"""^\s*
+    [>*\u2022\-]*\s*                       # decoration such as ">>>[CHORUS 1]"
     [\[\(]?\s*
     (?P<word>Intro|Verse|Chorus|Pre[\s\-]?Chorus|Post[\s\-]?Chorus|Bridge|Tag|Outro|
-       Ending|Interlude|Instrumental|Refrain|Vamp|Turnaround|Coda|Breakdown|Hook|Solo|
-       Reprise|Channel|Link)
+       Ending|End|Interlude|Instrumental|Refrain|Vamp|Turnaround|Turn|Coda|Breakdown|
+       Hook|Solo|Reprise|Channel|Link)
     \s*
-    (?P<number>[0-9]+[A-Za-z]?|[A-Z])?
+    (?P<number>[0-9]+[A-Za-z]?|[IVX]{1,4}|[A-Z])?
     \s*[\]\)]?\s*:?\s*
-    (?P<trailer>\(\s*[xX]\s*\d+\s*\)|[xX]\s*\d+)?
+    (?P<trailer>\[\s*[xX]\s*\d+\s*\]|\(\s*[xX]\s*\d+\s*\)|[xX]\s*\d+)?
     \s*$""",
     re.VERBOSE | re.IGNORECASE,
 )
+
+_ROMAN_VALUES: Final[dict[str, int]] = {"I": 1, "V": 5, "X": 10}
 
 _ABBREVIATION_RE: Final[re.Pattern[str]] = re.compile(
     r"^\s*[\[\(]?\s*(?P<word>[A-Za-z]{1,4})\s*(?P<number>\d{1,2})?\s*[\]\)]?\s*:?\s*$"
 )
 
-_TRAILING_REPEAT_RE: Final[re.Pattern[str]] = re.compile(r"\(?\s*[xX]\s*\d+\s*\)?\s*$")
+_TRAILING_REPEAT_RE: Final[re.Pattern[str]] = re.compile(r"[\[\(]?\s*[xX]\s*\d+\s*[\]\)]?\s*$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -111,16 +124,32 @@ def _variant_from(text: str | None) -> str:
     return match.group(1).upper() if match else ""
 
 
+def _roman_to_int(text: str) -> int | None:
+    """``II`` -> 2. Returns ``None`` for anything that is not a roman numeral."""
+    total = 0
+    previous = 0
+    for character in reversed(text.upper()):
+        value = _ROMAN_VALUES.get(character)
+        if value is None:
+            return None
+        total = total - value if value < previous else total + value
+        previous = max(previous, value)
+    return total or None
+
+
 def _number_from(text: str | None) -> int | None:
     if not text:
         return None
     digits = re.match(r"\d+", text)
     if digits:
         return int(digits.group())
-    # A bare letter suffix: "Verse A" -> 1, "Verse B" -> 2.
-    letter = text.strip().upper()
-    if len(letter) == 1 and letter.isalpha():
-        return ord(letter) - ord("A") + 1
+    candidate = text.strip().upper()
+    # "Verse II" is roman; "Verse B" is a letter variant. Roman wins when it can.
+    roman = _roman_to_int(candidate)
+    if roman is not None:
+        return roman
+    if len(candidate) == 1 and candidate.isalpha():
+        return ord(candidate) - ord("A") + 1
     return None
 
 
@@ -257,3 +286,282 @@ def assign_section_numbers(sections: list[Section]) -> None:
         next_number[section.type] = candidate
         section.number = candidate
         seen[fingerprint] = candidate
+
+
+# ---------------------------------------------------------------------------
+# Detection: which lines are headers, which are chords, which are lyrics
+# ---------------------------------------------------------------------------
+
+#: Words that mark a performance instruction rather than something to project.
+_INSTRUCTION_WORDS: Final[frozenset[str]] = frozenset(
+    {
+        "repeat",
+        "hold",
+        "bar",
+        "bars",
+        "beat",
+        "beats",
+        "tacet",
+        "build",
+        "drop",
+        "cue",
+        "spontaneous",
+        "spont",
+        "acappella",
+        "cappella",
+        "rit",
+        "fermata",
+        "until",
+        "til",
+        "click",
+        "break",
+        "stop",
+        "times",
+        "downbeat",
+        "instrumental",
+        "modulate",
+        "key change",
+        "no click",
+    }
+)
+
+_TRAILING_PAREN_RE: Final[re.Pattern[str]] = re.compile(r"\s+\(([^()]{1,30})\)\s*$")
+_TRAILING_COUNT_RE: Final[re.Pattern[str]] = re.compile(r"\s+([xX]\s?\d{1,2})\s*$")
+_WRAPPED_RE: Final[re.Pattern[str]] = re.compile(r"^\s*[\(\[]([^()\[\]]{1,40})[\)\]]\s*$")
+
+MAX_HEADER_LENGTH: Final[int] = 32
+#: How many certain chord lines make a document "a chord chart" for evidence 4.
+MIN_CHORD_LINES_FOR_DENSITY: Final[int] = 3
+
+
+class LineKind(StrEnum):
+    """What a line turned out to be, after context was taken into account."""
+
+    HEADER = "header"
+    CHORD = "chord"
+    LYRIC = "lyric"
+    ANNOTATION = "annotation"
+    BLANK = "blank"
+    #: Internal only: an ambiguous line before the second pass decides what it is.
+    AMBIGUOUS_PLACEHOLDER = "ambiguous"
+
+
+@dataclass(slots=True)
+class ClassifiedLine:
+    """One source line, with the decision made about it."""
+
+    index: int
+    line: PositionedLine
+    kind: LineKind
+    label: SectionLabel | None = None
+    lyric_text: str = ""
+    annotation: str = ""
+
+
+def is_instruction(text: str) -> bool:
+    """A performance note ("Hold G X 8 BARS"), not a lyric and not a chord."""
+    stripped = text.strip()
+    if not stripped:
+        return False
+    wrapped = _WRAPPED_RE.match(stripped)
+    if wrapped:
+        stripped = wrapped.group(1).strip()
+    words = re.findall(r"[A-Za-z]+", stripped.lower())
+    if not words or len(words) > 8:
+        return False
+    if not any(word in _INSTRUCTION_WORDS for word in words):
+        return False
+    # "Bars of gold" is a lyric; an instruction is short and mostly not prose.
+    return len(stripped) <= 40
+
+
+def split_trailing_instruction(text: str) -> tuple[str, str]:
+    """Peel a trailing ``(HOLD)`` or ``x4`` off a lyric line.
+
+    Real charts write these next to the words. Projected to a congregation they read
+    as part of the song, so they move to the line's annotation instead.
+    """
+    annotation_parts: list[str] = []
+    body = text.rstrip()
+    while True:
+        count = _TRAILING_COUNT_RE.search(body)
+        if count:
+            annotation_parts.insert(0, count.group(1).strip())
+            body = body[: count.start()].rstrip()
+            continue
+        paren = _TRAILING_PAREN_RE.search(body)
+        if paren:
+            annotation_parts.insert(0, paren.group(1).strip())
+            body = body[: paren.start()].rstrip()
+            continue
+        break
+    return body, " ".join(annotation_parts)
+
+
+def _bold_marks_chords(document: RawDocument) -> bool:
+    """Does this document use bold for chord lines? The reference Word charts do."""
+    bold_chords = plain_chords = bold_lyrics = plain_lyrics = 0
+    for line in document.lines:
+        text = line.text.strip()
+        if not text:
+            continue
+        structural = classify_line(text)
+        if structural is LineClass.CHORD:
+            bold_chords += line.bold
+            plain_chords += not line.bold
+        elif structural is LineClass.LYRIC and len(text.split()) > 3:
+            bold_lyrics += line.bold
+            plain_lyrics += not line.bold
+    if bold_chords + plain_chords < 3 or bold_lyrics + plain_lyrics < 3:
+        return False
+    return bold_chords > plain_chords and plain_lyrics > bold_lyrics
+
+
+def classify_document(document: RawDocument) -> list[ClassifiedLine]:
+    """Classify every line, resolving ambiguity with its neighbours.
+
+    Three passes, because each one needs the previous one's answers:
+
+    1. The unambiguous decisions — blank, header, annotation, definite chord line.
+    2. The ambiguous ones ("A" alone), resolved against the kinds decided in pass 1.
+       Headers and blank lines act as boundaries here, which is the whole point: a
+       lone "A" directly under ``[Verse 1]`` and directly above a lyric is a chord.
+    3. Formatting-based headers, which can only be judged once chord lines are known.
+    """
+    bold_is_chords = _bold_marks_chords(document)
+    structural = [classify_line(line.text) for line in document.lines]
+    classified: list[ClassifiedLine] = []
+
+    for index, line in enumerate(document.lines):
+        text = line.text.strip()
+        if not text:
+            classified.append(ClassifiedLine(index, line, LineKind.BLANK))
+            continue
+
+        label = parse_section_label(text)
+        if label is not None and structural[index] is not LineClass.CHORD:
+            classified.append(ClassifiedLine(index, line, LineKind.HEADER, label=label))
+            continue
+
+        # "Hold G X 8 BARS" is an instruction; "I won't turn back  (HOLD)" is a lyric
+        # with one attached. Peel the trailing note off before judging the line, or
+        # every lyric ending in a cue reads as an instruction and never reaches a slide.
+        body, trailing = split_trailing_instruction(text)
+        if structural[index] is not LineClass.CHORD and (not body or is_instruction(body)):
+            classified.append(ClassifiedLine(index, line, LineKind.ANNOTATION, annotation=text))
+            continue
+
+        if structural[index] is LineClass.CHORD:
+            classified.append(ClassifiedLine(index, line, LineKind.CHORD))
+            continue
+
+        if structural[index] is LineClass.AMBIGUOUS:
+            classified.append(ClassifiedLine(index, line, LineKind.AMBIGUOUS_PLACEHOLDER))
+            continue
+
+        # "A  Bm    I have decided": chords and their lyric share one line. It reads as
+        # a lyric line by proportion, but projecting it verbatim would put chord names
+        # on the screen, so it is handled as a chord line and split during pairing.
+        if find_inline_lyric_start(text) is not None:
+            classified.append(ClassifiedLine(index, line, LineKind.CHORD))
+            continue
+
+        classified.append(
+            ClassifiedLine(index, line, LineKind.LYRIC, lyric_text=body, annotation=trailing)
+        )
+
+    chord_line_count = sum(1 for item in classified if item.kind is LineKind.CHORD)
+    _resolve_ambiguous(classified, bold_is_chords, chord_line_count)
+    _promote_formatting_headers(classified, document)
+    return classified
+
+
+def _neighbour_kind(classified: list[ClassifiedLine], position: int, step: int) -> LineKind | None:
+    """The kind of the nearest non-blank line in one direction."""
+    index = position + step
+    while 0 <= index < len(classified):
+        kind = classified[index].kind
+        if kind is not LineKind.BLANK:
+            return kind
+        index += step
+    return None
+
+
+def _resolve_ambiguous(
+    classified: list[ClassifiedLine], bold_is_chords: bool, chord_line_count: int
+) -> None:
+    """Turn each placeholder into a chord line or a lyric line.
+
+    Evidence, in the order it is worth trusting:
+
+    1. This document marks chord lines bold, and this line's weight agrees.
+    2. A neighbour is definitely a chord line — chords cluster together.
+    3. The line above is a header or the start of the section and the line below is a
+       lyric, which is exactly the shape of a chord sitting over its words.
+    4. The document is full of chord lines and this one sits directly above a lyric.
+       In a chart with three or more unambiguous chord lines, a lone "A" on its own
+       line above a lyric is a chord; a lyric line consisting only of the word "A"
+       essentially does not occur.
+    """
+    for position, item in enumerate(classified):
+        if item.kind is not LineKind.AMBIGUOUS_PLACEHOLDER:
+            continue
+        if bold_is_chords:
+            is_chord = item.line.bold
+        else:
+            is_chord = _ambiguous_reads_as_chord(classified, position, chord_line_count)
+
+        if is_chord:
+            item.kind = LineKind.CHORD
+        else:
+            body, annotation = split_trailing_instruction(item.line.text.strip())
+            item.kind = LineKind.LYRIC
+            item.lyric_text = body
+            item.annotation = annotation
+
+
+def _ambiguous_reads_as_chord(
+    classified: list[ClassifiedLine], position: int, chord_line_count: int
+) -> bool:
+    """Apply evidence 2 to 4 from ``_resolve_ambiguous`` to one line."""
+    above = _neighbour_kind(classified, position, -1)
+    below = _neighbour_kind(classified, position, 1)
+    if LineKind.CHORD in (above, below):
+        return True
+    if below is not LineKind.LYRIC:
+        return False
+    if above in (LineKind.HEADER, LineKind.ANNOTATION, None):
+        return True
+    # A chart with several unmistakable chord lines is a chart where a lone "A" above
+    # a lyric is a chord, not the article.
+    return chord_line_count >= MIN_CHORD_LINES_FOR_DENSITY
+
+
+def _promote_formatting_headers(classified: list[ClassifiedLine], document: RawDocument) -> None:
+    """Priority 3: a short, standalone, emphasised line that is not a chord line."""
+    for position, item in enumerate(classified):
+        if item.kind is not LineKind.LYRIC:
+            continue
+        text = item.line.text.strip()
+        if len(text) > MAX_HEADER_LENGTH or len(text.split()) > 4:
+            continue
+        if is_chord_token(text):
+            continue
+        emphasised = item.line.heading or item.line.bold or (text.isupper() and len(text) > 1)
+        if not emphasised:
+            continue
+        before = classified[position - 1].kind if position else LineKind.BLANK
+        after = classified[position + 1].kind if position + 1 < len(classified) else LineKind.BLANK
+        if before not in (LineKind.BLANK, LineKind.HEADER) and after is not LineKind.BLANK:
+            continue
+        word = re.sub(r"[^a-z]", "", text.lower())
+        section_type = _TYPE_BY_KEYWORD.get(word, SectionType.MISC)
+        if section_type is SectionType.MISC and not document.monospace:
+            continue
+        item.kind = LineKind.HEADER
+        item.label = SectionLabel(
+            type=section_type,
+            number=None,
+            raw_label=text,
+            confidence=CONFIDENCE_FORMATTING,
+        )
