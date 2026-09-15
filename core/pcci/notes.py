@@ -51,11 +51,45 @@ def render_line(line: Line, placement: ChordPlacementStyle) -> list[str]:
     return rows
 
 
+#: Separates one lyric line's chords from the next on an inline row.
+#:
+#: Plain spaces, deliberately. A middle dot reads better but has to travel through RTF
+#: as a \uNNNN escape, and if the reader that renders it disagrees the operator gets a
+#: literal "?" on the stage screen mid-song. A pipe would render, but a pipe means a
+#: bar line on a chord chart and these groups are lyric lines, not bars. The notes use
+#: a fixed-pitch font, so four spaces against one is an obvious gap.
+INLINE_SEPARATOR = "    "
+
+
+def render_inline(lines: list[Line]) -> str:
+    """Every chord on the slide in one horizontal row.
+
+    A wider gap separates one lyric line's chords from the next, so an operator can
+    still see which chords belong together, and a line with no chords contributes
+    nothing rather than leaving a hole in the row.
+    """
+    groups: list[str] = []
+    annotations: list[str] = []
+    for line in lines:
+        chords = " ".join(placement.chord for placement in line.chords)
+        if chords:
+            groups.append(chords)
+        if line.annotation:
+            annotations.append(line.annotation)
+    row = INLINE_SEPARATOR.join(groups)
+    if annotations:
+        note = " / ".join(annotations)
+        row = f"{row}{INLINE_SEPARATOR}({note})" if row else f"({note})"
+    return row
+
+
 def render_lines(
     lines: list[Line],
-    placement: ChordPlacementStyle = ChordPlacementStyle.ABOVE,
+    placement: ChordPlacementStyle = ChordPlacementStyle.CHORDS_INLINE,
 ) -> str:
     """A block of chord/lyric rows for a slide."""
+    if placement is ChordPlacementStyle.CHORDS_INLINE:
+        return render_inline(lines)
     rows: list[str] = []
     for line in lines:
         rows.extend(render_line(line, placement))

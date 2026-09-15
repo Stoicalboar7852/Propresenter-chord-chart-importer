@@ -274,10 +274,51 @@ def test_chord_row_reconstructs_positions() -> None:
         ],
     )
     assert chord_row(line) == "C       G/B       Am"
-    assert render_lines([line]).splitlines() == [
+    assert render_lines([line], ChordPlacementStyle.ABOVE).splitlines() == [
         "C       G/B       Am",
         "Amazing grace how sweet the sound",
     ]
+
+
+def test_inline_row_is_the_default_and_is_horizontal() -> None:
+    """One row of chords, because a stage screen scales notes to fit."""
+    from pcci.ir import ChordPlacement, Line
+
+    lines = [
+        Line(lyrics="Again and again", chords=[ChordPlacement(chord="A", char_index=0)]),
+        Line(lyrics="You rescued me", chords=[ChordPlacement(chord="D", char_index=0)]),
+        Line(lyrics="You traded my sorrow", chords=[ChordPlacement(chord="A/C#", char_index=0)]),
+    ]
+    assert render_lines(lines) == "A    D    A/C#"
+    assert "\n" not in render_lines(lines)
+
+
+def test_inline_row_groups_a_line_s_chords_together() -> None:
+    from pcci.ir import ChordPlacement, Line
+
+    lines = [
+        Line(
+            lyrics="Again and again and again",
+            chords=[
+                ChordPlacement(chord="D", char_index=0),
+                ChordPlacement(chord="E", char_index=11),
+                ChordPlacement(chord="F#m", char_index=21),
+            ],
+        ),
+        Line(lyrics="You rescued me", chords=[ChordPlacement(chord="Bm", char_index=0)]),
+    ]
+    assert render_lines(lines) == "D E F#m    Bm"
+
+
+def test_inline_row_skips_lines_with_no_chords_and_keeps_annotations() -> None:
+    from pcci.ir import ChordPlacement, Line
+
+    lines = [
+        Line(lyrics="Again", chords=[ChordPlacement(chord="A", char_index=0)]),
+        Line(lyrics="a line with no chords"),
+        Line(lyrics="last", chords=[ChordPlacement(chord="D", char_index=0)], annotation="x4"),
+    ]
+    assert render_lines(lines) == "A    D    (x4)"
 
 
 def test_chords_can_be_placed_below() -> None:

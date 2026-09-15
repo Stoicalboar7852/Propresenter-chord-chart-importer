@@ -29,25 +29,32 @@ This is the route that works everywhere, with nothing to install or copy.
 6. Turn text scaling **off** or set it to shrink-to-fit, so long lines are not wrapped.
 7. Assign the layout to the stage screen your band sees.
 
-Advance through the song. Each slide's notes show that slide's chords, one row per
-lyric line:
+Advance through the song. Each slide's notes show that slide's chords on **one
+horizontal row**, grouped by lyric line:
 
 ```
-C       G/B       Am
-              G          D
+A    D    A/C#    D
 ```
 
-The lyrics are **not** repeated in the notes, because they are already on the slide and
-a stage screen shrinks its notes element to fit whatever text you give it. Half the text
-means the chords render at roughly twice the size. Row one is the chord row for line
-one, row two for line two, and a line with no chords leaves its row blank, so the rows
-still read against the words beside them.
+Two deliberate choices there. The lyrics are **not** repeated, because they are already
+on the slide and a stage screen shrinks its notes element to fit whatever text you give
+it — half the text renders at roughly twice the size. And the chords sit on one line
+rather than one per lyric line, because a column of single chords runs down the screen
+and reads slowly. A wider gap separates one lyric line's chords from the next, which is
+why the notes element needs a fixed-pitch font for this to read properly.
 
-If you would rather have the lyrics in the notes as well, convert with
-`--chord-placement above` (or `below`), or change it in the app's settings:
+Three other layouts are available, in the app's settings or with
+`--chord-placement`:
+
+| Value | What you get |
+|---|---|
+| `chords_inline` | One horizontal row. The default. |
+| `chords_only` | One row per lyric line, horizontal spacing preserved. |
+| `above` | The chart layout: chords over their own words. |
+| `below` | Lyrics first, chords beneath. |
 
 ```
-     C        G/B      Am
+     C        G/B      Am            <- above
 Amazing grace how sweet the sound
 ```
 

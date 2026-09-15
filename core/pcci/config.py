@@ -40,19 +40,24 @@ class ChordDelivery(StrEnum):
 class ChordPlacementStyle(StrEnum):
     """What the slide-notes block contains.
 
-    ``CHORDS_ONLY`` is the default because a stage screen scales its notes element to
-    fit: repeating the lyrics that are already on the slide doubles the text and halves
-    the size everything renders at. Chord rows keep their horizontal spacing and their
-    one-row-per-lyric-line order, so they still read against the words on the slide.
+    The default is ``CHORDS_INLINE``: every chord on the slide in one horizontal row,
+    grouped by lyric line. A stage screen scales its notes element to fit, so a block
+    that repeats the lyrics already on the slide renders at half the size, and one
+    chord per row runs the chords down the screen in a narrow column. One row of
+    chords is the largest and the quickest to read.
+
+    ``CHORDS_ONLY`` keeps the older shape — one row per lyric line, horizontal spacing
+    preserved — for anyone who wants the chords sitting above their own words.
     """
 
+    CHORDS_INLINE = "chords_inline"
     CHORDS_ONLY = "chords_only"
     ABOVE = "above"
     BELOW = "below"
 
     @property
     def includes_lyrics(self) -> bool:
-        return self is not ChordPlacementStyle.CHORDS_ONLY
+        return self in (ChordPlacementStyle.ABOVE, ChordPlacementStyle.BELOW)
 
 
 class RGBA(BaseModel):
@@ -164,7 +169,7 @@ class ConversionConfig(BaseModel):
     )
     balance_last_slide: bool = True
     chord_delivery: ChordDelivery = ChordDelivery.BOTH
-    chord_placement: ChordPlacementStyle = ChordPlacementStyle.CHORDS_ONLY
+    chord_placement: ChordPlacementStyle = ChordPlacementStyle.CHORDS_INLINE
     include_annotations_in_notes: bool = True
     category: str = "Song"
     style: SlideStyle = Field(default_factory=SlideStyle)

@@ -103,7 +103,7 @@ public sealed partial class AppState : ObservableObject
     [ObservableProperty] private bool writeChordPro;
     [ObservableProperty] private int linesPerSlide = 4;
     [ObservableProperty] private string chordDelivery = "both";
-    [ObservableProperty] private string chordPlacement = "chords_only";
+    [ObservableProperty] private string chordPlacement = "chords_inline";
 
     public ObservableCollection<ChartDocument> Documents { get; } = new();
     public ObservableCollection<EngineLogLine> LogLines { get; } = new();

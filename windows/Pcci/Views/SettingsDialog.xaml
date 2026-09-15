@@ -25,7 +25,8 @@
             HorizontalAlignment="Stretch"
             Header="What the slide notes contain"
             SelectionChanged="OnChordPlacementChanged">
-            <ComboBoxItem Content="Chords only (largest on stage)" Tag="chords_only" />
+            <ComboBoxItem Content="Chords in one row (largest on stage)" Tag="chords_inline" />
+            <ComboBoxItem Content="Chords, one row per lyric line" Tag="chords_only" />
             <ComboBoxItem Content="Chords above the lyrics" Tag="above" />
             <ComboBoxItem Content="Chords below the lyrics" Tag="below" />
         </ComboBox>

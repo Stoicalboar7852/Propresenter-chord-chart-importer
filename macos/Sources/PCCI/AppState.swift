@@ -60,7 +60,7 @@ final class AppState {
         linesPerSlide: 4,
         balanceLastSlide: true,
         chordDelivery: .both,
-        chordPlacement: .chordsOnly
+        chordPlacement: .chordsInline
     )
     var writeChordPro = false
     var logLines: [EngineLogLine] = []
