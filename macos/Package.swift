@@ -13,10 +13,7 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "PCCI",
-            path: "Sources/PCCI",
-            swiftSettings: [
-                .unsafeFlags(["-parse-as-library"])
-            ]
+            path: "Sources/PCCI"
         )
     ]
 )

@@ -99,6 +99,6 @@
     }
   ],
   "warnings": [],
-  "source_path": "<fixtures>/adversarial/nashville.txt",
+  "source_path": "adversarial/nashville.txt",
   "source_format": "txt"
 }

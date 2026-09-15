@@ -1016,6 +1016,6 @@
     }
   ],
   "warnings": [],
-  "source_path": "<fixtures>/pdf/goodbye_yesterday.pdf",
+  "source_path": "pdf/goodbye_yesterday.pdf",
   "source_format": "pdf"
 }

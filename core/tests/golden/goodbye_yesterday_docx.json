@@ -1018,6 +1018,6 @@
   "warnings": [
     "Removed an indent of 64 spaces shared by every line."
   ],
-  "source_path": "<fixtures>/GOODBYE YESTERDAY A.docx",
+  "source_path": "GOODBYE YESTERDAY A.docx",
   "source_format": "docx"
 }

@@ -1016,6 +1016,6 @@
     }
   ],
   "warnings": [],
-  "source_path": "<fixtures>/text/goodbye_yesterday.txt",
+  "source_path": "text/goodbye_yesterday.txt",
   "source_format": "txt"
 }

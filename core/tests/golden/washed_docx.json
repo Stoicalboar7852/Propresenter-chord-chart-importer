@@ -949,6 +949,6 @@
   "warnings": [
     "The document's main font (unknown) is not fixed-pitch, so chord positions were read from spacing rather than exact columns."
   ],
-  "source_path": "<fixtures>/WASHED D.docx",
+  "source_path": "WASHED D.docx",
   "source_format": "docx"
 }

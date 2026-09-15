@@ -114,6 +114,6 @@
     }
   ],
   "warnings": [],
-  "source_path": "<fixtures>/adversarial/chord_only_intro.txt",
+  "source_path": "adversarial/chord_only_intro.txt",
   "source_format": "txt"
 }

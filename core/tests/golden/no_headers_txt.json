@@ -112,6 +112,6 @@
   "warnings": [
     "These sections were guessed rather than read from a label: Verse 1, Verse 2. Check them before exporting."
   ],
-  "source_path": "<fixtures>/adversarial/no_headers.txt",
+  "source_path": "adversarial/no_headers.txt",
   "source_format": "txt"
 }

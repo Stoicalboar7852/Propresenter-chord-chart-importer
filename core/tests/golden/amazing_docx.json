@@ -672,6 +672,6 @@
   "warnings": [
     "The document's main font (Arial Nova Cond) is not fixed-pitch, so chord positions were read from spacing rather than exact columns."
   ],
-  "source_path": "<fixtures>/AMAZING.docx",
+  "source_path": "AMAZING.docx",
   "source_format": "docx"
 }

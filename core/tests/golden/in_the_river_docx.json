@@ -549,6 +549,6 @@
     "The document's main font (Arial) is not fixed-pitch, so chord positions were read from spacing rather than exact columns.",
     "These sections were guessed rather than read from a label: Intro. Check them before exporting."
   ],
-  "source_path": "<fixtures>/IN THE RIVER.docx",
+  "source_path": "IN THE RIVER.docx",
   "source_format": "docx"
 }

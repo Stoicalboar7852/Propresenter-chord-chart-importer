@@ -130,6 +130,6 @@
   "warnings": [
     "These sections were guessed rather than read from a label: Verse 1, Pre-Chorus, Chorus, Verse 2. Check them before exporting."
   ],
-  "source_path": "<fixtures>/adversarial/abbreviations.txt",
+  "source_path": "adversarial/abbreviations.txt",
   "source_format": "txt"
 }

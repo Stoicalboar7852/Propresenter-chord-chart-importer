@@ -21,6 +21,7 @@ struct GlassPanel: ViewModifier {
     var cornerRadius: CGFloat = 16
     var tint: Color? = nil
 
+    @ViewBuilder
     func body(content: Content) -> some View {
         #if PCCI_LIQUID_GLASS
         if #available(macOS 26, *) {
