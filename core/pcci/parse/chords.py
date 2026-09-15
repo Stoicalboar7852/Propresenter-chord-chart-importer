@@ -30,6 +30,8 @@ UNICODE_ACCIDENTALS: Final[dict[str, str]] = {
 }
 
 ROOTS: Final[frozenset[str]] = frozenset("ABCDEFG")
+#: Nashville number charts write the degree instead of the letter: "1 5/7 6m 4".
+NASHVILLE_ROOTS: Final[frozenset[str]] = frozenset("1234567")
 
 # Qualities, longest first so that "maj" wins over "m" and "min" over "m".
 _QUALITY_ALIASES: Final[list[tuple[str, str]]] = [
@@ -98,6 +100,7 @@ class Chord:
     alterations: tuple[str, ...] = ()
     bass: str = ""
     raw: str = ""
+    nashville: bool = False
 
     @property
     def normalised(self) -> str:
@@ -118,8 +121,10 @@ def normalise_accidentals(text: str) -> str:
     return text
 
 
-def _parse_root(token: str, index: int) -> tuple[str, str, int] | None:
-    if index >= len(token) or token[index] not in ROOTS:
+def _parse_root(token: str, index: int, *, nashville: bool = False) -> tuple[str, str, int] | None:
+    """Read a root note (or a Nashville degree) plus any accidental."""
+    allowed = NASHVILLE_ROOTS if nashville else ROOTS
+    if index >= len(token) or token[index] not in allowed:
         return None
     root = token[index]
     index += 1
@@ -132,11 +137,12 @@ def _parse_root(token: str, index: int) -> tuple[str, str, int] | None:
     return root, accidental, index
 
 
-def parse_chord(token: str) -> Chord | None:
+def parse_chord(token: str, *, nashville: bool = False) -> Chord | None:
     """Parse one whitespace-delimited token. Returns ``None`` if it is not a chord.
 
     The whole token must be consumed — a trailing comma or a stray letter means this
-    is a word, not a chord.
+    is a word, not a chord. With ``nashville=True`` the root is a scale degree
+    (``1``..``7``, optionally preceded by an accidental) instead of a letter.
     """
     if not token:
         return None
@@ -145,10 +151,15 @@ def parse_chord(token: str) -> Chord | None:
     if not token:
         return None
 
-    parsed_root = _parse_root(token, 0)
+    prefix = ""
+    if nashville and token[:1] in ("b", "#"):
+        prefix, token = token[0], token[1:]
+
+    parsed_root = _parse_root(token, 0, nashville=nashville)
     if parsed_root is None:
         return None
     root, accidental, index = parsed_root
+    root = prefix + root
 
     quality = ""
     for alias, canonical in _QUALITY_ALIASES:
@@ -194,7 +205,7 @@ def parse_chord(token: str) -> Chord | None:
 
     bass = ""
     if index < len(token) and token[index] == "/":
-        parsed_bass = _parse_root(token, index + 1)
+        parsed_bass = _parse_root(token, index + 1, nashville=nashville)
         if parsed_bass is None:
             return None
         bass_root, bass_accidental, index = parsed_bass
@@ -211,12 +222,18 @@ def parse_chord(token: str) -> Chord | None:
         alterations=tuple(alterations),
         bass=bass,
         raw=raw,
+        nashville=nashville,
     )
+
+
+def parse_any_chord(token: str) -> Chord | None:
+    """Parse a letter chord, falling back to Nashville number notation."""
+    return parse_chord(token) or parse_chord(token, nashville=True)
 
 
 def normalise_chord(token: str) -> str | None:
     """``"CM7"`` -> ``"Cmaj7"``. ``None`` when the token is not a chord."""
-    chord = parse_chord(token)
+    chord = parse_any_chord(token)
     return chord.normalised if chord else None
 
 
@@ -229,7 +246,7 @@ def is_chord_token(token: str) -> bool:
         return False
     if stripped in NON_CHORD_TOKENS or _REPEAT_RE.match(stripped):
         return True
-    return parse_chord(stripped) is not None
+    return parse_any_chord(stripped) is not None
 
 
 def tokenise(text: str) -> list[tuple[str, int]]:

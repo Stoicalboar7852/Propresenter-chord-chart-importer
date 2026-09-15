@@ -54,7 +54,7 @@ select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF", "PTH", "C4", "ARG"]
 ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["ARG"]
+"tests/*" = ["ARG", "RUF001", "RUF002", "RUF003"]
 # These modules exist to recognise and replace confusable characters, so their
 # literals are ambiguous on purpose.
 "pcci/ingest/base.py" = ["RUF001", "RUF002", "RUF003"]
@@ -76,6 +76,7 @@ module = [
     "markdown_it.*",
     "pcci.propresenter.proto.generated.*",
     "google.protobuf.*",
+    "pymupdf.*",
 ]
 ignore_missing_imports = true
 follow_imports = "skip"

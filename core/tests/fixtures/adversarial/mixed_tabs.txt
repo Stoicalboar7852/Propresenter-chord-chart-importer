@@ -1,0 +1,7 @@
+Mixed Whitespace
+
+Verse 1
+C	G		Am	F
+This line used tabs above it
+  C   G      Am  F
+And this one used spaces
