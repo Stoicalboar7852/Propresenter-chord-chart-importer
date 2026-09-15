@@ -23,12 +23,8 @@ $work = Join-Path $repoRoot 'build\pyinstaller'
 $python = Join-Path $core '.venv\Scripts\python.exe'
 
 if (-not (Test-Path $python)) {
-    Write-Error @"
-No virtualenv at $core\.venv. Create one first:
-  cd core
-  py -3.12 -m venv .venv
-  .venv\Scripts\python -m pip install -e ".[dev]"
-"@
+    Write-Host '==> No Python environment yet; setting one up'
+    & (Join-Path $PSScriptRoot 'setup-engine.ps1')
 }
 
 Write-Host '==> Installing PyInstaller'

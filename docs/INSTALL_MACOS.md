@@ -9,19 +9,23 @@ have one. Everything works; macOS just needs to be told once that you meant to o
 git clone https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer.git
 cd Propresenter-chord-chart-importer
 
-# The engine's Python environment
-cd core
-python3.12 -m venv .venv
-.venv/bin/python -m pip install -e ".[dev]"
-cd ..
+# The engine and the apps live on this branch, which is not the repository's default
+git checkout claude/affectionate-hamilton-ad8a08
 
-# The app, engine included
 ./scripts/build-macos.sh          # add --dmg for a disk image
 ```
 
+That is the whole thing. The build script sets up the engine's Python environment the
+first time, so there is nothing to prepare by hand. If you would rather do that step on
+its own — to run the command-line tool without building an app — it is
+`./scripts/setup-engine.sh`.
+
 The result is `build/macos/PCCI.app`. Drag it to `/Applications`.
 
-Requirements: macOS 14 or later, Xcode or the Swift toolchain, Python 3.12.
+Requirements: macOS 14 or later, Xcode or the Swift toolchain, and **Python 3.12 or
+newer**. The Python that comes with macOS is older than that and cannot run the engine;
+`brew install python@3.12` is the usual fix, and `setup-engine.sh` tells you so if it
+cannot find a suitable one.
 
 ### Liquid Glass
 

@@ -9,20 +9,21 @@ SmartScreen just needs one extra click the first time.
 git clone https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer.git
 cd Propresenter-chord-chart-importer
 
-# The engine's Python environment
-cd core
-py -3.12 -m venv .venv
-.venv\Scripts\python -m pip install -e ".[dev]"
-cd ..
+# The engine and the apps live on this branch, which is not the repository's default
+git checkout claude/affectionate-hamilton-ad8a08
 
-# The app, engine included
 .\scripts\build-windows.ps1
 ```
 
-The result is `build\windows\win-x64\` and a zip beside it. Copy the folder wherever you
-like — it is self-contained and needs no installer.
+That is the whole thing. The build script sets up the engine's Python environment the
+first time. To do only that step — to run the command-line tool without building an
+app — use `.\scripts\setup-engine.ps1`.
 
-Requirements: Windows 10 1809 or later, the .NET 8 SDK, Python 3.12. For an ARM machine:
+The result is `build\windows\win-x64\` and a zip beside it. Copy the folder wherever
+you like; it is self-contained and needs no installer.
+
+Requirements: Windows 10 1809 or later, the .NET 8 SDK, and **Python 3.12 or newer**
+(`winget install Python.Python.3.12`). For an ARM machine:
 `.\scripts\build-windows.ps1 -Architecture win-arm64`.
 
 ## First launch

@@ -14,12 +14,19 @@ The project is a headless Python engine plus two native front-ends:
 | `scripts/` | Build and code-generation scripts. |
 | `docs/` | Format reconnaissance, stage setup guide, build prompt. |
 
-## Working on the engine
+## Getting set up
+
+```bash
+git checkout claude/affectionate-hamilton-ad8a08   # where the engine and apps live
+./scripts/setup-engine.sh                          # or setup-engine.ps1 on Windows
+```
+
+It finds a Python 3.12 or newer, builds `core/.venv`, installs everything and checks the
+result runs. The platform build scripts call it themselves when the environment is
+missing, so `./scripts/build-macos.sh` alone is enough to get an app.
 
 ```bash
 cd core
-uv venv --python 3.12 .venv          # or: python3.12 -m venv .venv
-.venv/bin/python -m pip install -e ".[dev]"
 .venv/bin/python -m pytest
 .venv/bin/ruff check . && .venv/bin/mypy pcci
 ```

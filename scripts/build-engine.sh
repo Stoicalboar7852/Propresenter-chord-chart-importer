@@ -14,9 +14,8 @@ VENV="$CORE/.venv"
 PYTHON="$VENV/bin/python"
 
 if [[ ! -x "$PYTHON" ]]; then
-    echo "No virtualenv at $VENV. Create one first:" >&2
-    echo "  cd core && python3.12 -m venv .venv && .venv/bin/pip install -e '.[dev]'" >&2
-    exit 1
+    echo "==> No Python environment yet; setting one up"
+    "$REPO_ROOT/scripts/setup-engine.sh"
 fi
 
 echo "==> Installing PyInstaller"
