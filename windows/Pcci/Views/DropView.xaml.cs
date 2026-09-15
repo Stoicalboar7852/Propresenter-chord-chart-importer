@@ -1,3 +1,7 @@
+// `using System;` is load-bearing: the awaiter for a WinRT IAsyncOperation comes from
+// WindowsRuntimeSystemExtensions in the System namespace, so without it every
+// `await picker...Async()` fails to compile with CS4036.
+using System;
 using System.Linq;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
