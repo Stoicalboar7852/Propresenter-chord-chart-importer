@@ -1,0 +1,109 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pcci"
+version = "0.1.0"
+description = "ProPresenter Chord Chart Importer engine: chord charts in any common document format to ProPresenter 7 .pro presentations"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+    "pydantic>=2.7",
+    "protobuf>=5.27",
+    "charset-normalizer>=3.3",
+    "pymupdf>=1.24",
+    "pdfplumber>=0.11",
+    "python-docx>=1.1",
+    "odfpy>=1.4",
+    "striprtf>=0.0.26",
+    "beautifulsoup4>=4.12",
+    "markdown-it-py>=3.0",
+    "click>=8.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "pytest-cov>=5.0",
+    "hypothesis>=6.100",
+    "mypy>=1.10",
+    "ruff>=0.5",
+    "grpcio-tools>=1.64",
+    "types-protobuf>=5.27",
+]
+
+[project.scripts]
+pcci = "pcci.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pcci*"]
+
+[tool.setuptools.package-data]
+pcci = ["py.typed", "propresenter/proto/*.proto"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["pcci/propresenter/proto/generated"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM", "RUF", "PTH", "C4", "ARG"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ARG"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+exclude = ["pcci/propresenter/proto/generated/"]
+
+[[tool.mypy.overrides]]
+module = [
+    "fitz.*",
+    "pdfplumber.*",
+    "striprtf.*",
+    "odf.*",
+    "docx.*",
+    "markdown_it.*",
+    "pcci.propresenter.proto.generated.*",
+    "google.protobuf.*",
+]
+ignore_missing_imports = true
+follow_imports = "skip"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning:pkg_resources"]
+
+[tool.coverage.run]
+source = ["pcci"]
+omit = ["pcci/propresenter/proto/generated/*"]
+
+# protoc emits flat modules whose own .pyi stubs do not satisfy strict mode (they use
+# bare `Mapping` throughout). We treat them as untyped rather than weaken our own
+# settings; everything that touches them lives in bindings.py, writer.py and verify.py
+# and is covered by round-trip tests against real ProPresenter files instead.
+[[tool.mypy.overrides]]
+module = [
+    "action_pb2",
+    "applicationInfo_pb2",
+    "color_pb2",
+    "cue_pb2",
+    "font_pb2",
+    "graphicsData_pb2",
+    "groups_pb2",
+    "hotKey_pb2",
+    "presentation_pb2",
+    "presentationSlide_pb2",
+    "slide_pb2",
+    "url_pb2",
+    "uuid_pb2",
+]
+ignore_missing_imports = true
+follow_imports = "skip"

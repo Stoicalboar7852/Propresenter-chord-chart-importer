@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Generated protobuf bindings are committed; their caches are not
+*.pyc
+
+# macOS
+.DS_Store
+
+# Word lock files
+~$*
+
+# Editors
+.vscode/
+.idea/
