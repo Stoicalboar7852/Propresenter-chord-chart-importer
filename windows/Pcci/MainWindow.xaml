@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="Pcci.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Pcci"
+    xmlns:models="using:Pcci.Models"
+    xmlns:vm="using:Pcci.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid x:Name="RootGrid" RowDefinitions="Auto,*">
+
+        <!-- Title bar -->
+        <Grid x:Name="TitleBarArea" Grid.Row="0" Height="40" ColumnDefinitions="Auto,*,Auto">
+            <TextBlock
+                Grid.Column="0"
+                Margin="16,0,0,0"
+                VerticalAlignment="Center"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="ProPresenter Chord Chart Importer" />
+            <TextBlock
+                x:Name="TitleText"
+                Grid.Column="1"
+                Margin="24,0"
+                VerticalAlignment="Center"
+                Style="{StaticResource BodyStrongTextBlockStyle}" />
+            <Button
+                Grid.Column="2"
+                Margin="0,0,140,0"
+                Background="Transparent"
+                BorderThickness="0"
+                Click="OnShowLog"
+                ToolTipService.ToolTip="Show what the conversion engine reported">
+                <FontIcon FontSize="14" Glyph="&#xE9D9;" />
+            </Button>
+        </Grid>
+
+        <NavigationView
+            x:Name="Navigation"
+            Grid.Row="1"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="True"
+            PaneDisplayMode="Left"
+            OpenPaneLength="260"
+            SelectionChanged="OnQueueSelectionChanged">
+
+            <NavigationView.PaneHeader>
+                <StackPanel Margin="12,8" Orientation="Horizontal" Spacing="8">
+                    <Button Click="OnOpenFiles" Style="{StaticResource PcciPrimaryButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon FontSize="14" Glyph="&#xE8E5;" />
+                            <TextBlock Text="Add charts" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </NavigationView.PaneHeader>
+
+            <NavigationView.MenuItemTemplate>
+                <DataTemplate x:DataType="vm:ChartDocument">
+                    <NavigationViewItem Content="{x:Bind Name}" ToolTipService.ToolTip="{x:Bind Path}">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE8A5;" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                </DataTemplate>
+            </NavigationView.MenuItemTemplate>
+
+            <Grid RowDefinitions="Auto,*" AllowDrop="True" DragOver="OnDragOver" Drop="OnDrop">
+
+                <!-- Error banner -->
+                <InfoBar
+                    x:Name="Banner"
+                    Grid.Row="0"
+                    Margin="16,12,16,0"
+                    IsClosable="True"
+                    IsOpen="False"
+                    Severity="Error" />
+
+                <Grid x:Name="Panes" Grid.Row="1">
+                    <local:DropView x:Name="DropPane" />
+                    <local:ReviewView x:Name="ReviewPane" Visibility="Collapsed" />
+                    <local:ExportedView x:Name="ExportedPane" Visibility="Collapsed" />
+                    <local:FailureView x:Name="FailurePane" Visibility="Collapsed" />
+                    <ProgressRing
+                        x:Name="BusyRing"
+                        Width="42"
+                        Height="42"
+                        IsActive="False"
+                        Visibility="Collapsed" />
+                </Grid>
+            </Grid>
+        </NavigationView>
+    </Grid>
+</Window>

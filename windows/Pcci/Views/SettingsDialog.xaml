@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="Pcci.SettingsDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Settings"
+    CloseButtonText="Done"
+    DefaultButton="Close">
+
+    <StackPanel Width="420" Spacing="14">
+
+        <ComboBox
+            x:Name="ChordDeliveryCombo"
+            HorizontalAlignment="Stretch"
+            Header="How chords reach the stage screen"
+            SelectionChanged="OnChordDeliveryChanged">
+            <ComboBoxItem Content="Notes and chart" Tag="both" />
+            <ComboBoxItem Content="Slide notes only" Tag="notes" />
+            <ComboBoxItem Content="Chord chart only" Tag="chart" />
+            <ComboBoxItem Content="No chords" Tag="none" />
+        </ComboBox>
+
+        <ComboBox
+            x:Name="ChordPlacementCombo"
+            HorizontalAlignment="Stretch"
+            Header="What the slide notes contain"
+            SelectionChanged="OnChordPlacementChanged">
+            <ComboBoxItem Content="Chords only (largest on stage)" Tag="chords_only" />
+            <ComboBoxItem Content="Chords above the lyrics" Tag="above" />
+            <ComboBoxItem Content="Chords below the lyrics" Tag="below" />
+        </ComboBox>
+
+        <ToggleSwitch
+            x:Name="ChordProToggle"
+            Header="Also write a ChordPro (.cho) file"
+            Toggled="OnChordProToggled" />
+
+        <ComboBox
+            x:Name="ThemeCombo"
+            HorizontalAlignment="Stretch"
+            Header="Appearance"
+            SelectionChanged="OnThemeChanged">
+            <ComboBoxItem Content="Follow the system" Tag="default" />
+            <ComboBoxItem Content="Light" Tag="light" />
+            <ComboBoxItem Content="Dark" Tag="dark" />
+        </ComboBox>
+
+        <TextBlock
+            x:Name="EngineText"
+            Foreground="{ThemeResource PcciSecondaryTextBrush}"
+            Style="{StaticResource CaptionTextBlockStyle}"
+            TextWrapping="Wrap" />
+    </StackPanel>
+</ContentDialog>

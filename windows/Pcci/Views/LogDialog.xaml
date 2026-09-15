@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="Pcci.LogDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:Pcci.Models"
+    Title="Engine log"
+    CloseButtonText="Done"
+    PrimaryButtonText="Copy"
+    PrimaryButtonClick="OnCopy"
+    DefaultButton="Close">
+
+    <ScrollViewer Height="360" Width="620">
+        <ItemsControl x:Name="Lines">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:EngineLogLine">
+                    <TextBlock
+                        Style="{StaticResource PcciMonospaceTextStyle}"
+                        Text="{x:Bind Display}"
+                        TextWrapping="Wrap" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
+</ContentDialog>

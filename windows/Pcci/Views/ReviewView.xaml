@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Pcci.ReviewView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:Pcci.Models">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- Header: title, summary, lines-per-slide, export -->
+        <Grid
+            Grid.Row="0"
+            Padding="16,12"
+            ColumnDefinitions="*,Auto,Auto">
+            <StackPanel Grid.Column="0" Spacing="2">
+                <TextBlock x:Name="TitleText" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <TextBlock
+                    x:Name="SummaryText"
+                    Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}" />
+            </StackPanel>
+
+            <StackPanel
+                Grid.Column="1"
+                Margin="0,0,12,0"
+                Orientation="Horizontal"
+                Spacing="8"
+                VerticalAlignment="Center">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                    Text="Lines per slide" />
+                <NumberBox
+                    x:Name="LinesPerSlideBox"
+                    Width="110"
+                    Maximum="10"
+                    Minimum="1"
+                    SmallChange="1"
+                    SpinButtonPlacementMode="Inline"
+                    ValueChanged="OnLinesPerSlideChanged"
+                    Value="4" />
+            </StackPanel>
+
+            <Button
+                Grid.Column="2"
+                Click="OnExport"
+                Content="Export…"
+                Style="{StaticResource PcciPrimaryButtonStyle}"
+                VerticalAlignment="Center" />
+        </Grid>
+
+        <InfoBar
+            x:Name="GuessBar"
+            Grid.Row="1"
+            Margin="16,0,16,8"
+            IsClosable="False"
+            IsOpen="False"
+            Severity="Informational"
+            Title="Some sections were guessed"
+            Message="Rows with an amber or red dot were not read from a label in the chart. Correct them here before exporting." />
+
+        <!-- Sections on the left, the slides they produce on the right -->
+        <Grid Grid.Row="2" ColumnDefinitions="360,Auto,*">
+
+            <ListView
+                x:Name="SectionList"
+                Grid.Column="0"
+                Margin="8,0,0,8"
+                SelectionMode="Single">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="models:SongSection">
+                        <Grid
+                            Padding="4,6"
+                            ColumnDefinitions="Auto,*,Auto,Auto"
+                            ColumnSpacing="8">
+                            <Ellipse
+                                Grid.Column="0"
+                                Width="9"
+                                Height="9"
+                                Fill="{x:Bind Confidence, Converter={StaticResource ConfidenceToBrush}}"
+                                VerticalAlignment="Center" />
+                            <TextBlock
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Text="{x:Bind Label}" />
+                            <TextBlock
+                                Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Text="{x:Bind Lines.Count}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <StackPanel
+                Grid.Column="1"
+                Margin="8,8,8,8"
+                Spacing="6"
+                VerticalAlignment="Top">
+                <ComboBox
+                    x:Name="TypeCombo"
+                    Width="150"
+                    Header="Section type"
+                    SelectionChanged="OnTypeChanged" />
+                <NumberBox
+                    x:Name="NumberBox"
+                    Width="150"
+                    Header="Number"
+                    Minimum="1"
+                    SpinButtonPlacementMode="Inline"
+                    ValueChanged="OnNumberChanged" />
+                <Button Width="150" Click="OnMoveUp" Content="Move up" />
+                <Button Width="150" Click="OnMoveDown" Content="Move down" />
+                <Button Width="150" Click="OnMergeUp" Content="Merge into above" />
+                <Button Width="150" Click="OnSplit" Content="Split in half" />
+                <Button Width="150" Click="OnDelete" Content="Delete section" />
+            </StackPanel>
+
+            <ScrollViewer Grid.Column="2" Margin="0,0,8,8">
+                <ItemsControl x:Name="SlideList" Padding="8">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:PlannedSlide">
+                            <Border Margin="0,0,0,10" Style="{StaticResource PcciCardStyle}">
+                                <StackPanel Spacing="6">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Foreground="{ThemeResource PcciAccentBrush}"
+                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind Label}" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                            Text="{x:Bind LineCountText}" />
+                                    </Grid>
+                                    <ItemsControl ItemsSource="{x:Bind Lines}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="models:SongLine">
+                                                <StackPanel>
+                                                    <TextBlock
+                                                        Style="{StaticResource PcciChordTextStyle}"
+                                                        Text="{x:Bind ChordRow}"
+                                                        Visibility="{x:Bind HasChords}" />
+                                                    <TextBlock
+                                                        Style="{StaticResource PcciMonospaceTextStyle}"
+                                                        Text="{x:Bind Lyrics}"
+                                                        Visibility="{x:Bind HasLyrics}" />
+                                                    <TextBlock
+                                                        FontStyle="Italic"
+                                                        Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                                        Text="{x:Bind Annotation}"
+                                                        Visibility="{x:Bind HasAnnotation}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

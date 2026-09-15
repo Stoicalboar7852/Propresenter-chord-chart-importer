@@ -37,8 +37,13 @@ mkdir -p "$OUTPUT" "$WORK"
 # The generated protobuf modules are imported by bare name after their directory is
 # added to sys.path at runtime, so PyInstaller cannot find them by static analysis.
 # They ship as data and the runtime path lookup finds them exactly as it does in a
-# source checkout.
+# source checkout. Their dependency on google.protobuf is invisible to the analyser for
+# the same reason, so it is collected explicitly — without it the engine builds,
+# launches, and then fails the moment somebody tries to export.
+# --add-data resolves relative source paths against --specpath, not the working
+# directory, so the source side is absolute and only the destination is relative.
 GENERATED="pcci/propresenter/proto/generated"
+GENERATED_SOURCE="$CORE/$GENERATED"
 
 echo "==> Freezing the engine"
 cd "$CORE"
@@ -51,7 +56,7 @@ cd "$CORE"
     --distpath "$OUTPUT" \
     --workpath "$WORK" \
     --specpath "$WORK" \
-    --add-data "$GENERATED:$GENERATED" \
+    --add-data "$GENERATED_SOURCE:$GENERATED" \
     --hidden-import "pcci.ingest.chordpro" \
     --hidden-import "pcci.ingest.docx" \
     --hidden-import "pcci.ingest.html" \
@@ -62,6 +67,8 @@ cd "$CORE"
     --hidden-import "pcci.ingest.txt" \
     --collect-submodules pymupdf \
     --collect-submodules charset_normalizer \
+    --collect-submodules google.protobuf \
+    --copy-metadata protobuf \
     entrypoint.py
 
 BINARY="$OUTPUT/pcci/pcci"

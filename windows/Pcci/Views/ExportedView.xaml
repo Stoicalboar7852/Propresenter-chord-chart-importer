@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Pcci.ExportedView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer>
+        <StackPanel
+            Padding="40"
+            HorizontalAlignment="Center"
+            MaxWidth="620"
+            Spacing="16">
+            <FontIcon
+                FontSize="42"
+                Foreground="{ThemeResource PcciConfidentBrush}"
+                Glyph="&#xE930;" />
+            <TextBlock
+                x:Name="TitleText"
+                HorizontalAlignment="Center"
+                Style="{StaticResource SubtitleTextBlockStyle}" />
+            <TextBlock
+                x:Name="SummaryText"
+                HorizontalAlignment="Center"
+                Foreground="{ThemeResource PcciSecondaryTextBrush}" />
+
+            <Border Style="{StaticResource PcciCardStyle}">
+                <StackPanel x:Name="FileList" Spacing="8" />
+            </Border>
+
+            <StackPanel
+                x:Name="WarningList"
+                Spacing="4"
+                Visibility="Collapsed" />
+
+            <StackPanel
+                HorizontalAlignment="Center"
+                Orientation="Horizontal"
+                Spacing="10">
+                <Button Click="OnShowInExplorer" Content="Show in File Explorer" />
+                <Button Click="OnOpenGuide" Content="Set up my stage screen" />
+                <Button
+                    Click="OnBackToReview"
+                    Content="Back to review"
+                    Style="{StaticResource PcciPrimaryButtonStyle}" />
+            </StackPanel>
+
+            <TextBlock
+                HorizontalAlignment="Center"
+                Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                TextAlignment="Center"
+                TextWrapping="Wrap"
+                Text="The chords are in each slide's notes, and the chart pages sit beside the presentation. Neither reaches the audience output." />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

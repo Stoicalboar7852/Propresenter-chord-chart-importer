@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Golden Gate over a Fluent dark neutral ramp.
+
+    Windows gets Fluent, not an imitation of macOS: Mica Alt for the window backdrop,
+    flat surfaces, rounded corners, no acrylic pretending to be glass. The accent is the
+    same International Orange the Mac app uses, so the two look like one product without
+    either pretending to be the other platform.
+-->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Pcci">
+
+    <local:ConfidenceToBrushConverter x:Key="ConfidenceToBrush" />
+
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+            <Color x:Key="PcciAccentColor">#C0362C</Color>
+            <Color x:Key="PcciAccentWarmColor">#E8603C</Color>
+            <SolidColorBrush x:Key="PcciAccentBrush" Color="{StaticResource PcciAccentColor}" />
+            <SolidColorBrush x:Key="PcciAccentWarmBrush" Color="{StaticResource PcciAccentWarmColor}" />
+            <SolidColorBrush x:Key="PcciSurfaceBrush" Color="#252528" />
+            <SolidColorBrush x:Key="PcciSurfaceRaisedBrush" Color="#2E2E32" />
+            <SolidColorBrush x:Key="PcciSeparatorBrush" Color="#3A3A3E" />
+            <SolidColorBrush x:Key="PcciPrimaryTextBrush" Color="#F5F4F2" />
+            <SolidColorBrush x:Key="PcciSecondaryTextBrush" Color="#A0A0A6" />
+            <SolidColorBrush x:Key="PcciConfidentBrush" Color="#4CC38A" />
+            <SolidColorBrush x:Key="PcciUncertainBrush" Color="#E8B339" />
+            <SolidColorBrush x:Key="PcciGuessedBrush" Color="#E8603C" />
+        </ResourceDictionary>
+
+        <ResourceDictionary x:Key="Light">
+            <Color x:Key="PcciAccentColor">#C0362C</Color>
+            <Color x:Key="PcciAccentWarmColor">#E8603C</Color>
+            <SolidColorBrush x:Key="PcciAccentBrush" Color="{StaticResource PcciAccentColor}" />
+            <SolidColorBrush x:Key="PcciAccentWarmBrush" Color="{StaticResource PcciAccentWarmColor}" />
+            <SolidColorBrush x:Key="PcciSurfaceBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="PcciSurfaceRaisedBrush" Color="#FAFAF8" />
+            <SolidColorBrush x:Key="PcciSeparatorBrush" Color="#D8D6D2" />
+            <SolidColorBrush x:Key="PcciPrimaryTextBrush" Color="#1C1C1E" />
+            <SolidColorBrush x:Key="PcciSecondaryTextBrush" Color="#5B5B60" />
+            <SolidColorBrush x:Key="PcciConfidentBrush" Color="#2E7D51" />
+            <SolidColorBrush x:Key="PcciUncertainBrush" Color="#B4791B" />
+            <SolidColorBrush x:Key="PcciGuessedBrush" Color="#B03A2E" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <x:Double x:Key="PcciCardCorner">8</x:Double>
+
+    <Style x:Key="PcciCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource PcciSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{ThemeResource PcciSeparatorBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="14" />
+    </Style>
+
+    <Style x:Key="PcciPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource AccentButtonStyle}">
+        <Setter Property="Padding" Value="18,8" />
+        <Setter Property="CornerRadius" Value="6" />
+    </Style>
+
+    <Style x:Key="PcciMonospaceTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Cascadia Mono, Consolas, Courier New" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="IsTextSelectionEnabled" Value="True" />
+    </Style>
+
+    <Style x:Key="PcciChordTextStyle" TargetType="TextBlock" BasedOn="{StaticResource PcciMonospaceTextStyle}">
+        <Setter Property="Foreground" Value="{ThemeResource PcciAccentWarmBrush}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+</ResourceDictionary>

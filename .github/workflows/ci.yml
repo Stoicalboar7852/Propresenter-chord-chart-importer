@@ -38,3 +38,46 @@ jobs:
 
       - name: Test
         run: pytest --cov=pcci --cov-report=term-missing
+
+  app-sanity:
+    name: desktop app sanity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The Swift and WinUI apps need macOS and Windows toolchains to compile, which is
+      # what the platform jobs below are for. This job catches the cheap mistakes on
+      # every push: a view file that never got added, a build script that lost its
+      # executable bit.
+      - name: Every source file is referenced
+        run: |
+          test -f macos/Package.swift
+          test -f macos/Sources/PCCI/PCCIApp.swift
+          test -f windows/Pcci/Pcci.csproj
+          test -f windows/Pcci/MainWindow.xaml
+          test -x scripts/build-engine.sh
+          test -x scripts/build-macos.sh
+          for xaml in windows/Pcci/**/*.xaml windows/Pcci/*.xaml; do
+            python3 -c "import sys, xml.etree.ElementTree as ET; ET.parse(sys.argv[1])" "$xaml"
+          done
+
+  macos-app:
+    name: macOS app
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile the SwiftUI app
+        working-directory: macos
+        run: swift build -c debug
+
+  windows-app:
+    name: Windows app
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Build the WinUI app
+        working-directory: windows
+        run: dotnet build Pcci.sln -c Release -p:Platform=x64

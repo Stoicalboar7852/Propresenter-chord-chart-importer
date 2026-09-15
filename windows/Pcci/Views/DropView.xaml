@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Pcci.DropView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Padding="40">
+        <Border
+            Background="{ThemeResource PcciSurfaceBrush}"
+            BorderBrush="{ThemeResource PcciSeparatorBrush}"
+            BorderThickness="1"
+            CornerRadius="12">
+            <StackPanel
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="14">
+                <FontIcon
+                    FontSize="46"
+                    Foreground="{ThemeResource PcciAccentBrush}"
+                    Glyph="&#xE896;" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    Style="{StaticResource SubtitleTextBlockStyle}"
+                    Text="Drop a chord chart here" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                    MaxWidth="460"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap"
+                    Text="Word, PDF, plain text, Markdown, RTF, OpenDocument, HTML or ChordPro." />
+                <Button
+                    x:Name="ChooseButton"
+                    HorizontalAlignment="Center"
+                    Click="OnChoose"
+                    Content="Choose files…"
+                    Style="{StaticResource PcciPrimaryButtonStyle}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
