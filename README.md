@@ -40,18 +40,16 @@ are vendored from a schema generated from the same build — see
 
 ## Status
 
-Under construction. See `docs/BUILD_PROMPT.md` for the full plan and
-`docs/FORMAT_NOTES.md` for what has been proven about the file format so far.
+| Part | State |
+|---|---|
+| Format reconnaissance | Done. All three reference exports round-trip byte-identically; findings in `docs/FORMAT_NOTES.md`. |
+| Engine | Done. Every format, detection, slide planning, writer, verifier, CLI. |
+| macOS app | Written and compiling; not yet run on a Mac. |
+| Windows app | Written; building in CI. |
+| Packaging | Engine freezes and self-checks; both apps build unsigned. |
 
-## Checks
+Verified in real ProPresenter 21.4 so far: the exported `.pro` imports, groups and
+slides come through, and the chord chart appears in the editor.
 
-```bash
-cd core
-.venv/bin/python -m pytest                       # tests
-.venv/bin/ruff check . && .venv/bin/ruff format --check .
-.venv/bin/mypy pcci                              # and --platform darwin / win32
-core/.venv/bin/python ../scripts/detection_report.py   # detection accuracy on the corpus
-```
-
-`mypy` specialises `sys.platform` for the machine it runs on, so CI runs it for all
-three platforms from every runner.
+See `docs/BUILD_PROMPT.md` for the full plan, `docs/ACCEPTANCE.md` for the manual
+checklist, and `docs/STAGE_SETUP.md` for getting the chords onto a stage screen.

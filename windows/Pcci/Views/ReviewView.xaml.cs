@@ -54,9 +54,9 @@ public sealed partial class ReviewView : UserControl
         var section = SectionList.SelectedItem as SongSection;
         _updating = true;
         TypeCombo.SelectedItem = section?.Type;
-        NumberBox.Value = section?.Number ?? double.NaN;
+        SectionNumberBox.Value = section?.Number ?? double.NaN;
         TypeCombo.IsEnabled = section is not null;
-        NumberBox.IsEnabled = section is not null;
+        SectionNumberBox.IsEnabled = section is not null;
         _updating = false;
     }
 
@@ -78,7 +78,7 @@ public sealed partial class ReviewView : UserControl
         Show(_document);
     }
 
-    private async void OnLinesPerSlideChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    private void OnLinesPerSlideChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
         if (_updating || _state is null || double.IsNaN(args.NewValue)) return;
         _state.LinesPerSlide = (int)args.NewValue;

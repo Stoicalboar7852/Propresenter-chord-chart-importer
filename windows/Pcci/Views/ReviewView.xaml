@@ -105,7 +105,7 @@
                     Header="Section type"
                     SelectionChanged="OnTypeChanged" />
                 <NumberBox
-                    x:Name="NumberBox"
+                    x:Name="SectionNumberBox"
                     Width="150"
                     Header="Number"
                     Minimum="1"

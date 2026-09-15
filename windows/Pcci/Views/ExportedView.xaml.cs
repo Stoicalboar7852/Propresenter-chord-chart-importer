@@ -8,12 +8,14 @@ namespace Pcci;
 
 public sealed partial class ExportedView : UserControl
 {
-    private AppState? _state;
     private ChartDocument? _document;
 
     public ExportedView() => InitializeComponent();
 
-    public void Initialise(AppState state) => _state = state;
+    /// <summary>Kept for symmetry with the other panes; this one reads only the document.</summary>
+    public void Initialise(AppState state)
+    {
+    }
 
     public void Show(ChartDocument document)
     {
