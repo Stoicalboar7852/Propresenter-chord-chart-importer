@@ -12,10 +12,13 @@
     <Nullable>enable</Nullable>
     <LangVersion>12</LangVersion>
     <!-- Unpackaged: there is no code-signing certificate for this project, and an
-         unsigned MSIX refuses to install, so a plain folder is strictly better.
-         EnableMsixTooling is deliberately absent — it pulls in packaging targets that
-         fight WindowsPackageType=None. -->
+         unsigned MSIX refuses to install, so a plain folder is what ships.
+         EnableMsixTooling is still required. Despite the name it is not only about
+         packaging: it brings in the MRT tooling that generates the .pri resource
+         indexes WinUI needs at runtime. Without it the build dies in
+         MrtCore.PriGen.targets looking for Microsoft.Build.Packaging.Pri.Tasks.dll. -->
     <WindowsPackageType>None</WindowsPackageType>
+    <EnableMsixTooling>true</EnableMsixTooling>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <SelfContained>true</SelfContained>
   </PropertyGroup>
