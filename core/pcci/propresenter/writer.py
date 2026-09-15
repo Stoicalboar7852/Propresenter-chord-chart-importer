@@ -236,6 +236,19 @@ def build_presentation(
         presentation.music.original_music_key = song.key
         presentation.music.user_music_key = song.key
 
+    # ProPresenter's own export leaves the presentation-level chord chart empty and
+    # attaches one per slide. Which of the two a stage-layout Chord Chart element reads
+    # is not something the reference files can settle, so pcci populates both: the
+    # per-slide reference points at the page that slide's words are on, and the
+    # presentation-level one points at page 1. Setting both costs nothing and removes a
+    # whole class of "it shows in the editor but not on stage".
+    if chart_pages:
+        first_page = chart_pages[0]
+        presentation.chord_chart.absolute_string = first_page.absolute_path.as_uri()
+        presentation.chord_chart.platform = 1 if sys.platform != "win32" else 2
+        presentation.chord_chart.local.root = 10  # ROOT_SHOW
+        presentation.chord_chart.local.path = first_page.show_relative_path
+
     assigner = GroupAssigner(config=config)
     arrangement_group_uuids: list[str] = []
     section_pages = _pages_by_section(song.sections, chart_pages, page_for_section)

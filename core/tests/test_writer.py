@@ -126,11 +126,21 @@ def test_text_element_style_follows_the_config(parsed) -> None:
 
 
 def test_notes_hold_the_chord_block(parsed) -> None:
+    """By default the notes carry chords only — the lyrics are already on the slide."""
     notes = parsed.cues[0].actions[0].slide.presentation.notes.rtf_data.decode()
     assert notes.startswith("{\\rtf1")
     assert "fmodern" in notes, "notes must use a fixed-pitch font or chords misalign"
+    assert "Asus" in notes
+    assert "Goodbye yesterday" not in notes, "repeating the lyrics shrinks the stage text"
+
+
+def test_notes_can_include_the_lyrics(fixtures_dir: Path) -> None:
+    config = ConversionConfig(chord_placement=ChordPlacementStyle.ABOVE)
+    plan = plan_slides(analyze(fixtures_dir / CHART), config)
+    presentation = build_presentation(plan)
+    notes = presentation.cues[0].actions[0].slide.presentation.notes.rtf_data.decode()
     assert "Goodbye yesterday" in notes
-    assert "A" in notes
+    assert "Asus" in notes
 
 
 def test_slide_size_is_configurable(fixtures_dir: Path) -> None:
@@ -275,6 +285,28 @@ def test_chords_can_be_placed_below() -> None:
 
     line = Line(lyrics="Amazing", chords=[ChordPlacement(chord="C", char_index=0)])
     assert render_lines([line], ChordPlacementStyle.BELOW).splitlines() == ["Amazing", "C"]
+
+
+def test_chords_only_keeps_one_row_per_line() -> None:
+    """Row n of the notes is chord row n of the slide, even where a line has none."""
+    from pcci.ir import ChordPlacement, Line
+
+    lines = [
+        Line(lyrics="Amazing grace", chords=[ChordPlacement(chord="C", char_index=0)]),
+        Line(lyrics="how sweet the sound"),
+        Line(lyrics="that saved a wretch", chords=[ChordPlacement(chord="G", char_index=5)]),
+    ]
+    rendered = render_lines(lines, ChordPlacementStyle.CHORDS_ONLY).split("\n")
+    assert rendered == ["C", "", "     G"]
+
+
+def test_the_chart_always_carries_the_lyrics(fixtures_dir: Path) -> None:
+    """The notes may be chords only; the chord chart is still a chord chart."""
+    from pcci.notes import render_song
+
+    text = render_song(analyze(fixtures_dir / CHART))
+    assert "Goodbye yesterday" in text
+    assert "Asus" in text
 
 
 def test_two_chords_at_the_same_index_both_survive() -> None:

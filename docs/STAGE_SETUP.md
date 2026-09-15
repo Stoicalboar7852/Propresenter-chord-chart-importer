@@ -29,15 +29,27 @@ This is the route that works everywhere, with nothing to install or copy.
 6. Turn text scaling **off** or set it to shrink-to-fit, so long lines are not wrapped.
 7. Assign the layout to the stage screen your band sees.
 
-Advance through the song. Each slide's notes show that slide's chords:
+Advance through the song. Each slide's notes show that slide's chords, one row per
+lyric line:
+
+```
+C       G/B       Am
+              G          D
+```
+
+The lyrics are **not** repeated in the notes, because they are already on the slide and
+a stage screen shrinks its notes element to fit whatever text you give it. Half the text
+means the chords render at roughly twice the size. Row one is the chord row for line
+one, row two for line two, and a line with no chords leaves its row blank, so the rows
+still read against the words beside them.
+
+If you would rather have the lyrics in the notes as well, convert with
+`--chord-placement above` (or `below`), or change it in the app's settings:
 
 ```
      C        G/B      Am
 Amazing grace how sweet the sound
 ```
-
-To put the chords *under* the words instead, convert with
-`--chord-placement below`, or change it in the app's settings.
 
 ---
 

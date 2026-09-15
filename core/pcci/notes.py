@@ -27,10 +27,16 @@ def chord_row(line: Line) -> str:
 
 
 def render_line(line: Line, placement: ChordPlacementStyle) -> list[str]:
-    """One song line as one or two rows of text."""
+    """One song line as one or two rows of text.
+
+    In ``CHORDS_ONLY`` mode a line with no chords still produces an empty row, so row
+    *n* of the block is always chord row *n* of the slide.
+    """
     rows: list[str] = []
     chords = chord_row(line)
-    if line.lyrics:
+    if not placement.includes_lyrics:
+        rows = [chords]
+    elif line.lyrics:
         rows = (
             [chords, line.lyrics]
             if placement is ChordPlacementStyle.ABOVE

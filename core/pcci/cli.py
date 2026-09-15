@@ -33,6 +33,7 @@ from pcci.convert import build as build_from_plan
 from pcci.convert import convert as run_conversion
 from pcci.errors import PcciError, UserInputError
 from pcci.ingest import supported_extensions
+from pcci.ir import Song
 from pcci.logging_setup import configure_logging, get_logger
 from pcci.parse.pipeline import analyze
 from pcci.propresenter.bindings import PROTO_SOURCE_BUILD, PROTO_SOURCE_VERSION, load_bindings
@@ -173,6 +174,18 @@ def _parse_size(value: str) -> tuple[int, int]:
         ) from exc
 
 
+def _load_song(path: Path) -> Song:
+    """Read a Song JSON produced by ``pcci analyze`` and possibly edited since."""
+    try:
+        return Song.from_json(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise UserInputError(
+            f"{path.name} is not a song file pcci can read.",
+            f"{type(exc).__name__}: {exc}",
+            context={"path": str(path)},
+        ) from exc
+
+
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
 @click.version_option(__version__, prog_name="pcci")
 @click.option("-v", "--verbose", is_flag=True, help="Log at debug level.")
@@ -252,17 +265,44 @@ def analyze_command(context: click.Context, /, source: Path, as_json: bool) -> N
 
 
 @cli.command(name="plan")
-@click.argument("source", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument(
+    "source", type=click.Path(exists=True, dir_okay=False, path_type=Path), required=False
+)
+@click.option(
+    "--song",
+    "song_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=None,
+    help="Plan from a Song JSON the user has corrected, instead of a source document.",
+)
 @_plan_options
 @_style_options
 @click.option("--json", "as_json", is_flag=True, help="Emit the SlidePlan as JSON on stdout.")
 @click.pass_context
-def plan_command(context: click.Context, /, source: Path, as_json: bool, **options: Any) -> None:
-    """Parse a chart and print the slide plan. Writes nothing."""
+def plan_command(
+    context: click.Context,
+    /,
+    source: Path | None,
+    song_path: Path | None,
+    as_json: bool,
+    **options: Any,
+) -> None:
+    """Parse a chart and print the slide plan. Writes nothing.
+
+    Give it a document, or ``--song`` with a Song JSON the review screen has edited.
+    Re-planning corrected sections is the engine's job, not the front-end's, so the
+    chunking rules live in exactly one place.
+    """
     configure_logging(verbose=context.obj["verbose"], json_logs=as_json)
 
     def action() -> int:
-        plan = plan_slides(analyze(source), build_config(**options))
+        if (source is None) == (song_path is None):
+            raise UserInputError(
+                "Give pcci plan either a document or --song with a song file, not both.",
+                f"source={source} song={song_path}",
+            )
+        song = _load_song(song_path) if song_path is not None else analyze(source)  # type: ignore[arg-type]
+        plan = plan_slides(song, build_config(**options))
 
         def human() -> None:
             click.echo(f"{plan.song.title}: {plan.slide_count} slides")

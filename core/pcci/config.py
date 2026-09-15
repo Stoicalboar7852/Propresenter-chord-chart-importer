@@ -38,10 +38,21 @@ class ChordDelivery(StrEnum):
 
 
 class ChordPlacementStyle(StrEnum):
-    """Where chords sit relative to the lyric in the notes block."""
+    """What the slide-notes block contains.
 
+    ``CHORDS_ONLY`` is the default because a stage screen scales its notes element to
+    fit: repeating the lyrics that are already on the slide doubles the text and halves
+    the size everything renders at. Chord rows keep their horizontal spacing and their
+    one-row-per-lyric-line order, so they still read against the words on the slide.
+    """
+
+    CHORDS_ONLY = "chords_only"
     ABOVE = "above"
     BELOW = "below"
+
+    @property
+    def includes_lyrics(self) -> bool:
+        return self is not ChordPlacementStyle.CHORDS_ONLY
 
 
 class RGBA(BaseModel):
@@ -153,7 +164,7 @@ class ConversionConfig(BaseModel):
     )
     balance_last_slide: bool = True
     chord_delivery: ChordDelivery = ChordDelivery.BOTH
-    chord_placement: ChordPlacementStyle = ChordPlacementStyle.ABOVE
+    chord_placement: ChordPlacementStyle = ChordPlacementStyle.CHORDS_ONLY
     include_annotations_in_notes: bool = True
     category: str = "Song"
     style: SlideStyle = Field(default_factory=SlideStyle)

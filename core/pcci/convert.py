@@ -79,12 +79,9 @@ def build(
 
     chart: ChartRender | None = None
     if config.chord_delivery.writes_chart:
-        chart = render_chart_pages(
-            plan.song,
-            directory,
-            stem=output.stem,
-            placement=config.chord_placement,
-        )
+        # The chart is a chord chart: it always carries the words, whatever the notes
+        # block is set to. chord_placement describes the notes, not the chart.
+        chart = render_chart_pages(plan.song, directory, stem=output.stem)
         logger.info("rendered %d chord chart page(s)", len(chart.pages))
 
     presentation = build_presentation(
