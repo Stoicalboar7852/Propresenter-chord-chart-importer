@@ -17,8 +17,7 @@ The project is a headless Python engine plus two native front-ends:
 ## Getting set up
 
 ```bash
-git checkout claude/affectionate-hamilton-ad8a08   # where the engine and apps live
-./scripts/setup-engine.sh                          # or setup-engine.ps1 on Windows
+./scripts/setup-engine.sh          # or .\scripts\setup-engine.ps1 on Windows
 ```
 
 It finds a Python 3.12 or newer, builds `core/.venv`, installs everything and checks the

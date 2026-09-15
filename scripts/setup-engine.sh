@@ -17,11 +17,12 @@ if [[ ! -f "$CORE/pyproject.toml" ]]; then
     cat >&2 <<'MESSAGE'
 core/pyproject.toml is missing, so this checkout does not contain the engine.
 
-The engine lives on the branch claude/affectionate-hamilton-ad8a08, which is not this
-repository's default branch. Switch to it:
+This usually means the checkout predates the engine landing on the default branch.
+Bring it up to date:
 
     git fetch origin
-    git checkout claude/affectionate-hamilton-ad8a08
+    git checkout claude/blissful-planck-pbslml
+    git pull
 
 MESSAGE
     exit 1

@@ -9,9 +9,6 @@ SmartScreen just needs one extra click the first time.
 git clone https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer.git
 cd Propresenter-chord-chart-importer
 
-# The engine and the apps live on this branch, which is not the repository's default
-git checkout claude/affectionate-hamilton-ad8a08
-
 .\scripts\build-windows.ps1
 ```
 

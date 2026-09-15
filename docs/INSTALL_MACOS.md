@@ -9,9 +9,6 @@ have one. Everything works; macOS just needs to be told once that you meant to o
 git clone https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer.git
 cd Propresenter-chord-chart-importer
 
-# The engine and the apps live on this branch, which is not the repository's default
-git checkout claude/affectionate-hamilton-ad8a08
-
 ./scripts/build-macos.sh          # add --dmg for a disk image
 ```
 
