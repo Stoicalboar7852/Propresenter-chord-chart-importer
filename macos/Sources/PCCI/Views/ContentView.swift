@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 /// The window: a queue on the left, the three-step flow on the right.
+@MainActor
 struct ContentView: View {
     @Environment(AppState.self) private var state
 
@@ -53,6 +54,7 @@ struct ContentView: View {
 }
 
 /// The queue of dropped files.
+@MainActor
 struct QueueSidebar: View {
     @Environment(AppState.self) private var state
 
@@ -103,6 +105,7 @@ struct QueueSidebar: View {
 }
 
 /// Which of the three panes a document is currently showing.
+@MainActor
 struct DocumentDetail: View {
     @Environment(AppState.self) private var state
     let document: ChartDocument
@@ -121,6 +124,7 @@ struct DocumentDetail: View {
     }
 }
 
+@MainActor
 struct LoadingPane: View {
     let name: String
 
@@ -134,6 +138,7 @@ struct LoadingPane: View {
     }
 }
 
+@MainActor
 struct FailurePane: View {
     @Environment(AppState.self) private var state
     let document: ChartDocument
@@ -177,6 +182,7 @@ struct FailurePane: View {
     }
 }
 
+@MainActor
 struct ErrorBanner: View {
     let error: EngineError
     var dismiss: () -> Void

@@ -6,6 +6,7 @@ import SwiftUI
 /// Left: the detected sections, each editable. Right: exactly what each slide will
 /// contain, chords over lyrics in a monospaced face. Changing lines per slide re-plans
 /// through the engine, so the preview is never an approximation of the output.
+@MainActor
 struct ReviewPane: View {
     @Environment(AppState.self) private var state
     let document: ChartDocument
@@ -82,6 +83,7 @@ struct ReviewPane: View {
 }
 
 /// The detected sections, reorderable and editable.
+@MainActor
 struct SectionList: View {
     @Environment(AppState.self) private var state
     let document: ChartDocument
@@ -116,6 +118,7 @@ struct SectionList: View {
     }
 }
 
+@MainActor
 struct SectionRow: View {
     @Environment(AppState.self) private var state
     let document: ChartDocument
@@ -204,6 +207,7 @@ struct SectionRow: View {
 }
 
 /// What each slide will actually contain.
+@MainActor
 struct SlidePreview: View {
     let document: ChartDocument
 
@@ -220,6 +224,7 @@ struct SlidePreview: View {
     }
 }
 
+@MainActor
 struct SlideCard: View {
     let slide: PlannedSlide
 

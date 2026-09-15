@@ -3,6 +3,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// The first pane: a full-window drop target that validates on hover.
+@MainActor
 struct DropTarget: View {
     @Environment(AppState.self) private var state
     @State private var isTargeted = false
@@ -54,7 +55,7 @@ struct DropTarget: View {
 
     private func handle(_ providers: [NSItemProvider]) {
         rejected = false
-        Task {
+        Task { @MainActor in
             var urls: [URL] = []
             for provider in providers {
                 if let url = await provider.loadFileURL() {
@@ -62,12 +63,10 @@ struct DropTarget: View {
                 }
             }
             let accepted = urls.filter(AppState.accepts)
-            await MainActor.run {
-                if accepted.isEmpty, !urls.isEmpty {
-                    rejected = true
-                } else {
-                    state.add(urls: accepted)
-                }
+            if accepted.isEmpty, !urls.isEmpty {
+                rejected = true
+            } else {
+                state.add(urls: accepted)
             }
         }
     }

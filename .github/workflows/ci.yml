@@ -87,4 +87,4 @@ jobs:
           dotnet-version: "8.0.x"
       - name: Build the WinUI app
         working-directory: windows
-        run: dotnet build Pcci.sln -c Release -p:Platform=x64
+        run: dotnet build Pcci.sln -c Release -p:Platform=x64 -v:normal

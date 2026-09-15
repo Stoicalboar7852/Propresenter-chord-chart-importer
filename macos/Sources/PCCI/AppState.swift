@@ -69,7 +69,10 @@ final class AppState {
     var isBusy = false
 
     /// File types the drop target accepts, kept in step with the engine's readers.
-    static let acceptedExtensions: Set<String> = [
+    /// `nonisolated` because deciding whether a path looks convertible is a pure
+    /// function of its extension, and the drop handler asks before it reaches the
+    /// main actor.
+    nonisolated static let acceptedExtensions: Set<String> = [
         "txt", "text", "md", "markdown", "pdf", "docx", "rtf", "odt", "fodt",
         "html", "htm", "xhtml", "cho", "chopro", "chordpro", "crd", "pro"
     ]
@@ -97,7 +100,7 @@ final class AppState {
         if selectedID == document.id { selectedID = documents.first?.id }
     }
 
-    static func accepts(_ url: URL) -> Bool {
+    nonisolated static func accepts(_ url: URL) -> Bool {
         acceptedExtensions.contains(url.pathExtension.lowercased())
     }
 

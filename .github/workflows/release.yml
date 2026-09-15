@@ -1,0 +1,109 @@
+name: Release
+
+# Builds both apps and attaches them to a GitHub release. Neither is signed — this
+# project has no Apple Developer ID and no Windows code-signing certificate — so the
+# release notes tell people what their operating system will say on first launch.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build (for a manual run)"
+        required: false
+
+jobs:
+  macos:
+    name: macOS app
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Prepare the engine environment
+        working-directory: core
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -e ".[dev]"
+
+      - name: Build the app and a disk image
+        run: ./scripts/build-macos.sh --dmg
+
+      - name: Check the bundled engine runs
+        run: build/macos/PCCI.app/Contents/Resources/engine/pcci doctor
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PCCI-macos-arm64
+          path: build/macos/PCCI.dmg
+          if-no-files-found: error
+
+  windows:
+    name: Windows app
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Prepare the engine environment
+        working-directory: core
+        run: |
+          python -m venv .venv
+          .venv\Scripts\python -m pip install --upgrade pip
+          .venv\Scripts\python -m pip install -e ".[dev]"
+
+      - name: Build the app
+        run: .\scripts\build-windows.ps1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PCCI-windows-x64
+          path: build/windows/PCCI-win-x64.zip
+          if-no-files-found: error
+
+  publish:
+    name: Publish the release
+    needs: [macos, windows]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/PCCI-macos-arm64/PCCI.dmg
+            artifacts/PCCI-windows-x64/PCCI-win-x64.zip
+          body: |
+            ## Installing
+
+            Neither build is signed, so each system will question it once.
+
+            **macOS** — right-click PCCI in Finder and choose **Open**, then **Open**
+            again. See `docs/INSTALL_MACOS.md`.
+
+            **Windows** — click **More info**, then **Run anyway**. See
+            `docs/INSTALL_WINDOWS.md`.
+
+            ## Setting up your stage screen
+
+            Chords never appear on the audience output. To see them on stage, add a
+            **Current Slide Notes** or **Chord Chart** element to your stage layout —
+            `docs/STAGE_SETUP.md` has the steps.
+          generate_release_notes: true

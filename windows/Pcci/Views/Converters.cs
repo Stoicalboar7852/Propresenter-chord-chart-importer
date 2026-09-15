@@ -27,3 +27,14 @@ public sealed class ConfidenceToBrushConverter : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, string language) =>
         throw new NotSupportedException();
 }
+
+
+/// <summary>Bool to Visibility, spelled out rather than relying on x:Bind's implicit conversion.</summary>
+public sealed class BoolToVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language) =>
+        value is true ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
+        value is Microsoft.UI.Xaml.Visibility.Visible;
+}

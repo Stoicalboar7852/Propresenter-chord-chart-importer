@@ -12,8 +12,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Pcci">
 
-    <local:ConfidenceToBrushConverter x:Key="ConfidenceToBrush" />
-
     <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Dark">
             <Color x:Key="PcciAccentColor">#C0362C</Color>
@@ -45,6 +43,9 @@
             <SolidColorBrush x:Key="PcciGuessedBrush" Color="#B03A2E" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
+
+    <local:ConfidenceToBrushConverter x:Key="ConfidenceToBrush" />
+    <local:BoolToVisibilityConverter x:Key="BoolToVisibility" />
 
     <x:Double x:Key="PcciCardCorner">8</x:Double>
 

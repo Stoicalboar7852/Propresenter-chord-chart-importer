@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 /// The success screen: what was written, and what to do next.
+@MainActor
 struct ExportedPane: View {
     @Environment(AppState.self) private var state
     let document: ChartDocument
@@ -85,6 +86,7 @@ struct ExportedPane: View {
     }
 }
 
+@MainActor
 struct FileRow: View {
     let label: String
     let url: URL

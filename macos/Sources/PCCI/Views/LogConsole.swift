@@ -3,6 +3,7 @@ import SwiftUI
 
 /// What the engine said, as it said it. Collapsed by default; useful when something
 /// goes wrong and the user needs to send us something concrete.
+@MainActor
 struct LogConsole: View {
     @Environment(AppState.self) private var state
     @Environment(\.dismiss) private var dismiss

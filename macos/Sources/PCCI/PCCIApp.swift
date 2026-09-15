@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 @main
+@MainActor
 struct PCCIApp: App {
     @State private var state = AppState()
 

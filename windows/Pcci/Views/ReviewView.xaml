@@ -143,17 +143,17 @@
                                                     <TextBlock
                                                         Style="{StaticResource PcciChordTextStyle}"
                                                         Text="{x:Bind ChordRow}"
-                                                        Visibility="{x:Bind HasChords}" />
+                                                        Visibility="{x:Bind HasChords, Converter={StaticResource BoolToVisibility}}" />
                                                     <TextBlock
                                                         Style="{StaticResource PcciMonospaceTextStyle}"
                                                         Text="{x:Bind Lyrics}"
-                                                        Visibility="{x:Bind HasLyrics}" />
+                                                        Visibility="{x:Bind HasLyrics, Converter={StaticResource BoolToVisibility}}" />
                                                     <TextBlock
                                                         FontStyle="Italic"
                                                         Foreground="{ThemeResource PcciSecondaryTextBrush}"
                                                         Style="{StaticResource CaptionTextBlockStyle}"
                                                         Text="{x:Bind Annotation}"
-                                                        Visibility="{x:Bind HasAnnotation}" />
+                                                        Visibility="{x:Bind HasAnnotation, Converter={StaticResource BoolToVisibility}}" />
                                                 </StackPanel>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
