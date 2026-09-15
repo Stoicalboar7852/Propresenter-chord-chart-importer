@@ -62,6 +62,7 @@ jobs:
           test -f macos/Sources/PCCI/PCCIApp.swift
           test -f windows/Pcci/Pcci.csproj
           test -f windows/Pcci/MainWindow.xaml
+          test -x scripts/setup-engine.sh
           test -x scripts/build-engine.sh
           test -x scripts/build-macos.sh
           for xaml in windows/Pcci/**/*.xaml windows/Pcci/*.xaml; do

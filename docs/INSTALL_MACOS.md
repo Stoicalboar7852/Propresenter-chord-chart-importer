@@ -19,10 +19,31 @@ its own — to run the command-line tool without building an app — it is
 
 The result is `build/macos/PCCI.app`. Drag it to `/Applications`.
 
-Requirements: macOS 14 or later, Xcode or the Swift toolchain, and **Python 3.12 or
-newer**. The Python that comes with macOS is older than that and cannot run the engine;
+Requirements: macOS 14 or later, **full Xcode**, and **Python 3.12 or newer**.
+
+Xcode from the App Store, not the Command Line Tools. SwiftUI declares `@State` as a
+macro on the macOS 26 SDK and later, and the plugin that expands it ships only inside
+`Xcode.app` — the Command Line Tools cannot compile a SwiftUI app at all. After
+installing Xcode, point the toolchain at it once:
+
+```bash
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+```
+
+`build-macos.sh` checks this before it does anything else and tells you if it is wrong,
+rather than letting the compiler bury you in macro errors.
+
+The Python that comes with macOS is older than 3.12 and cannot run the engine;
 `brew install python@3.12` is the usual fix, and `setup-engine.sh` tells you so if it
 cannot find a suitable one.
+
+**The engine does not need Xcode.** If you only want the command-line converter,
+`./scripts/setup-engine.sh` is the whole install and Python is the only requirement:
+
+```bash
+./scripts/setup-engine.sh
+core/.venv/bin/pcci convert "My Song.docx" -o "My Song.pro" --lines-per-slide 4
+```
 
 ### Liquid Glass
 
@@ -53,6 +74,20 @@ flag rather than actual damage. Clear it:
 ```bash
 xattr -dr com.apple.quarantine /Applications/PCCI.app
 ```
+
+## If the build fails
+
+**`external macro implementation type 'SwiftUIMacros.StateMacro' could not be found`**,
+usually followed by `cannot find '$isTargeted' in scope` and `cannot assign to property:
+'self' is immutable`. Only the first error is real — the rest are what happens when
+`@State` never expands. You are on the Command Line Tools. Install Xcode and run
+`sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
+
+**`swift not found`.** Same cause, earlier: no toolchain is selected at all.
+
+**`setup-engine.sh` cannot find Python 3.12.** `brew install python@3.12`, then run it
+again. It searches `python3.14`, `python3.13`, `python3.12`, `python3` and `python`, and
+takes the first that is new enough.
 
 ## What is inside
 

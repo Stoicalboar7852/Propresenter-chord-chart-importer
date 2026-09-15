@@ -26,7 +26,44 @@ for argument in "$@"; do
     esac
 done
 
-command -v swift >/dev/null || { echo "swift not found — install Xcode or the Swift toolchain" >&2; exit 1; }
+command -v swift >/dev/null || { echo "swift not found — install Xcode" >&2; exit 1; }
+
+# Building SwiftUI needs *full Xcode*, not the Command Line Tools.
+#
+# On the macOS 26 SDK and later, SwiftUI declares @State (and its siblings) as macros
+# rather than property wrappers. The plugin that expands them, SwiftUIMacros, lives
+# inside Xcode.app; the Command Line Tools ship ObservationMacros and SwiftMacros but
+# not that one. Compiling without it fails with "external macro implementation type
+# 'SwiftUIMacros.StateMacro' could not be found", followed by a long tail of errors
+# that are all just consequences of @State never expanding. Catch it here instead.
+DEVELOPER_DIR_PATH="${DEVELOPER_DIR:-$(xcode-select -p 2>/dev/null || true)}"
+case "$DEVELOPER_DIR_PATH" in
+    ""|*/CommandLineTools|*/CommandLineTools/*)
+        cat >&2 <<MESSAGE
+The app needs full Xcode to build, and this machine is pointed at the Command Line Tools.
+
+    xcode-select -p
+    ${DEVELOPER_DIR_PATH:-(nothing selected)}
+
+SwiftUI's @State is a macro on recent SDKs, and the plugin that expands it ships inside
+Xcode.app. The Command Line Tools cannot build a SwiftUI app at all.
+
+  1. Install Xcode from the App Store (it is a large download).
+  2. Point the tools at it:
+
+         sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+  3. Run this script again.
+
+The engine does not need Xcode. To convert charts from the command line meanwhile:
+
+    ./scripts/setup-engine.sh
+    core/.venv/bin/pcci convert "My Song.docx" -o "My Song.pro" --lines-per-slide 4
+
+MESSAGE
+        exit 1
+        ;;
+esac
 
 echo "==> Building the engine"
 "$REPO_ROOT/scripts/build-engine.sh" "$BUILD/engine"
