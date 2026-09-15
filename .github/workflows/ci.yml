@@ -34,7 +34,14 @@ jobs:
           ruff format --check .
 
       - name: Type check
-        run: mypy pcci
+        # All three platforms from every runner: mypy specialises sys.platform for the
+        # machine it runs on, so a Linux-only check silently skips the branches the
+        # other two take. Catching that here beats finding it on someone's laptop.
+        run: |
+          mypy pcci
+          mypy --platform linux pcci
+          mypy --platform darwin pcci
+          mypy --platform win32 pcci
 
       - name: Test
         run: pytest --cov=pcci --cov-report=term-missing

@@ -41,11 +41,23 @@ class JsonLinesFormatter(logging.Formatter):
         return json.dumps(payload, ensure_ascii=False)
 
 
+def current_platform() -> str:
+    """``sys.platform``, read through a function on purpose.
+
+    Type checkers specialise ``sys.platform`` for the machine they are running on,
+    which makes every other platform's branch "unreachable" and fails ``--strict``
+    with ``warn_unreachable``. Reading it through a function keeps all three branches
+    real, which they are: the engine runs on all three.
+    """
+    return sys.platform
+
+
 def log_directory() -> Path:
     """Platform log directory, per the spec's error-handling contract."""
-    if sys.platform == "darwin":
+    platform = current_platform()
+    if platform == "darwin":
         return Path.home() / "Library" / "Logs" / "PCCI"
-    if sys.platform == "win32":
+    if platform == "win32":
         base = os.environ.get("LOCALAPPDATA")
         root = Path(base) if base else Path.home() / "AppData" / "Local"
         return root / "PCCI" / "Logs"

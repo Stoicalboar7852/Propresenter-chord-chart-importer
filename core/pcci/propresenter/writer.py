@@ -9,13 +9,13 @@ those fields mattered.
 
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from pcci.config import RGBA, ConversionConfig
 from pcci.ir import Section
+from pcci.logging_setup import current_platform
 from pcci.notes import render_lines
 from pcci.propresenter.bindings import PROTO_SOURCE_BUILD, Bindings, load_bindings
 from pcci.propresenter.groups import GroupAssigner, new_uuid
@@ -53,11 +53,25 @@ def _set_uuid(target: Any, value: str) -> None:
     target.string = value
 
 
+def _is_windows() -> bool:
+    """Read the platform through a function so type checking keeps both branches.
+
+    See ``pcci.logging_setup.current_platform`` — a checker running on one platform
+    narrows ``sys.platform`` to a literal and calls the others dead code.
+    """
+    return current_platform() == "win32"
+
+
 def _platform(bindings: Bindings) -> int:
     info = bindings.application_info.ApplicationInfo
-    if sys.platform == "win32":
+    if _is_windows():
         return int(info.Platform.PLATFORM_WINDOWS)
     return int(info.Platform.PLATFORM_MACOS)
+
+
+#: URL.Platform: PLATFORM_MACOS is 1, PLATFORM_WIN32 is 2.
+def _url_platform() -> int:
+    return 2 if _is_windows() else 1
 
 
 def _fill_application_info(presentation: Any, bindings: Bindings) -> None:
@@ -179,7 +193,7 @@ def _build_cue(
     if chart_page is not None:
         url = presentation_slide.chord_chart
         url.absolute_string = chart_page.absolute_path.as_uri()
-        url.platform = 1 if sys.platform != "win32" else 2
+        url.platform = _url_platform()
         url.local.root = 10  # ROOT_SHOW
         url.local.path = chart_page.show_relative_path
     return cue
@@ -245,7 +259,7 @@ def build_presentation(
     if chart_pages:
         first_page = chart_pages[0]
         presentation.chord_chart.absolute_string = first_page.absolute_path.as_uri()
-        presentation.chord_chart.platform = 1 if sys.platform != "win32" else 2
+        presentation.chord_chart.platform = _url_platform()
         presentation.chord_chart.local.root = 10  # ROOT_SHOW
         presentation.chord_chart.local.path = first_page.show_relative_path
 

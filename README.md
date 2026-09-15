@@ -42,3 +42,16 @@ are vendored from a schema generated from the same build — see
 
 Under construction. See `docs/BUILD_PROMPT.md` for the full plan and
 `docs/FORMAT_NOTES.md` for what has been proven about the file format so far.
+
+## Checks
+
+```bash
+cd core
+.venv/bin/python -m pytest                       # tests
+.venv/bin/ruff check . && .venv/bin/ruff format --check .
+.venv/bin/mypy pcci                              # and --platform darwin / win32
+core/.venv/bin/python ../scripts/detection_report.py   # detection accuracy on the corpus
+```
+
+`mypy` specialises `sys.platform` for the machine it runs on, so CI runs it for all
+three platforms from every runner.
