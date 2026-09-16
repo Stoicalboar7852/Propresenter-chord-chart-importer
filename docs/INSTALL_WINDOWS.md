@@ -31,6 +31,15 @@ whichever interpreter builds it, so an x64 Python produces an x64 engine that th
 under emulation inside an ARM64 app. The build picks a matching Python when the machine
 has more than one, and says so on screen when it cannot.
 
+**No C++ or Rust toolchain is needed.** Every runtime dependency ships a Windows ARM64
+wheel, and CI fails if one ever stops doing so. The test and lint tooling is a different
+matter — `grpcio-tools` has no ARM64 wheel at all — so it is not installed unless you
+ask for it:
+
+```powershell
+.\scripts\setup-engine.ps1 -Dev      # pytest, mypy, ruff; x64 only
+```
+
 ## First launch
 
 Windows will show **"Windows protected your PC"**. Click **More info**, then **Run
@@ -49,6 +58,13 @@ install folders.
 
 **`dotnet not found`.** Install the .NET 8 SDK:
 `winget install Microsoft.DotNet.SDK.8`.
+
+**`Microsoft Visual C++ 14.0 or greater is required`**, from a wheel build for
+`grpcio`, `cryptography` or similar. A checkout from before this was fixed: setup used
+to install the test tooling along with the engine, and some of it has no ARM64 wheel and
+had to be compiled. `git pull` and run it again. If you deliberately asked for `-Dev` on
+an ARM64 machine, that is the one case where the toolchain really is needed; leave the
+switch off unless you are running the tests.
 
 **`core\.venv runs a ... Python`.** The environment was built by an interpreter of a
 different architecture than the app. Harmless, but to fix it delete `core\.venv` and

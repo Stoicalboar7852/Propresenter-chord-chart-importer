@@ -7,6 +7,11 @@
     and checks the result works. The build scripts call this when the environment is
     missing, so you should rarely need to run it by hand.
 
+.PARAMETER Dev
+    Also install the test and lint tooling. Contributors want this; people who just
+    want to convert charts do not, and on Windows ARM64 it cannot be installed at all
+    (grpcio-tools has no ARM64 wheel and would have to be compiled).
+
 .PARAMETER Architecture
     win-x64 or win-arm64. Picks a Python of that architecture when the machine has
     more than one, so the frozen engine matches the app it ships inside. Defaults to
@@ -18,6 +23,8 @@
 #>
 [CmdletBinding()]
 param(
+    [switch]$Dev,
+
     [ValidateSet('win-x64', 'win-arm64')]
     [string]$Architecture
 )
@@ -251,10 +258,16 @@ if ($LASTEXITCODE -ne 0) { Write-Error 'could not create the virtual environment
 $venvPython = Join-Path $venv 'Scripts\python.exe'
 if (-not (Test-Path $venvPython)) { Write-Error "no interpreter at $venvPython" }
 
-Write-Host '==> Installing the engine and its tooling (this takes a minute)'
+# The engine itself, not the test tooling. Every runtime dependency ships a Windows
+# ARM64 wheel; the dev extra does not, so installing it by default would put an ARM64
+# machine through a C++ and Rust build it has no reason to do.
+$package = $core
+if ($Dev) { $package = "$core[dev]" }
+
+Write-Host '==> Installing the engine (this takes a minute)'
 & $venvPython -m pip install --quiet --upgrade pip
 if ($LASTEXITCODE -ne 0) { Write-Error 'could not upgrade pip' }
-& $venvPython -m pip install --quiet -e "$core[dev]"
+& $venvPython -m pip install --quiet -e $package
 if ($LASTEXITCODE -ne 0) { Write-Error 'installation failed' }
 
 Write-Host '==> Checking it works'
@@ -266,6 +279,11 @@ Write-Host @'
 Ready. Useful commands:
 
     core\.venv\Scripts\pcci convert "My Song.docx" -o "My Song.pro"
-    core\.venv\Scripts\python -m pytest       (from inside core\)
     .\scripts\build-windows.ps1               builds the app, engine included
 '@
+if ($Dev) {
+    Write-Host '    core\.venv\Scripts\python -m pytest       (from inside core\)'
+}
+else {
+    Write-Host '    .\scripts\setup-engine.ps1 -Dev            adds pytest, mypy and ruff'
+}

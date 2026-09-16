@@ -14,7 +14,6 @@ dependencies = [
     "protobuf>=5.27",
     "charset-normalizer>=3.3",
     "pymupdf>=1.24",
-    "pdfplumber>=0.11",
     "python-docx>=1.1",
     "odfpy>=1.4",
     "striprtf>=0.0.26",
@@ -25,6 +24,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    # pdfplumber is the cross-check for pymupdf's extraction, not a runtime dependency:
+    # nothing in pcci imports it. It stays out of the install because it pulls in
+    # pdfminer.six and so cryptography, which has no Windows ARM64 wheel and would send
+    # every ARM64 install through a Rust toolchain build.
+    "pdfplumber>=0.11",
     "pytest>=8.2",
     "pytest-cov>=5.0",
     "hypothesis>=6.100",

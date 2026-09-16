@@ -1,12 +1,23 @@
 #!/usr/bin/env bash
 # Create the engine's Python environment.
 #
-#   scripts/setup-engine.sh
+#   scripts/setup-engine.sh [--dev]
 #
-# Finds a Python new enough to run the engine, makes core/.venv, installs everything,
-# and checks the result actually works. The build scripts call this for you when the
-# environment is missing, so you should rarely need to run it by hand.
+# Finds a Python new enough to run the engine, makes core/.venv, installs it, and checks
+# the result actually works. The build scripts call this for you when the environment is
+# missing, so you should rarely need to run it by hand.
+#
+# --dev also installs the test and lint tooling. Contributors want it; people who just
+# want to convert charts do not.
 set -euo pipefail
+
+WITH_DEV=0
+for argument in "$@"; do
+    case "$argument" in
+        --dev) WITH_DEV=1 ;;
+        *) echo "unknown option: $argument" >&2; exit 2 ;;
+    esac
+done
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CORE="$REPO_ROOT/core"
@@ -73,9 +84,17 @@ fi
 echo "==> Creating core/.venv"
 "$PYTHON" -m venv "$VENV"
 
-echo "==> Installing the engine and its tooling (this takes a minute)"
+# The engine itself, not the test tooling: the dev extra pulls in grpcio-tools, which
+# is only needed to regenerate the protobuf bindings and has to be compiled on any
+# machine without a wheel for it.
+PACKAGE="$CORE"
+if [[ "$WITH_DEV" == "1" ]]; then
+    PACKAGE="$CORE[dev]"
+fi
+
+echo "==> Installing the engine (this takes a minute)"
 "$VENV/bin/python" -m pip install --quiet --upgrade pip
-"$VENV/bin/python" -m pip install --quiet -e "$CORE[dev]"
+"$VENV/bin/python" -m pip install --quiet -e "$PACKAGE"
 
 echo "==> Checking it works"
 "$VENV/bin/pcci" doctor
@@ -85,6 +104,10 @@ cat <<'MESSAGE'
 Ready. Useful commands:
 
     core/.venv/bin/pcci convert "My Song.docx" -o "My Song.pro"
-    core/.venv/bin/python -m pytest        (from inside core/)
     ./scripts/build-macos.sh               builds the app, engine included
 MESSAGE
+if [[ "$WITH_DEV" == "1" ]]; then
+    echo '    core/.venv/bin/python -m pytest        (from inside core/)'
+else
+    echo '    ./scripts/setup-engine.sh --dev         adds pytest, mypy and ruff'
+fi

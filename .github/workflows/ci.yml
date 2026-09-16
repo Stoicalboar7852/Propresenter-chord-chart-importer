@@ -51,6 +51,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
       # The Swift and WinUI apps need macOS and Windows toolchains to compile, which is
       # what the platform jobs below are for. This job catches the cheap mistakes on
@@ -72,6 +75,12 @@ jobs:
       - name: Python discovery holds up
         shell: pwsh
         run: ./scripts/test-setup-engine.ps1
+
+      # A dependency with no Windows ARM64 wheel is compiled from source there, and an
+      # ARM64 machine has no C++ or Rust toolchain to compile it with. That is a broken
+      # install on a whole platform, found by whoever tries it rather than by us.
+      - name: The engine installs on Windows ARM64 without a compiler
+        run: python3 scripts/check_windows_arm64.py
 
       # Windows PowerShell reads a .ps1 with no byte-order mark as ANSI, so an em dash
       # in a message arrives on screen as mojibake. Plain ASCII in these files, then.

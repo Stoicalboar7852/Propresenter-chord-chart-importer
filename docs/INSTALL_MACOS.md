@@ -45,6 +45,8 @@ cannot find a suitable one.
 core/.venv/bin/pcci convert "My Song.docx" -o "My Song.pro" --lines-per-slide 4
 ```
 
+That installs the engine alone. Add `--dev` for the test and lint tooling.
+
 ### Liquid Glass
 
 On macOS 26 with the macOS 26 SDK installed:
