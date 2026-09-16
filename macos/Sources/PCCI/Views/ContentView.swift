@@ -25,10 +25,14 @@ struct ContentView: View {
                 }
             }
             ToolbarItem(placement: .primaryAction) {
+                // Title and icon, not icon alone: an icon-only toolbar button is easy
+                // to miss, and an SF Symbol the running system does not have draws
+                // nothing at all.
                 Button {
-                    convertAllPanel()
+                    state.chooseFolderAndConvertAll()
                 } label: {
-                    Label("Convert All", systemImage: "square.stack.3d.down.forward")
+                    Label("Convert All", systemImage: "tray.and.arrow.down")
+                        .labelStyle(.titleAndIcon)
                 }
                 .disabled(state.documents.isEmpty || state.isBusy)
                 .help("Convert every chart in the list into one folder")
@@ -45,19 +49,6 @@ struct ContentView: View {
         .sheet(isPresented: $state.showLog) {
             LogConsole()
         }
-    }
-
-    /// Ask where the batch should go, then convert the whole queue into it.
-    private func convertAllPanel() {
-        let panel = NSOpenPanel()
-        panel.canChooseDirectories = true
-        panel.canChooseFiles = false
-        panel.canCreateDirectories = true
-        panel.allowsMultipleSelection = false
-        panel.prompt = "Convert Here"
-        panel.message = "Where should the \(state.documents.count) presentations go?"
-        guard panel.runModal() == .OK, let directory = panel.url else { return }
-        Task { await state.convertAll(into: directory) }
     }
 
     @ViewBuilder
@@ -125,6 +116,16 @@ struct QueueSidebar: View {
                     )
                 )
                 .font(.caption)
+
+                Button {
+                    state.chooseFolderAndConvertAll()
+                } label: {
+                    Text("Convert All\u{2026}")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(GoldenGateButtonStyle())
+                .disabled(state.documents.isEmpty || state.isBusy)
+                .help("Convert every chart in the list into one folder")
 
                 HStack(spacing: 8) {
                     if let progress = state.batchProgress {

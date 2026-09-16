@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Observation
 import SwiftUI
@@ -60,7 +61,7 @@ final class AppState {
         linesPerSlide: 4,
         balanceLastSlide: true,
         chordDelivery: .both,
-        chordPlacement: .chordsInline
+        chordPlacement: .chordsOnly
     )
     var writeChordPro = false
     var logLines: [EngineLogLine] = []
@@ -270,6 +271,26 @@ final class AppState {
     }
 
     // MARK: Converting the whole queue
+
+    /// Ask where the batch should go, then convert the whole queue into it.
+    ///
+    /// The panel lives here rather than in a view because two places offer this same
+    /// action - the toolbar and the button under the list - and neither should own a
+    /// private copy of it.
+    func chooseFolderAndConvertAll() {
+        guard !documents.isEmpty else { return }
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.prompt = "Convert Here"
+        panel.message = documents.count == 1
+            ? "Where should the presentation go?"
+            : "Where should the \(documents.count) presentations go?"
+        guard panel.runModal() == .OK, let directory = panel.url else { return }
+        Task { await convertAll(into: directory) }
+    }
 
     /// Export every chart in the queue into one folder with the current settings.
     ///

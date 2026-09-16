@@ -85,7 +85,7 @@ def render_inline(lines: list[Line]) -> str:
 
 def render_lines(
     lines: list[Line],
-    placement: ChordPlacementStyle = ChordPlacementStyle.CHORDS_INLINE,
+    placement: ChordPlacementStyle = ChordPlacementStyle.CHORDS_ONLY,
 ) -> str:
     """A block of chord/lyric rows for a slide."""
     if placement is ChordPlacementStyle.CHORDS_INLINE:

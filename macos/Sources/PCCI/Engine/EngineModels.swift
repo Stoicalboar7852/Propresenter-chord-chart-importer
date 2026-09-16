@@ -162,7 +162,7 @@ enum ChordPlacementStyle: String, Codable, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .chordsInline: return "Chords in one row"
-        case .chordsOnly: return "Chords, one row per line"
+        case .chordsOnly: return "Chords, aligned to the words"
         case .above: return "Chords above the lyric"
         case .below: return "Chords below the lyric"
         }
@@ -171,11 +171,11 @@ enum ChordPlacementStyle: String, Codable, CaseIterable, Identifiable {
     var explanation: String {
         switch self {
         case .chordsInline:
-            return "Every chord on one horizontal line — the largest and quickest to read."
+            return "Every chord on one horizontal line. Largest on screen, but nothing lines up."
         case .chordsOnly:
-            return "One row per lyric line, spacing preserved. Runs down the screen."
+            return "One row per lyric line, each chord over the word it is played on."
         case .above, .below:
-            return "Repeats the lyrics in the notes as well as on the slide."
+            return "The chart in full. Repeats the lyrics already on the slide."
         }
     }
 }

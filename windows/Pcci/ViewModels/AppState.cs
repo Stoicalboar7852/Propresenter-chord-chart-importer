@@ -103,7 +103,7 @@ public sealed partial class AppState : ObservableObject
     [ObservableProperty] private bool writeChordPro;
     [ObservableProperty] private int linesPerSlide = 4;
     [ObservableProperty] private string chordDelivery = "both";
-    [ObservableProperty] private string chordPlacement = "chords_inline";
+    [ObservableProperty] private string chordPlacement = "chords_only";
     [ObservableProperty] private string batchStatus = "";
     [ObservableProperty] private bool isBatchRunning;
 

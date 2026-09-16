@@ -212,24 +212,65 @@ def test_title_helpers() -> None:
     )
 
 
+def test_an_indented_chart_keeps_its_chords_over_the_right_words() -> None:
+    """A chart written inside a Word text box carries the same indent on every line.
+
+    The lyric loses that indent when it is read; the chord columns are measured before
+    it does. Subtracting one from the other is the whole fix, and getting it wrong
+    pushes every chord past the end of the line and piles them on the last character,
+    which is what these charts used to do.
+    """
+    indent = " " * 64
+    chords = align_chords(
+        PositionedLine(text=f"{indent}G                                      Gsus"),
+        PositionedLine(text="I was headed for hell until He rescued me"),
+        lyric_offset=len(indent),
+    )
+    assert [c.char_index for c in chords] == [0, 39]
+    # 39 is "me": the word the Gsus actually falls on.
+    lyric = "I was headed for hell until He rescued me"
+    assert lyric[39:] == "me"
+
+
+def test_an_indented_chart_reads_the_same_as_an_unindented_one() -> None:
+    """Indenting a whole chart must not move a single chord."""
+    chord_text = "D          E         F#m"
+    lyric_text = "Again and again and again and again"
+    plain = align_chords(PositionedLine(text=chord_text), PositionedLine(text=lyric_text))
+    indented = align_chords(
+        PositionedLine(text=" " * 40 + chord_text),
+        PositionedLine(text=lyric_text),
+        lyric_offset=40,
+    )
+    assert [c.char_index for c in plain] == [c.char_index for c in indented]
+
+
+def test_a_chord_line_indented_further_than_its_lyric_still_moves_right() -> None:
+    """Only the lyric's own indent comes off; the chord's extra indent is meaningful."""
+    chords = align_chords(
+        PositionedLine(text="        A"),
+        PositionedLine(text="Goodbye yesterday"),
+    )
+    assert [c.char_index for c in chords] == [8]
+
+
 def test_alignment_clamps_to_the_lyric() -> None:
     chords = align_chords(
         PositionedLine(text="D          E         F#m"),
         PositionedLine(text="Short"),
-        monospace=True,
     )
     assert [c.char_index for c in chords] == [0, 5, 5]
 
 
 def test_alignment_without_a_lyric_puts_everything_at_zero() -> None:
-    chords = align_chords(PositionedLine(text="Am  F  C  G"), None, monospace=True)
+    chords = align_chords(PositionedLine(text="Am  F  C  G"), None)
     assert [c.char_index for c in chords] == [0, 0, 0, 0]
 
 
 def test_positional_alignment_uses_real_coordinates() -> None:
     chord_line = PositionedLine(text="C   G", char_x=[0.0, 6.0, 12.0, 18.0, 24.0])
     lyric_line = PositionedLine(text="abcde", char_x=[0.0, 6.0, 12.0, 18.0, 24.0])
-    chords = align_chords(chord_line, lyric_line, monospace=False)
+    chords = align_chords(chord_line, lyric_line)
     assert [(c.chord, c.char_index) for c in chords] == [("C", 0), ("G", 4)]
 
 
@@ -260,6 +301,6 @@ def test_label_parsing_never_raises(text: str) -> None:
 @given(st.text(alphabet=st.characters(blacklist_categories=("Cs",)), max_size=80))
 def test_alignment_indices_stay_inside_the_lyric(lyric: str) -> None:
     chord_line = PositionedLine(text="C   G   Am   F")
-    chords = align_chords(chord_line, PositionedLine(text=lyric), monospace=True)
+    chords = align_chords(chord_line, PositionedLine(text=lyric))
     for placement in chords:
         assert 0 <= placement.char_index <= len(lyric)

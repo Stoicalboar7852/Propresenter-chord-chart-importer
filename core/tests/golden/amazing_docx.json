@@ -77,12 +77,12 @@
           "chords": [
             {
               "chord": "G",
-              "char_index": 41,
+              "char_index": 0,
               "raw": "G"
             },
             {
               "chord": "Gsus",
-              "char_index": 41,
+              "char_index": 39,
               "raw": "Gsus"
             }
           ],
@@ -93,7 +93,7 @@
           "chords": [
             {
               "chord": "G",
-              "char_index": 50,
+              "char_index": 46,
               "raw": "G"
             }
           ],
@@ -104,7 +104,7 @@
           "chords": [
             {
               "chord": "Gsus",
-              "char_index": 39,
+              "char_index": 37,
               "raw": "Gsus"
             }
           ],
@@ -115,7 +115,7 @@
           "chords": [
             {
               "chord": "G",
-              "char_index": 30,
+              "char_index": 27,
               "raw": "G"
             }
           ],
@@ -135,12 +135,12 @@
           "chords": [
             {
               "chord": "G",
-              "char_index": 41,
+              "char_index": 0,
               "raw": "G"
             },
             {
               "chord": "C",
-              "char_index": 41,
+              "char_index": 39,
               "raw": "C"
             }
           ],
@@ -151,7 +151,7 @@
           "chords": [
             {
               "chord": "G",
-              "char_index": 50,
+              "char_index": 46,
               "raw": "G"
             }
           ],
@@ -162,7 +162,7 @@
           "chords": [
             {
               "chord": "C",
-              "char_index": 39,
+              "char_index": 37,
               "raw": "C"
             }
           ],
@@ -173,7 +173,7 @@
           "chords": [
             {
               "chord": "Em",
-              "char_index": 30,
+              "char_index": 27,
               "raw": "Em"
             }
           ],
@@ -193,27 +193,27 @@
           "chords": [
             {
               "chord": "Em",
-              "char_index": 56,
+              "char_index": 0,
               "raw": "Em"
             },
             {
               "chord": "D",
-              "char_index": 56,
+              "char_index": 7,
               "raw": "D"
             },
             {
               "chord": "C",
-              "char_index": 56,
+              "char_index": 22,
               "raw": "C"
             },
             {
               "chord": "G",
-              "char_index": 56,
+              "char_index": 35,
               "raw": "G"
             },
             {
               "chord": "Em",
-              "char_index": 56,
+              "char_index": 52,
               "raw": "Em"
             }
           ],
@@ -224,27 +224,27 @@
           "chords": [
             {
               "chord": "D",
-              "char_index": 61,
+              "char_index": 7,
               "raw": "D"
             },
             {
               "chord": "C",
-              "char_index": 61,
+              "char_index": 27,
               "raw": "C"
             },
             {
               "chord": "G",
-              "char_index": 61,
+              "char_index": 39,
               "raw": "G"
             },
             {
               "chord": "D/F#",
-              "char_index": 61,
+              "char_index": 48,
               "raw": "D/F#"
             },
             {
               "chord": "Em",
-              "char_index": 61,
+              "char_index": 55,
               "raw": "Em"
             }
           ],
@@ -255,22 +255,22 @@
           "chords": [
             {
               "chord": "D",
-              "char_index": 67,
+              "char_index": 7,
               "raw": "D"
             },
             {
               "chord": "C",
-              "char_index": 67,
+              "char_index": 27,
               "raw": "C"
             },
             {
               "chord": "G",
-              "char_index": 67,
+              "char_index": 40,
               "raw": "G"
             },
             {
               "chord": "Em",
-              "char_index": 67,
+              "char_index": 62,
               "raw": "Em"
             }
           ],
@@ -281,12 +281,12 @@
           "chords": [
             {
               "chord": "D",
-              "char_index": 53,
+              "char_index": 8,
               "raw": "D"
             },
             {
               "chord": "C",
-              "char_index": 53,
+              "char_index": 26,
               "raw": "C"
             }
           ],
@@ -306,27 +306,27 @@
           "chords": [
             {
               "chord": "Em",
-              "char_index": 56,
+              "char_index": 0,
               "raw": "Em"
             },
             {
               "chord": "D",
-              "char_index": 56,
+              "char_index": 7,
               "raw": "D"
             },
             {
               "chord": "C",
-              "char_index": 56,
+              "char_index": 22,
               "raw": "C"
             },
             {
               "chord": "G",
-              "char_index": 56,
+              "char_index": 35,
               "raw": "G"
             },
             {
               "chord": "Em",
-              "char_index": 56,
+              "char_index": 52,
               "raw": "Em"
             }
           ],
@@ -363,22 +363,22 @@
           "chords": [
             {
               "chord": "D",
-              "char_index": 51,
+              "char_index": 6,
               "raw": "D"
             },
             {
               "chord": "C",
-              "char_index": 51,
+              "char_index": 19,
               "raw": "C"
             },
             {
               "chord": "G",
-              "char_index": 51,
+              "char_index": 32,
               "raw": "G"
             },
             {
               "chord": "Em",
-              "char_index": 51,
+              "char_index": 45,
               "raw": "Em"
             }
           ],
@@ -389,12 +389,12 @@
           "chords": [
             {
               "chord": "D",
-              "char_index": 45,
+              "char_index": 6,
               "raw": "D"
             },
             {
               "chord": "C",
-              "char_index": 45,
+              "char_index": 19,
               "raw": "C"
             }
           ],
@@ -414,7 +414,7 @@
           "chords": [
             {
               "chord": "G",
-              "char_index": 41,
+              "char_index": 0,
               "raw": "G"
             }
           ],
@@ -425,7 +425,7 @@
           "chords": [
             {
               "chord": "G9/B",
-              "char_index": 47,
+              "char_index": 0,
               "raw": "G9/B"
             }
           ],
@@ -436,7 +436,7 @@
           "chords": [
             {
               "chord": "Em",
-              "char_index": 48,
+              "char_index": 0,
               "raw": "Em"
             }
           ],
@@ -447,7 +447,7 @@
           "chords": [
             {
               "chord": "C",
-              "char_index": 30,
+              "char_index": 0,
               "raw": "C"
             }
           ],
@@ -467,17 +467,17 @@
           "chords": [
             {
               "chord": "Am",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "Am"
             },
             {
               "chord": "G/B",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "G/B"
             },
             {
               "chord": "C",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "C"
             }
           ],
@@ -493,17 +493,17 @@
           "chords": [
             {
               "chord": "Em",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "Em"
             },
             {
               "chord": "D/F#",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "D/F#"
             },
             {
               "chord": "G",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "G"
             }
           ],
@@ -519,17 +519,17 @@
           "chords": [
             {
               "chord": "Am",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "Am"
             },
             {
               "chord": "G/B",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "G/B"
             },
             {
               "chord": "C",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "C"
             }
           ],
@@ -545,17 +545,17 @@
           "chords": [
             {
               "chord": "Em",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "Em"
             },
             {
               "chord": "D/F#",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "D/F#"
             },
             {
               "chord": "G",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "G"
             }
           ],
@@ -571,17 +571,17 @@
           "chords": [
             {
               "chord": "Am",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "Am"
             },
             {
               "chord": "G/B",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "G/B"
             },
             {
               "chord": "C",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "C"
             }
           ],
@@ -597,17 +597,17 @@
           "chords": [
             {
               "chord": "Em",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "Em"
             },
             {
               "chord": "D/F#",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "D/F#"
             },
             {
               "chord": "G",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "G"
             }
           ],
@@ -623,17 +623,17 @@
           "chords": [
             {
               "chord": "Am",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "Am"
             },
             {
               "chord": "G/B",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "G/B"
             },
             {
               "chord": "C",
-              "char_index": 19,
+              "char_index": 0,
               "raw": "C"
             }
           ],

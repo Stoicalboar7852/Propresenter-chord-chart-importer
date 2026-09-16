@@ -58,11 +58,11 @@ def build_song(document: RawDocument) -> Song:
     metadata = extract_metadata(document, header_indices=labelled)
 
     usable = [item for item in classified if item.index not in metadata.consumed_indices]
-    sections = _build_sections(usable, monospace=document.monospace)
+    sections = _build_sections(usable)
     if not sections:
-        sections = _fallback_sections(usable, monospace=document.monospace)
+        sections = _fallback_sections(usable)
     sections = [section for section in sections if section.lines]
-    _prepend_title_line_chords(sections, metadata.title_chords, monospace=document.monospace)
+    _prepend_title_line_chords(sections, metadata.title_chords)
 
     if not sections:
         raise NoSectionsDetectedError(
@@ -96,9 +96,7 @@ def build_song(document: RawDocument) -> Song:
     )
 
 
-def _prepend_title_line_chords(
-    sections: list[Section], chord_text: str, *, monospace: bool
-) -> None:
+def _prepend_title_line_chords(sections: list[Section], chord_text: str) -> None:
     """Keep the chords some charts type next to the song title.
 
     ``IN THE RIVER      A   F#m   C#m   E`` is a title and an intro. The title goes to
@@ -109,7 +107,7 @@ def _prepend_title_line_chords(
         return
     if any(section.type is SectionType.INTRO for section in sections):
         return
-    chords = align_chords(PositionedLine(text=chord_text), None, monospace=monospace)
+    chords = align_chords(PositionedLine(text=chord_text), None)
     if len(chords) < 2:
         return
     sections.insert(
@@ -133,7 +131,7 @@ def _new_section(label: SectionLabel) -> Section:
     )
 
 
-def _build_sections(classified: list[ClassifiedLine], *, monospace: bool) -> list[Section]:
+def _build_sections(classified: list[ClassifiedLine]) -> list[Section]:
     """Split at headers and fill each section with paired chord/lyric lines."""
     sections: list[Section] = []
     current: Section | None = None
@@ -142,7 +140,7 @@ def _build_sections(classified: list[ClassifiedLine], *, monospace: bool) -> lis
     def flush() -> None:
         nonlocal buffer
         if current is not None and buffer:
-            current.lines.extend(_pair_lines(buffer, monospace=monospace))
+            current.lines.extend(_pair_lines(buffer))
         buffer = []
 
     for item in classified:
@@ -158,7 +156,7 @@ def _build_sections(classified: list[ClassifiedLine], *, monospace: bool) -> lis
     return sections
 
 
-def _fallback_sections(classified: list[ClassifiedLine], *, monospace: bool) -> list[Section]:
+def _fallback_sections(classified: list[ClassifiedLine]) -> list[Section]:
     """Last resort: blank-line stanzas.
 
     The first stanza becomes an Intro only if it is chords with no words; otherwise
@@ -178,7 +176,7 @@ def _fallback_sections(classified: list[ClassifiedLine], *, monospace: bool) -> 
 
     sections: list[Section] = []
     for position, stanza in enumerate(stanzas):
-        lines = _pair_lines(stanza, monospace=monospace)
+        lines = _pair_lines(stanza)
         if not lines:
             continue
         instrumental = all(not line.lyrics for line in lines)
@@ -198,7 +196,7 @@ def _fallback_sections(classified: list[ClassifiedLine], *, monospace: bool) -> 
     return sections
 
 
-def _pair_lines(items: list[ClassifiedLine], *, monospace: bool) -> list[Line]:
+def _pair_lines(items: list[ClassifiedLine]) -> list[Line]:
     """Pair each chord line with the lyric beneath it."""
     lines: list[Line] = []
     pending_annotations: list[str] = []
@@ -238,11 +236,12 @@ def _pair_lines(items: list[ClassifiedLine], *, monospace: bool) -> list[Line]:
                 continue
             lyric_item = _next_content(items, index + 1)
             if lyric_item is not None and lyric_item.kind is LineKind.LYRIC:
+                offset = _lyric_offset(lyric_item)
                 lyric_line = PositionedLine(
                     text=lyric_item.lyric_text or lyric_item.line.text.strip(),
                     char_x=_shifted_char_x(lyric_item),
                 )
-                chords = align_chords(item.line, lyric_line, monospace=monospace)
+                chords = align_chords(item.line, lyric_line, lyric_offset=offset)
                 line = Line(
                     lyrics=lyric_line.text,
                     chords=chords,
@@ -251,7 +250,7 @@ def _pair_lines(items: list[ClassifiedLine], *, monospace: bool) -> list[Line]:
                 lines.append(attach_annotations(line))
                 index = items.index(lyric_item) + 1
                 continue
-            chords = align_chords(item.line, None, monospace=monospace)
+            chords = align_chords(item.line, None)
             lines.append(attach_annotations(Line(chords=chords)))
             index += 1
             continue
@@ -280,11 +279,23 @@ def _next_content(items: list[ClassifiedLine], start: int) -> ClassifiedLine | N
     return None
 
 
+def _lyric_offset(item: ClassifiedLine) -> int:
+    """How many characters were trimmed from the front of this line's lyric.
+
+    Every chord column on the line above is measured from the same left edge, so this
+    is what has to come off them before they mean anything as an index into the lyric.
+    """
+    original = item.line.text
+    kept = item.lyric_text or original.strip()
+    if not kept or kept not in original:
+        return 0
+    return original.index(kept)
+
+
 def _shifted_char_x(item: ClassifiedLine) -> list[float]:
     """Character positions for the lyric text after leading whitespace was stripped."""
-    original = item.line.text
-    stripped = item.lyric_text or original.strip()
     if not item.line.char_x:
         return []
-    offset = original.index(stripped) if stripped and stripped in original else 0
-    return item.line.char_x[offset : offset + len(stripped)]
+    kept = item.lyric_text or item.line.text.strip()
+    offset = _lyric_offset(item)
+    return item.line.char_x[offset : offset + len(kept)]

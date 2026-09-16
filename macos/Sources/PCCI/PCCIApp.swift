@@ -29,6 +29,9 @@ struct PCCIApp: App {
             CommandGroup(replacing: .newItem) {
                 Button("Open Chart…") { openPanel() }
                     .keyboardShortcut("o")
+                Button("Convert All…") { state.chooseFolderAndConvertAll() }
+                    .keyboardShortcut("e", modifiers: [.command, .shift])
+                    .disabled(state.documents.isEmpty)
             }
             CommandGroup(after: .toolbar) {
                 Toggle("Show Engine Log", isOn: Binding(

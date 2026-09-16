@@ -48,10 +48,10 @@ Three other layouts are available, in the app's settings or with
 
 | Value | What you get |
 |---|---|
-| `chords_inline` | One horizontal row. The default. |
-| `chords_only` | One row per lyric line, horizontal spacing preserved. |
-| `above` | The chart layout: chords over their own words. |
-| `below` | Lyrics first, chords beneath. |
+| `chords_only` | One row per lyric line, each chord at the column it sits at in the chart. The default. |
+| `chords_inline` | Every chord on the slide in one horizontal row. Largest on screen, but nothing lines up with anything. |
+| `above` | The chart in full: chords over their own words, lyrics and all. |
+| `below` | The same, lyrics first. |
 
 ```
      C        G/B      Am            <- above

@@ -280,8 +280,35 @@ def test_chord_row_reconstructs_positions() -> None:
     ]
 
 
-def test_inline_row_is_the_default_and_is_horizontal() -> None:
-    """One row of chords, because a stage screen scales notes to fit."""
+def test_the_default_notes_keep_each_chord_over_its_word() -> None:
+    """The default is alignment, not compactness.
+
+    A chord's column is the whole point of a chord chart: it says which syllable the
+    change lands on. The notes reproduce that and leave the lyrics out, because they
+    are already on the slide and repeating them halves the size a stage screen can
+    render the block at.
+    """
+    from pcci.ir import ChordPlacement, Line
+
+    lines = [
+        Line(
+            lyrics="Again and again and again",
+            chords=[
+                ChordPlacement(chord="D", char_index=0),
+                ChordPlacement(chord="E", char_index=11),
+                ChordPlacement(chord="F#m", char_index=21),
+            ],
+        ),
+        Line(lyrics="You rescued me", chords=[ChordPlacement(chord="Bm", char_index=0)]),
+    ]
+    assert render_lines(lines).splitlines() == [
+        "D          E         F#m",
+        "Bm",
+    ]
+
+
+def test_inline_row_is_horizontal() -> None:
+    """The one-row style is still there for anyone who wants the largest text."""
     from pcci.ir import ChordPlacement, Line
 
     lines = [
@@ -289,8 +316,9 @@ def test_inline_row_is_the_default_and_is_horizontal() -> None:
         Line(lyrics="You rescued me", chords=[ChordPlacement(chord="D", char_index=0)]),
         Line(lyrics="You traded my sorrow", chords=[ChordPlacement(chord="A/C#", char_index=0)]),
     ]
-    assert render_lines(lines) == "A    D    A/C#"
-    assert "\n" not in render_lines(lines)
+    row = render_lines(lines, ChordPlacementStyle.CHORDS_INLINE)
+    assert row == "A    D    A/C#"
+    assert "\n" not in row
 
 
 def test_inline_row_groups_a_line_s_chords_together() -> None:
@@ -307,7 +335,7 @@ def test_inline_row_groups_a_line_s_chords_together() -> None:
         ),
         Line(lyrics="You rescued me", chords=[ChordPlacement(chord="Bm", char_index=0)]),
     ]
-    assert render_lines(lines) == "D E F#m    Bm"
+    assert render_lines(lines, ChordPlacementStyle.CHORDS_INLINE) == "D E F#m    Bm"
 
 
 def test_inline_row_skips_lines_with_no_chords_and_keeps_annotations() -> None:
@@ -318,7 +346,7 @@ def test_inline_row_skips_lines_with_no_chords_and_keeps_annotations() -> None:
         Line(lyrics="a line with no chords"),
         Line(lyrics="last", chords=[ChordPlacement(chord="D", char_index=0)], annotation="x4"),
     ]
-    assert render_lines(lines) == "A    D    (x4)"
+    assert render_lines(lines, ChordPlacementStyle.CHORDS_INLINE) == "A    D    (x4)"
 
 
 def test_chords_can_be_placed_below() -> None:
