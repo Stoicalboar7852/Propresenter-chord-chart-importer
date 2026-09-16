@@ -16,7 +16,10 @@ on:
 jobs:
   macos:
     name: macOS app
-    runs-on: macos-14
+    # macOS 26 for the SDK, so the Liquid Glass path compiles in. The app still
+    # deploys to macOS 14 and falls back to a plain material there at runtime; what
+    # this buys is that a Mac running 26 gets real glass rather than the fallback.
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
 
@@ -25,7 +28,7 @@ jobs:
           python-version: "3.12"
 
       - name: Build the app and a disk image
-        run: ./scripts/build-macos.sh --dmg
+        run: ./scripts/build-macos.sh --liquid-glass --dmg
 
       - name: Check the bundled engine runs
         run: build/macos/PCCI.app/Contents/Resources/engine/pcci doctor

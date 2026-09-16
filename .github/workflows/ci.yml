@@ -110,13 +110,10 @@ jobs:
 
   macos-app-glass:
     name: macOS app (Liquid Glass)
-    # The Liquid Glass path is behind a compilation condition, so nothing above ever
-    # compiles it - and it is the path anyone building with --liquid-glass uses. This
-    # needs the macOS 26 SDK; it does not fail the build while it is unproven whether
-    # a hosted runner carries one, because a job that cannot start is not a defect in
-    # this repository.
+    # The Liquid Glass path is behind a compilation condition, so the job above never
+    # compiles it - and it is the path every shipped build uses. A macOS 26 runner has
+    # the SDK for it, which was checked before this was made a required job.
     runs-on: macos-26
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Which SDK is here

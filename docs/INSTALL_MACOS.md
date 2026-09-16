@@ -73,6 +73,10 @@ Without that flag the app uses `.ultraThinMaterial`, which looks deliberate on e
 version from macOS 14 up. The flag is opt-in because the Liquid Glass symbols do not
 exist in older SDKs, so a build machine without the macOS 26 SDK cannot compile them.
 
+The builds on the releases page are made with it, on a macOS 26 runner. They still run
+on macOS 14: the glass sits behind an availability check, so an older Mac gets the
+material and a Mac on 26 gets real glass, from the same download.
+
 ## First launch
 
 macOS will refuse to open an unsigned app on the first try. Either:
