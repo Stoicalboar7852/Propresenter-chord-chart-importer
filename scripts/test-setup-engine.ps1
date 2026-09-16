@@ -84,6 +84,22 @@ Assert-That 'reports a machine, not a path' `
 Assert-That 'the path is the interpreter' `
     ($null -ne $info -and (Split-Path -Leaf $info.Path) -match '^python')
 
+# PowerShell 7 fixed how arguments reach a native program; Windows PowerShell still
+# uses the old rules, where an embedded double quote is dropped rather than escaped.
+# Running the probe under those rules here means a quoting mistake shows up on any
+# machine, not only on Windows.
+if (Test-Path variable:PSNativeCommandArgumentPassing) {
+    $previousPassing = $PSNativeCommandArgumentPassing
+    $PSNativeCommandArgumentPassing = 'Legacy'
+    try {
+        Assert-That 'the probe survives legacy argument passing' `
+            ($null -ne (Get-PythonInfo $real.Path))
+    }
+    finally {
+        $PSNativeCommandArgumentPassing = $previousPassing
+    }
+}
+
 # Looking for Python means running things that turn out not to be Python. None of it
 # may throw, whatever the shell's error preference: this is what used to abort the
 # script on a machine whose py launcher answered "No suitable Python runtime found".

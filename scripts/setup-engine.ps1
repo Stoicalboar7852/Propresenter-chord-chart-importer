@@ -108,7 +108,10 @@ function Get-HostArchitecture {
 function Get-PythonInfo {
     param([string]$Executable)
 
-    $probe = 'import platform, sys; print("PCCIPY|%d.%d.%d|%s|%s" % (sys.version_info[0], sys.version_info[1], sys.version_info[2], platform.machine(), sys.executable))'
+    # Single quotes inside the Python, deliberately. Windows PowerShell hands arguments
+    # to native programs by the old rules, which do not escape an embedded double quote:
+    # Python would receive the format string unquoted and refuse to parse it.
+    $probe = "import platform, sys; print('PCCIPY|%d.%d.%d|%s|%s' % (sys.version_info[0], sys.version_info[1], sys.version_info[2], platform.machine(), sys.executable))"
     $lines = Invoke-Native $Executable @('-c', $probe)
     foreach ($line in $lines) {
         if ($line -notmatch '^PCCIPY\|') { continue }
