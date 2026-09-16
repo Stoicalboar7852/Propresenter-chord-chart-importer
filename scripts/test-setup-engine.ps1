@@ -29,11 +29,14 @@ function Assert-That {
 
     if ($Condition) {
         Write-Host "  ok    $Name"
+        return
     }
-    else {
-        Write-Host "  FAIL  $Name$(if ($Detail) { " — $Detail" })"
-        $script:failures += $Name
-    }
+    # Windows PowerShell cannot parse a double-quoted string inside a subexpression of
+    # another double-quoted string, so the detail is built up first.
+    $suffix = ''
+    if ($Detail) { $suffix = " - $Detail" }
+    Write-Host "  FAIL  $Name$suffix"
+    $script:failures += $Name
 }
 
 Write-Host 'py -0p parsing'

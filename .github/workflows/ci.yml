@@ -73,6 +73,15 @@ jobs:
         shell: pwsh
         run: ./scripts/test-setup-engine.ps1
 
+      # Windows PowerShell reads a .ps1 with no byte-order mark as ANSI, so an em dash
+      # in a message arrives on screen as mojibake. Plain ASCII in these files, then.
+      - name: PowerShell scripts are ASCII
+        run: |
+          if LC_ALL=C grep -n '[^[:print:][:space:]]' scripts/*.ps1; then
+            echo "^ non-ASCII in a PowerShell script; use plain ASCII" >&2
+            exit 1
+          fi
+
   macos-app:
     name: macOS app
     runs-on: macos-14

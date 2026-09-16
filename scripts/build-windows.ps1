@@ -29,7 +29,7 @@ $output = Join-Path $repoRoot "build\windows\$Architecture"
 $engineOutput = Join-Path $repoRoot 'build\engine'
 
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    Write-Error 'dotnet not found — install the .NET 8 SDK'
+    Write-Error 'dotnet not found: install the .NET 8 SDK'
 }
 
 if (-not $SkipEngine) {

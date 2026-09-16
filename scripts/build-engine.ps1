@@ -57,8 +57,8 @@ if (Test-Path $work) { Remove-Item -Recurse -Force $work }
 New-Item -ItemType Directory -Force -Path $OutputDirectory, $work | Out-Null
 
 # The generated protobuf modules are imported by bare name after their directory is
-# added to sys.path at runtime, so PyInstaller cannot see them — or their dependency on
-# google.protobuf — by static analysis. Both are declared explicitly. On Windows the
+# added to sys.path at runtime, so PyInstaller cannot see them, or their dependency
+# on google.protobuf, by static analysis. Both are declared explicitly. On Windows the
 # --add-data separator is ';', not ':'.
 $generated = 'pcci\propresenter\proto\generated'
 $generatedSource = Join-Path $core $generated
