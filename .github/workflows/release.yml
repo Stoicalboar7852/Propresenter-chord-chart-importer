@@ -36,8 +36,8 @@ jobs:
           path: build/macos/PCCI.dmg
           if-no-files-found: error
 
-  windows:
-    name: Windows app
+  windows-x64:
+    name: Windows app (x64)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,8 +50,11 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
-      - name: Build the app
-        run: .\scripts\build-windows.ps1
+      - name: Build the app, the zip and the installer
+        run: .\scripts\build-windows.ps1 -Architecture win-x64
+
+      - name: Check the bundled engine runs
+        run: build\windows\win-x64\engine\pcci.exe doctor
 
       - uses: actions/upload-artifact@v4
         with:
@@ -61,9 +64,39 @@ jobs:
             build/windows/PCCI-win-x64-setup.exe
           if-no-files-found: error
 
+  windows-arm64:
+    name: Windows app (ARM64)
+    # Built on a real ARM64 machine because the engine cannot be cross-compiled:
+    # PyInstaller freezes with the interpreter it runs on.
+    runs-on: windows-11-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Build the app, the zip and the installer
+        run: .\scripts\build-windows.ps1 -Architecture win-arm64
+
+      - name: Check the bundled engine runs
+        run: build\windows\win-arm64\engine\pcci.exe doctor
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PCCI-windows-arm64
+          path: |
+            build/windows/PCCI-win-arm64.zip
+            build/windows/PCCI-win-arm64-setup.exe
+          if-no-files-found: error
+
   publish:
     name: Publish the release
-    needs: [macos, windows]
+    needs: [macos, windows-x64, windows-arm64]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
@@ -79,8 +112,25 @@ jobs:
             artifacts/PCCI-macos-arm64/PCCI.dmg
             artifacts/PCCI-windows-x64/PCCI-win-x64-setup.exe
             artifacts/PCCI-windows-x64/PCCI-win-x64.zip
+            artifacts/PCCI-windows-arm64/PCCI-win-arm64-setup.exe
+            artifacts/PCCI-windows-arm64/PCCI-win-arm64.zip
           body: |
-            ## Installing
+            ## Which file
+
+            | You have | Download |
+            |---|---|
+            | A Mac | `PCCI.dmg` — Apple silicon |
+            | A Windows PC, Intel or AMD | `PCCI-win-x64-setup.exe` |
+            | A Windows PC on ARM (Snapdragon, Surface Pro 11) | `PCCI-win-arm64-setup.exe` |
+
+            Not sure which Windows you have? **Settings → System → About → System
+            type**. The `.zip` files are the same apps as a folder, for anyone who
+            would rather not run an installer.
+
+            The Windows installer asks whether to install for everyone or just you,
+            lets you pick the folder, and can put a shortcut on your desktop.
+
+            ## First launch
 
             Neither build is signed, so each system will question it once.
 
