@@ -8,6 +8,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ application: NSApplication) -> Bool {
         true
     }
+
+    /// Let the desktop through.
+    ///
+    /// The visual effect view behind the content does the blurring, but an opaque
+    /// window with a solid background colour paints over it first, which is why the
+    /// app looked like flat panels rather than glass. A transparent titlebar then
+    /// stops a grey strip cutting across the top of it.
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        for window in NSApplication.shared.windows {
+            window.isOpaque = false
+            window.backgroundColor = .clear
+            window.titlebarAppearsTransparent = true
+        }
+    }
 }
 
 @main

@@ -13,9 +13,8 @@ struct ContentView: View {
                 .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 320)
         } detail: {
             detail
-                .background(Theme.background)
         }
-        .background(Theme.background)
+        .appBackdrop()
         .toolbar {
             ToolbarItem(placement: .principal) {
                 if let document = state.selected {
@@ -148,7 +147,7 @@ struct QueueSidebar: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(.ultraThinMaterial)
+            .background(.ultraThinMaterial.opacity(0.7))
         }
     }
 

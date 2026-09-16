@@ -27,7 +27,7 @@ struct LinesPerSlideField: View {
                 .padding(.vertical, 3)
                 .background(
                     RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .fill(Theme.surfaceRaised)
+                        .fill(.ultraThinMaterial)
                         .overlay(
                             RoundedRectangle(cornerRadius: 6, style: .continuous)
                                 .strokeBorder(isFocused ? Theme.accent : Theme.separator)

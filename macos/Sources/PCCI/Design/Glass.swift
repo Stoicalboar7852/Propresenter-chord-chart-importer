@@ -40,12 +40,29 @@ struct GlassPanel: ViewModifier {
 
     @ViewBuilder
     private func fallback(_ content: Content) -> some View {
+        // The tint is painted over the material rather than dropped, which it used to
+        // be: without it every tinted panel on macOS 14 came out the same flat grey and
+        // a tinted button lost the only thing making it look like a button.
         content
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius))
-            .overlay(
-                RoundedRectangle(cornerRadius: cornerRadius)
-                    .strokeBorder(Theme.separator.opacity(0.6), lineWidth: 1)
-            )
+            .background {
+                let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                shape
+                    .fill(.ultraThinMaterial)
+                    .overlay(shape.fill(tint ?? .clear))
+                    .overlay(
+                        shape.strokeBorder(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.28),
+                                    Theme.separator.opacity(0.45),
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                    )
+            }
     }
 }
 
@@ -56,7 +73,11 @@ extension View {
     }
 }
 
-/// The app's primary button: Golden Gate orange, warming when pressed.
+/// The app's primary button: Golden Gate orange, as glass rather than as paint.
+///
+/// The tint is heavy enough to carry white text over whatever is behind the window -
+/// a bright desktop included - and light enough that the button still reads as glass
+/// rather than a coloured rectangle.
 struct GoldenGateButtonStyle: ButtonStyle {
     var prominent: Bool = true
 
@@ -65,19 +86,19 @@ struct GoldenGateButtonStyle: ButtonStyle {
             .font(.system(size: 13, weight: .semibold))
             .padding(.horizontal, 18)
             .padding(.vertical, 9)
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(background(pressed: configuration.isPressed))
-            )
             .foregroundStyle(prominent ? Color.white : Theme.primaryText)
-            .contentShape(RoundedRectangle(cornerRadius: 10))
+            .glassPanel(cornerRadius: 10, tint: tint(pressed: configuration.isPressed))
+            .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .scaleEffect(configuration.isPressed ? 0.975 : 1)
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 
-    private func background(pressed: Bool) -> Color {
+    private func tint(pressed: Bool) -> Color {
         guard prominent else {
-            return pressed ? Theme.surfaceRaised : Theme.surface
+            return Theme.primaryText.opacity(pressed ? 0.16 : 0.08)
         }
-        return pressed ? Theme.accentWarm : Theme.effectiveAccent
+        return pressed
+            ? Theme.accentWarm.opacity(0.92)
+            : Theme.effectiveAccent.opacity(0.78)
     }
 }

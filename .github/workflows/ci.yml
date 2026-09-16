@@ -108,6 +108,23 @@ jobs:
         working-directory: macos
         run: swift build -c debug
 
+  macos-app-glass:
+    name: macOS app (Liquid Glass)
+    # The Liquid Glass path is behind a compilation condition, so nothing above ever
+    # compiles it - and it is the path anyone building with --liquid-glass uses. This
+    # needs the macOS 26 SDK; it does not fail the build while it is unproven whether
+    # a hosted runner carries one, because a job that cannot start is not a defect in
+    # this repository.
+    runs-on: macos-26
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Which SDK is here
+        run: xcodebuild -version && xcrun --show-sdk-version
+      - name: Compile with Liquid Glass
+        working-directory: macos
+        run: swift build -c debug -Xswiftc -DPCCI_LIQUID_GLASS
+
   windows-engine:
     name: Windows engine setup
     runs-on: windows-latest

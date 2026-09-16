@@ -29,6 +29,14 @@ enum Theme {
     /// The warmer end, used for hover and pressed states.
     static let accentWarm = dynamic(light: Color(hex: 0xE8603C), dark: Color(hex: 0xE8603C))
 
+    // MARK: Wash
+
+    /// The three colours thrown behind the glass. Warmer than the accent on purpose:
+    /// these are light through a window, not paint on a wall.
+    static let washWarm = dynamic(light: Color(hex: 0xFF9A1E), dark: Color(hex: 0xFF7A00))
+    static let washDeep = dynamic(light: Color(hex: 0xFF5A2A), dark: Color(hex: 0xFF3D00))
+    static let washCool = dynamic(light: Color(hex: 0x8A5CFF), dark: Color(hex: 0x6E3BFF))
+
     // MARK: Confidence
 
     static let confident = dynamic(light: Color(hex: 0x2E7D51), dark: Color(hex: 0x4CC38A))

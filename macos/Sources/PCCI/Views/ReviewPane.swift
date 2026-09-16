@@ -210,7 +210,6 @@ struct SlidePreview: View {
             }
             .padding(16)
         }
-        .background(Theme.background)
     }
 }
 

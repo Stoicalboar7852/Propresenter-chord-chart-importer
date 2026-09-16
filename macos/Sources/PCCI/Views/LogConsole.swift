@@ -52,7 +52,7 @@ struct LogConsole: View {
             }
         }
         .frame(width: 640, height: 420)
-        .background(Theme.surface)
+        .background(.ultraThinMaterial)
     }
 
     private var plainText: String {
