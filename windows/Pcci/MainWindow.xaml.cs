@@ -32,7 +32,8 @@ public sealed partial class MainWindow : Window
         State.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName is nameof(AppState.Selected) or nameof(AppState.Banner)
-                or nameof(AppState.IsBusy))
+                or nameof(AppState.IsBusy) or nameof(AppState.BatchStatus)
+                or nameof(AppState.IsBatchRunning) or nameof(AppState.LinesPerSlide))
             {
                 UpdatePanes();
             }
@@ -57,6 +58,17 @@ public sealed partial class MainWindow : Window
 
         BusyRing.IsActive = State.IsBusy;
         BusyRing.Visibility = State.IsBusy ? Visibility.Visible : Visibility.Collapsed;
+
+        var count = State.Documents.Count;
+        QueueStatusText.Text = State.BatchStatus.Length > 0
+            ? State.BatchStatus
+            : count switch { 0 => "Nothing loaded", 1 => "1 chart", _ => $"{count} charts" };
+        ConvertAllButton.IsEnabled = count > 0 && !State.IsBatchRunning;
+        ClearButton.IsEnabled = count > 0 && !State.IsBatchRunning;
+        if (QueueLinesPerSlide.Value != State.LinesPerSlide)
+        {
+            QueueLinesPerSlide.Value = State.LinesPerSlide;
+        }
 
         DropPane.Visibility = document is null ? Visibility.Visible : Visibility.Collapsed;
         ReviewPane.Visibility = document?.IsReview == true ? Visibility.Visible : Visibility.Collapsed;
@@ -102,6 +114,29 @@ public sealed partial class MainWindow : Window
         {
             await State.AddAsync(files.Select(file => file.Path));
         }
+    }
+
+    private async void OnConvertAll(object sender, RoutedEventArgs args)
+    {
+        if (State.Documents.Count == 0) return;
+
+        var picker = new FolderPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
+        // A FolderPicker with no filter returns nothing at all, which looks like a
+        // cancelled dialog. "*" means every folder is selectable.
+        picker.FileTypeFilter.Add("*");
+        InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+
+        var folder = await picker.PickSingleFolderAsync();
+        if (folder is null) return;
+        await State.ConvertAllAsync(folder.Path);
+    }
+
+    private void OnClear(object sender, RoutedEventArgs args) => State.Clear();
+
+    private async void OnQueueLinesPerSlideChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        if (double.IsNaN(args.NewValue)) return;
+        await State.SetLinesPerSlideAsync((int)args.NewValue);
     }
 
     private void OnShowLog(object sender, RoutedEventArgs args)

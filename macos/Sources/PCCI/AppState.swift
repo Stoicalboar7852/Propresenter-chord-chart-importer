@@ -67,6 +67,16 @@ final class AppState {
     var showLog = false
     var banner: EngineError?
     var isBusy = false
+    /// How far a Convert All has got, or nil when no batch is running.
+    var batchProgress: BatchProgress?
+
+    struct BatchProgress: Equatable {
+        var done: Int
+        var total: Int
+        var failed: Int
+
+        var label: String { "Converting \(done + 1) of \(total)" }
+    }
 
     /// File types the drop target accepts, kept in step with the engine's readers.
     /// `nonisolated` because deciding whether a path looks convertible is a pure
@@ -98,6 +108,14 @@ final class AppState {
     func remove(_ document: ChartDocument) {
         documents.removeAll { $0.id == document.id }
         if selectedID == document.id { selectedID = documents.first?.id }
+    }
+
+    /// Empty the queue and go back to the drop target. Exported files are left alone:
+    /// this clears the list, not anybody's disk.
+    func clear() {
+        documents.removeAll()
+        selectedID = nil
+        banner = nil
     }
 
     nonisolated static func accepts(_ url: URL) -> Bool {
@@ -240,8 +258,66 @@ final class AppState {
         Task { await replan(document) }
     }
 
-    func setLinesPerSlide(_ value: Int, for document: ChartDocument) {
+    /// Lines per slide is one setting for the whole queue, not a per-chart one, so
+    /// changing it re-plans every chart already read. Previews and a batch export then
+    /// cannot disagree about what a slide holds.
+    func setLinesPerSlide(_ value: Int) {
+        guard value != config.linesPerSlide else { return }
         config.linesPerSlide = value
-        Task { await replan(document) }
+        for document in documents where document.song != nil {
+            Task { await replan(document) }
+        }
+    }
+
+    // MARK: Converting the whole queue
+
+    /// Export every chart in the queue into one folder with the current settings.
+    ///
+    /// Anything not read yet is read first, and each chart keeps whatever corrections
+    /// have already been made to it. A chart that fails is left marked failed and the
+    /// rest still convert: one bad file in a service folder should not cost the others.
+    func convertAll(into directory: URL) async {
+        let queue = documents
+        guard !queue.isEmpty else { return }
+        var used: Set<String> = []
+        var failed = 0
+        for (index, document) in queue.enumerated() {
+            batchProgress = BatchProgress(done: index, total: queue.count, failed: failed)
+            if document.song == nil {
+                await analyse(document)
+            }
+            guard document.song != nil, document.plan != nil else {
+                failed += 1
+                continue
+            }
+            let destination = Self.freePath(
+                in: directory,
+                named: document.url.deletingPathExtension().lastPathComponent,
+                alreadyUsed: &used
+            )
+            await export(document, to: destination)
+            if case .failed = document.stage { failed += 1 }
+        }
+        batchProgress = nil
+        banner = nil
+    }
+
+    /// `<directory>/<name>.pro`, numbered rather than overwritten.
+    ///
+    /// Two folders of charts can easily each hold a Great Are You Lord, and a batch
+    /// that quietly wrote one over the other would be worse than no batch at all.
+    static func freePath(in directory: URL, named name: String, alreadyUsed: inout Set<String>) -> URL {
+        var candidate = name
+        var counter = 2
+        while alreadyUsed.contains(candidate.lowercased())
+            || FileManager.default.fileExists(
+                atPath: directory.appendingPathComponent(candidate + ".pro").path
+            )
+        {
+            candidate = "\(name) \(counter)"
+            counter += 1
+        }
+        alreadyUsed.insert(candidate.lowercased())
+        return directory.appendingPathComponent(candidate + ".pro")
     }
 }

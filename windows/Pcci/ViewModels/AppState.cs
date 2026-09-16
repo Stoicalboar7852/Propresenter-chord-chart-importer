@@ -104,6 +104,8 @@ public sealed partial class AppState : ObservableObject
     [ObservableProperty] private int linesPerSlide = 4;
     [ObservableProperty] private string chordDelivery = "both";
     [ObservableProperty] private string chordPlacement = "chords_inline";
+    [ObservableProperty] private string batchStatus = "";
+    [ObservableProperty] private bool isBatchRunning;
 
     public ObservableCollection<ChartDocument> Documents { get; } = new();
     public ObservableCollection<EngineLogLine> LogLines { get; } = new();
@@ -142,6 +144,82 @@ public sealed partial class AppState : ObservableObject
     {
         Documents.Remove(document);
         if (Selected == document) Selected = Documents.FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Empty the list and go back to the drop target. Files already exported are left
+    /// where they are: this clears the list, not anybody's disk.
+    /// </summary>
+    public void Clear()
+    {
+        Documents.Clear();
+        Selected = null;
+        Banner = null;
+    }
+
+    /// <summary>
+    /// Lines per slide is one setting for the whole queue, so changing it re-plans every
+    /// chart already read. The previews and a Convert All then cannot disagree about
+    /// what a slide holds.
+    /// </summary>
+    public async Task SetLinesPerSlideAsync(int value)
+    {
+        if (value == LinesPerSlide) return;
+        LinesPerSlide = value;
+        foreach (var document in Documents.ToList())
+        {
+            if (document.Song is not null) await ReplanAsync(document);
+        }
+    }
+
+    /// <summary>
+    /// Export every chart in the queue into one folder with the current settings.
+    /// Anything not read yet is read first, and each chart keeps the corrections already
+    /// made to it. A chart that fails is left marked failed and the rest still convert.
+    /// </summary>
+    public async Task ConvertAllAsync(string directory)
+    {
+        var queue = Documents.ToList();
+        if (queue.Count == 0) return;
+
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        IsBatchRunning = true;
+        try
+        {
+            for (var index = 0; index < queue.Count; index++)
+            {
+                var document = queue[index];
+                BatchStatus = $"Converting {index + 1} of {queue.Count}";
+                if (document.Song is null) await AnalyseAsync(document);
+                if (document.Song is null || document.Plan is null) continue;
+
+                var name = Path.GetFileNameWithoutExtension(document.Path);
+                await ExportAsync(document, FreePath(directory, name, used));
+            }
+        }
+        finally
+        {
+            IsBatchRunning = false;
+            BatchStatus = "";
+        }
+    }
+
+    /// <summary>
+    /// <c>directory\name.pro</c>, numbered rather than overwritten. Two folders of
+    /// charts can easily each hold a Great Are You Lord, and a batch that quietly wrote
+    /// one over the other would be worse than no batch at all.
+    /// </summary>
+    public static string FreePath(string directory, string name, HashSet<string> used)
+    {
+        var candidate = name;
+        var counter = 2;
+        while (used.Contains(candidate) || File.Exists(Path.Combine(directory, candidate + ".pro")))
+        {
+            candidate = $"{name} {counter}";
+            counter++;
+        }
+        used.Add(candidate);
+        return Path.Combine(directory, candidate + ".pro");
     }
 
     public async Task AnalyseAsync(ChartDocument document)

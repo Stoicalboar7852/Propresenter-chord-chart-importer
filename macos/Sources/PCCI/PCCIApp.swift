@@ -1,9 +1,19 @@
 import AppKit
 import SwiftUI
 
+/// Closing the window quits, rather than leaving an empty app sitting in the Dock.
+/// PCCI converts a chart and is done; there is nothing for it to do with no window.
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationShouldTerminateAfterLastWindowClosed(_ application: NSApplication) -> Bool {
+        true
+    }
+}
+
 @main
 @MainActor
 struct PCCIApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var state = AppState()
 
     var body: some Scene {

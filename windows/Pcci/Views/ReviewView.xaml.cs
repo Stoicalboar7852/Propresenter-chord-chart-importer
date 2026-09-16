@@ -78,10 +78,12 @@ public sealed partial class ReviewView : UserControl
         Show(_document);
     }
 
-    private void OnLinesPerSlideChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    private async void OnLinesPerSlideChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
         if (_updating || _state is null || double.IsNaN(args.NewValue)) return;
-        _state.LinesPerSlide = (int)args.NewValue;
+        // Re-plan, not just remember. Setting the number alone left the preview and the
+        // export running on the plan the parser first produced.
+        await _state.SetLinesPerSlideAsync((int)args.NewValue);
         if (_document is not null) Show(_document);
     }
 

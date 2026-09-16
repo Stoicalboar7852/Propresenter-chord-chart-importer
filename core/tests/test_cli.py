@@ -8,6 +8,7 @@ UIs must never have to parse prose.
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -264,3 +265,82 @@ def test_human_output_is_not_json(runner: CliRunner, fixtures_dir: Path) -> None
     assert "GOODBYE YESTERDAY" in result.stdout
     with pytest.raises(json.JSONDecodeError):
         json.loads(result.stdout)
+
+
+def test_convert_all_writes_every_chart_into_one_folder(
+    runner: CliRunner, fixtures_dir: Path, tmp_path: Path
+) -> None:
+    """The batch the app's Convert All button drives: one setting, many charts."""
+    inbox = tmp_path / "in"
+    (inbox / "nested").mkdir(parents=True)
+    for name in (CHART, "chordpro/goodbye_yesterday.cho"):
+        shutil.copy(fixtures_dir / name, inbox / Path(name).name)
+    # Same stem as the file above, in a subfolder: batches routinely hit this.
+    shutil.copy(fixtures_dir / "chordpro/goodbye_yesterday.cho", inbox / "nested")
+    # Something the engine has no reader for is skipped, not fatal.
+    (inbox / "set list.pptx").write_bytes(b"not a chart")
+
+    outbox = tmp_path / "out"
+    result = invoke(runner, "convert-all", str(inbox), "-d", str(outbox), "-n", "6", "--json")
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == 0
+    assert payload["failed"] == 0
+    assert payload["converted"] == 3
+    written = sorted(path.name for path in outbox.glob("*.pro"))
+    assert written == [
+        "GOODBYE YESTERDAY A.pro",
+        "goodbye_yesterday 2.pro",
+        "goodbye_yesterday.pro",
+    ]
+    assert all(entry["ok"] for entry in payload["results"])
+
+
+def test_convert_all_keeps_going_after_one_bad_chart(
+    runner: CliRunner, fixtures_dir: Path, tmp_path: Path
+) -> None:
+    inbox = tmp_path / "in"
+    inbox.mkdir()
+    shutil.copy(fixtures_dir / CHART, inbox)
+    (inbox / "empty.txt").write_text("nothing that looks like a song\n", encoding="utf-8")
+
+    outbox = tmp_path / "out"
+    result = invoke(runner, "convert-all", str(inbox), "-d", str(outbox), "--json")
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == EXIT_USER_INPUT
+    assert payload["converted"] == 1
+    assert payload["failed"] == 1
+    failure = next(entry for entry in payload["results"] if not entry["ok"])
+    assert failure["error"]["user_message"]
+    assert (outbox / "GOODBYE YESTERDAY A.pro").exists()
+
+
+def test_convert_all_rejects_a_folder_with_nothing_readable(
+    runner: CliRunner, tmp_path: Path
+) -> None:
+    inbox = tmp_path / "in"
+    inbox.mkdir()
+    (inbox / "slides.pptx").write_bytes(b"not a chart")
+
+    result = invoke(runner, "convert-all", str(inbox), "-d", str(tmp_path / "out"), "--json")
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == EXIT_USER_INPUT
+    assert "chart" in payload["error"]["user_message"]
+
+
+def test_convert_all_never_overwrites_an_existing_presentation(
+    runner: CliRunner, fixtures_dir: Path, tmp_path: Path
+) -> None:
+    outbox = tmp_path / "out"
+    outbox.mkdir()
+    existing = outbox / "GOODBYE YESTERDAY A.pro"
+    existing.write_bytes(b"older export")
+
+    result = invoke(runner, "convert-all", str(fixtures_dir / CHART), "-d", str(outbox), "--json")
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == 0
+    assert existing.read_bytes() == b"older export"
+    assert Path(payload["results"][0]["output"]).name == "GOODBYE YESTERDAY A 2.pro"

@@ -26,6 +26,15 @@ struct ContentView: View {
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
+                    convertAllPanel()
+                } label: {
+                    Label("Convert All", systemImage: "square.stack.3d.down.forward")
+                }
+                .disabled(state.documents.isEmpty || state.isBusy)
+                .help("Convert every chart in the list into one folder")
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
                     state.showLog.toggle()
                 } label: {
                     Label("Engine log", systemImage: "text.alignleft")
@@ -36,6 +45,19 @@ struct ContentView: View {
         .sheet(isPresented: $state.showLog) {
             LogConsole()
         }
+    }
+
+    /// Ask where the batch should go, then convert the whole queue into it.
+    private func convertAllPanel() {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.prompt = "Convert Here"
+        panel.message = "Where should the \(state.documents.count) presentations go?"
+        guard panel.runModal() == .OK, let directory = panel.url else { return }
+        Task { await state.convertAll(into: directory) }
     }
 
     @ViewBuilder
@@ -91,6 +113,49 @@ struct QueueSidebar: View {
                     description: Text("Drop a chart onto the window, or press \u{2318}O.")
                 )
             }
+        }
+        .safeAreaInset(edge: .bottom) {
+            VStack(alignment: .leading, spacing: 8) {
+                // The same setting the review screen shows: one value for the queue,
+                // so what you set here is what a Convert All writes.
+                LinesPerSlideField(
+                    value: Binding(
+                        get: { state.config.linesPerSlide },
+                        set: { state.setLinesPerSlide($0) }
+                    )
+                )
+                .font(.caption)
+
+                HStack(spacing: 8) {
+                    if let progress = state.batchProgress {
+                        ProgressView(value: Double(progress.done), total: Double(progress.total))
+                            .frame(width: 70)
+                        Text(progress.label)
+                            .font(.caption)
+                            .foregroundStyle(Theme.secondaryText)
+                    } else {
+                        Text(countLabel)
+                            .font(.caption)
+                            .foregroundStyle(Theme.secondaryText)
+                    }
+                    Spacer()
+                    Button("Clear") { state.clear() }
+                        .buttonStyle(.borderless)
+                        .disabled(state.documents.isEmpty || state.batchProgress != nil)
+                        .help("Empty the list. Files already exported are left where they are.")
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(.ultraThinMaterial)
+        }
+    }
+
+    private var countLabel: String {
+        switch state.documents.count {
+        case 0: return "Nothing loaded"
+        case 1: return "1 chart"
+        case let count: return "\(count) charts"
         }
     }
 

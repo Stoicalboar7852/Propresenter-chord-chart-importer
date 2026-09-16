@@ -57,6 +57,51 @@
                 </StackPanel>
             </NavigationView.PaneHeader>
 
+            <NavigationView.PaneFooter>
+                <StackPanel Margin="12,8,12,12" Spacing="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="Lines per slide" />
+                        <NumberBox
+                            x:Name="QueueLinesPerSlide"
+                            Width="96"
+                            Maximum="10"
+                            Minimum="1"
+                            SmallChange="1"
+                            SpinButtonPlacementMode="Inline"
+                            ValueChanged="OnQueueLinesPerSlideChanged"
+                            Value="4" />
+                    </StackPanel>
+                    <Button
+                        x:Name="ConvertAllButton"
+                        HorizontalAlignment="Stretch"
+                        Click="OnConvertAll"
+                        Content="Convert all…"
+                        Style="{StaticResource PcciPrimaryButtonStyle}"
+                        ToolTipService.ToolTip="Convert every chart in the list into one folder" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock
+                            x:Name="QueueStatusText"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="Nothing loaded" />
+                        <Button
+                            x:Name="ClearButton"
+                            Grid.Column="1"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Click="OnClear"
+                            Content="Clear"
+                            ToolTipService.ToolTip="Empty the list. Files already exported are left where they are." />
+                    </Grid>
+                </StackPanel>
+            </NavigationView.PaneFooter>
+
             <NavigationView.MenuItemTemplate>
                 <DataTemplate x:DataType="vm:ChartDocument">
                     <NavigationViewItem Content="{x:Bind Name}" ToolTipService.ToolTip="{x:Bind Path}">

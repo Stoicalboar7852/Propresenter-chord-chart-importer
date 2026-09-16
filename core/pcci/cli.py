@@ -31,7 +31,7 @@ from pcci.config import (
 )
 from pcci.convert import build as build_from_plan
 from pcci.convert import convert as run_conversion
-from pcci.errors import PcciError, UserInputError
+from pcci.errors import OutputWriteError, PcciError, UserInputError
 from pcci.ingest import supported_extensions
 from pcci.ir import Song
 from pcci.logging_setup import configure_logging, get_logger
@@ -174,6 +174,51 @@ def _parse_size(value: str) -> tuple[int, int]:
         ) from exc
 
 
+def expand_sources(sources: tuple[Path, ...]) -> list[Path]:
+    """Every readable chart in the paths given, files and folders alike.
+
+    A folder contributes every chart under it, at any depth, in a stable order.
+    Anything the engine has no reader for is skipped rather than reported: dropping a
+    folder of service files should not fail because the folder also holds a PowerPoint.
+    """
+    readable = supported_extensions()
+    found: list[Path] = []
+    seen: set[Path] = set()
+    for source in sources:
+        candidates = (
+            sorted(path for path in source.rglob("*") if path.is_file())
+            if source.is_dir()
+            else [source]
+        )
+        for candidate in candidates:
+            if candidate.name.startswith("."):
+                continue
+            if candidate.suffix.lower() not in readable:
+                continue
+            resolved = candidate.resolve()
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            found.append(candidate)
+    return found
+
+
+def unique_destination(directory: Path, source: Path, taken: set[str]) -> Path:
+    """``directory/<name>.pro``, with a number appended rather than overwriting.
+
+    Two folders can easily hold a Verse 1 and a Verse 1, and a batch that silently
+    wrote one over the other would be worse than useless.
+    """
+    stem = source.stem
+    candidate = stem
+    counter = 2
+    while candidate.casefold() in taken or (directory / f"{candidate}.pro").exists():
+        candidate = f"{stem} {counter}"
+        counter += 1
+    taken.add(candidate.casefold())
+    return directory / f"{candidate}.pro"
+
+
 def _load_song(path: Path) -> Song:
     """Read a Song JSON produced by ``pcci analyze`` and possibly edited since."""
     try:
@@ -235,6 +280,96 @@ def convert(
 
         emit(result.to_dict(), as_json=as_json, human=human)
         return EXIT_OK
+
+    context.exit(run(action, as_json=as_json))
+
+
+@cli.command(name="convert-all")
+@click.argument("sources", nargs=-1, required=True, type=click.Path(exists=True, path_type=Path))
+@click.option(
+    "-d",
+    "--output-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    required=True,
+    help="Folder every presentation is written to.",
+)
+@_plan_options
+@_style_options
+@click.option("--chordpro", is_flag=True, help="Also write a .cho sidecar beside each .pro.")
+@click.option("--json", "as_json", is_flag=True, help="Emit one JSON object on stdout.")
+@click.pass_context
+def convert_all(
+    context: click.Context,
+    /,
+    sources: tuple[Path, ...],
+    output_dir: Path,
+    as_json: bool,
+    chordpro: bool,
+    **options: Any,
+) -> None:
+    """Convert many charts with one set of settings into one folder.
+
+    Folders are searched for charts; files are taken as given. A chart that fails is
+    reported and the rest still convert, because one unreadable file in a service
+    folder should not cost you the other eleven.
+    """
+    configure_logging(verbose=context.obj["verbose"], json_logs=as_json)
+
+    def action() -> int:
+        config = build_config(**options)
+        charts = expand_sources(sources)
+        if not charts:
+            raise UserInputError(
+                "None of those paths held a chart I can read.",
+                f"looked at {len(sources)} path(s) for {', '.join(sorted(supported_extensions()))}",
+            )
+        try:
+            output_dir.mkdir(parents=True, exist_ok=True)
+        except OSError as error:
+            raise OutputWriteError(
+                f"I could not make the folder {output_dir}.",
+                f"{type(error).__name__}: {error}",
+            ) from error
+
+        results: list[dict[str, Any]] = []
+        taken: set[str] = set()
+        first_failure = EXIT_OK
+        for chart in charts:
+            destination = unique_destination(output_dir, chart, taken)
+            try:
+                result = run_conversion(chart, destination, config, write_chordpro=chordpro)
+            except PcciError as error:
+                get_logger().error("%s failed: %s", chart, error.user_message)
+                results.append({"source": str(chart), "ok": False, "error": error.to_dict()})
+                first_failure = first_failure or error.exit_code
+            else:
+                entry = result.to_dict()
+                entry.update({"source": str(chart), "ok": True})
+                results.append(entry)
+
+        converted = sum(1 for entry in results if entry["ok"])
+        payload: dict[str, Any] = {
+            "output_dir": str(output_dir),
+            "converted": converted,
+            "failed": len(results) - converted,
+            "results": results,
+        }
+
+        def human() -> None:
+            for entry in results:
+                name = Path(str(entry["source"])).name
+                if entry["ok"]:
+                    click.echo(f"  ok    {name} -> {Path(str(entry['output'])).name}")
+                else:
+                    click.echo(f"  FAIL  {name}: {entry['error']['user_message']}")
+            click.echo(
+                f"{converted} of {len(results)} converted into {output_dir}"
+                if results
+                else "nothing to convert"
+            )
+
+        emit(payload, as_json=as_json, human=human)
+        return first_failure
 
     context.exit(run(action, as_json=as_json))
 

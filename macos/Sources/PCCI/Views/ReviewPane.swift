@@ -38,22 +38,12 @@ struct ReviewPane: View {
             }
             Spacer()
 
-            HStack(spacing: 8) {
-                Text("Lines per slide")
-                    .foregroundStyle(Theme.secondaryText)
-                Stepper(
-                    value: Binding(
-                        get: { state.config.linesPerSlide },
-                        set: { state.setLinesPerSlide($0, for: document) }
-                    ),
-                    in: 1...10
-                ) {
-                    Text("\(state.config.linesPerSlide)")
-                        .font(.body.monospacedDigit().weight(.semibold))
-                        .frame(minWidth: 18)
-                }
-                .labelsHidden()
-            }
+            LinesPerSlideField(
+                value: Binding(
+                    get: { state.config.linesPerSlide },
+                    set: { state.setLinesPerSlide($0) }
+                )
+            )
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
             .glassPanel(cornerRadius: 10)
