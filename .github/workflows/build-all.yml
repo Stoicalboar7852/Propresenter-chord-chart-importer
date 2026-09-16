@@ -18,6 +18,12 @@ name: Build all
 # Artifacts keep for 90 days and need a GitHub account to download. For a permanent
 # link anybody can use, tag a release: release.yml attaches the same files to it.
 
+# Several pushes in a row should not each hold a macOS and two Windows runners for
+# five minutes. The newest push is the one worth building.
+concurrency:
+  group: build-all-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [claude/blissful-planck-pbslml]
