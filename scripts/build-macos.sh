@@ -137,6 +137,11 @@ if [[ "$MAKE_DMG" == "1" ]]; then
     hdiutil create -volname "$VOLUME" -srcfolder "$STAGING" -ov -format UDRW "$WRITABLE" \
         >/dev/null
     MOUNT_POINT="$BUILD/mount"
+    # If a previous run died between attach and detach, this is still a mount point,
+    # and rm -rf would be reaching inside a mounted image rather than cleaning up.
+    if mount | grep -q " on $MOUNT_POINT "; then
+        hdiutil detach "$MOUNT_POINT" -force -quiet || true
+    fi
     rm -rf "$MOUNT_POINT"
     mkdir -p "$MOUNT_POINT"
     hdiutil attach "$WRITABLE" -mountpoint "$MOUNT_POINT" -nobrowse -quiet
