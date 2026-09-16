@@ -46,6 +46,12 @@ jobs:
       - name: Test
         run: pytest --cov=pcci --cov-report=term-missing
 
+      # The icons are committed so no build has to draw them. This is what keeps them
+      # honest about the art they came from.
+      - name: Icons match the source art
+        if: matrix.os == 'ubuntu-latest'
+        run: python ../scripts/make_icons.py --check
+
   app-sanity:
     name: desktop app sanity
     runs-on: ubuntu-latest

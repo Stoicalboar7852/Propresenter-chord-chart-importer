@@ -14,15 +14,40 @@ The project is a headless Python engine plus two native front-ends:
 | `scripts/` | Build and code-generation scripts. |
 | `docs/` | Format reconnaissance, stage setup guide, build prompt. |
 
+## Install it
+
+Pick your machine. Each page covers what to install first, how to build, and what to do
+about the unsigned-app warning on first launch.
+
+| | |
+|---|---|
+| **macOS** | **[docs/INSTALL_MACOS.md](docs/INSTALL_MACOS.md)** — needs full Xcode for the app, Python 3.12+ for the engine. Right-click → Open the first time. |
+| **Windows** | **[docs/INSTALL_WINDOWS.md](docs/INSTALL_WINDOWS.md)** — needs the .NET 8 SDK for the app, Python 3.12+ for the engine. x64 and ARM64. |
+| **Stage screen** | **[docs/STAGE_SETUP.md](docs/STAGE_SETUP.md)** — the ProPresenter side: getting the chords onto a stage display and nowhere near the audience. |
+| **Checking a build** | **[docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)** — the manual pass before you trust it on a Sunday. |
+| **The file format** | **[docs/FORMAT_NOTES.md](docs/FORMAT_NOTES.md)** — what is actually inside a `.pro`, every claim read out of a real export. |
+| **The original brief** | **[docs/BUILD_PROMPT.md](docs/BUILD_PROMPT.md)** — the plan this was built from. |
+
 ## Getting set up
 
 ```bash
 ./scripts/setup-engine.sh          # or .\scripts\setup-engine.ps1 on Windows
 ```
 
-It finds a Python 3.12 or newer, builds `core/.venv`, installs everything and checks the
-result runs. The platform build scripts call it themselves when the environment is
-missing, so `./scripts/build-macos.sh` alone is enough to get an app.
+It finds a Python 3.12 or newer, builds `core/.venv`, installs the engine and checks the
+result runs. Add `--dev` (`-Dev` on Windows) for the test and lint tooling. The platform
+build scripts call it themselves when the environment is missing, so
+`./scripts/build-macos.sh` alone is enough to get an app.
+
+## Converting charts
+
+```bash
+core/.venv/bin/pcci convert "My Song.docx" -o "My Song.pro" --lines-per-slide 4
+core/.venv/bin/pcci convert-all "Sunday 12th" -d "out" --lines-per-slide 4
+```
+
+`convert-all` takes files, folders, or both, and writes every presentation into one
+folder. Both apps have the same thing behind a Convert All button.
 
 ```bash
 cd core
@@ -57,5 +82,13 @@ are vendored from a schema generated from the same build — see
 Verified in real ProPresenter 21.4 so far: the exported `.pro` imports, groups and
 slides come through, and the chord chart appears in the editor.
 
-See `docs/BUILD_PROMPT.md` for the full plan, `docs/ACCEPTANCE.md` for the manual
-checklist, and `docs/STAGE_SETUP.md` for getting the chords onto a stage screen.
+## The icon
+
+`assets/icon.png` is the master. To change it, replace that file and run:
+
+```bash
+core/.venv/bin/python scripts/make_icons.py
+```
+
+That regenerates `macos/Resources/AppIcon.icns` and `windows/Pcci/Assets/AppIcon.ico`
+from it. CI fails if they drift apart.

@@ -27,6 +27,7 @@ public sealed partial class MainWindow : Window
         SystemBackdrop = new MicaBackdrop { Kind = MicaKind.BaseAlt };
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleBarArea);
+        SetWindowIcon();
 
         Navigation.MenuItemsSource = State.Documents;
         State.PropertyChanged += (_, args) =>
@@ -45,6 +46,17 @@ public sealed partial class MainWindow : Window
         ExportedPane.Initialise(State);
         FailurePane.Initialise(State);
         UpdatePanes();
+    }
+
+    /// <summary>
+    /// The icon the window and the taskbar draw. ApplicationIcon only covers the .exe
+    /// as Explorer sees it; an unpackaged WinUI window asks separately. A missing file
+    /// is not worth failing a launch over, so it is simply skipped.
+    /// </summary>
+    private void SetWindowIcon()
+    {
+        var icon = System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico");
+        if (System.IO.File.Exists(icon)) AppWindow.SetIcon(icon);
     }
 
     private void UpdatePanes()
