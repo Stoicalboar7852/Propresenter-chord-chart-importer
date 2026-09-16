@@ -43,6 +43,32 @@ result runs. Add `--dev` (`-Dev` on Windows) for the test and lint tooling. The 
 build scripts call it themselves when the environment is missing, so
 `./scripts/build-macos.sh` alone is enough to get an app.
 
+## Downloading a build instead of making one
+
+Every push to the default branch builds all three targets on GitHub's runners and
+attaches them to the run:
+
+**[Actions -> Build all](https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/actions/workflows/build-all.yml)**
+-> the newest run -> **Artifacts**
+
+| Artifact | What is in it |
+|---|---|
+| `PCCI-windows-x64` | The app as a zip, and a setup program. Intel and AMD machines. |
+| `PCCI-windows-arm64` | The same, for ARM machines (Snapdragon, and Windows on Apple silicon). |
+| `PCCI-macos-arm64` | `PCCI.dmg`, Apple silicon. |
+
+Artifacts keep for 90 days and need a GitHub account to download, which is fine for
+you and awkward for anyone you hand this to. **Releases** have neither limit: push a
+`v*` tag and `release.yml` builds the same three and attaches them to a release page
+that anybody can download from, permanently.
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+Nothing has to be installed locally for either: GitHub's macOS runners come with Xcode
+and its Windows runners with the .NET SDK, which is exactly why this works.
+
 ## Building for a machine you are not sitting at
 
 The engine cannot be cross-compiled. PyInstaller freezes using the interpreter it runs

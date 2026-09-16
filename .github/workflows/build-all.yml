@@ -8,12 +8,23 @@ name: Build all
 # pretend otherwise, this runs each build on a machine that can actually do it and hands
 # back the artifacts.
 #
+# It runs by itself on every push to the default branch, so there is always a
+# freshly built copy of everything to download without anyone having to ask for it,
+# and on demand for a branch:
+#
 #   Actions -> Build all -> Run workflow
 #   scripts/build-all.sh            (or .ps1) does the same from a terminal
 #
-# Artifacts last 30 days. Tagging a release still goes through release.yml.
+# Artifacts keep for 90 days and need a GitHub account to download. For a permanent
+# link anybody can use, tag a release: release.yml attaches the same files to it.
 
 on:
+  push:
+    branches: [claude/blissful-planck-pbslml]
+    # Nothing in these changes what gets built.
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
   workflow_dispatch:
     inputs:
       targets:
@@ -34,7 +45,9 @@ on:
 jobs:
   windows-x64:
     name: Windows x64
-    if: inputs.targets == 'all' || inputs.targets == 'windows-x64'
+    if: >-
+      github.event_name == 'push' || inputs.targets == 'all'
+      || inputs.targets == 'windows-x64'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -58,11 +71,14 @@ jobs:
             build/windows/PCCI-win-x64.zip
             build/windows/PCCI-win-x64-setup.exe
           if-no-files-found: error
+          retention-days: 90
 
   windows-arm64:
     name: Windows ARM64
-    if: inputs.targets == 'all' || inputs.targets == 'windows-arm64'
-    runs-on: ${{ inputs.windows_arm_runner }}
+    if: >-
+      github.event_name == 'push' || inputs.targets == 'all'
+      || inputs.targets == 'windows-arm64'
+    runs-on: ${{ inputs.windows_arm_runner || 'windows-11-arm' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -85,10 +101,13 @@ jobs:
             build/windows/PCCI-win-arm64.zip
             build/windows/PCCI-win-arm64-setup.exe
           if-no-files-found: error
+          retention-days: 90
 
   macos:
     name: macOS
-    if: inputs.targets == 'all' || inputs.targets == 'macos'
+    if: >-
+      github.event_name == 'push' || inputs.targets == 'all'
+      || inputs.targets == 'macos'
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
@@ -107,3 +126,4 @@ jobs:
           name: PCCI-macos-arm64
           path: build/macos/PCCI.dmg
           if-no-files-found: error
+          retention-days: 90
