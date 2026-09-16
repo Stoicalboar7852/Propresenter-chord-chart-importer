@@ -92,14 +92,12 @@ jobs:
       - name: The engine installs on Windows without a compiler
         run: python3 scripts/check_windows_arm64.py
 
-      # Windows PowerShell reads a .ps1 with no byte-order mark as ANSI, so an em dash
-      # in a message arrives on screen as mojibake. Plain ASCII in these files, then.
-      - name: PowerShell scripts are ASCII
-        run: |
-          if LC_ALL=C grep -n '[^[:print:][:space:]]' scripts/*.ps1; then
-            echo "^ non-ASCII in a PowerShell script; use plain ASCII" >&2
-            exit 1
-          fi
+      # Parse errors, non-ASCII, and a local that shadows a parameter by case alone -
+      # PowerShell variable names being case-insensitive, that assigns to the parameter
+      # and trips its own ValidateSet, which is how the installer broke once.
+      - name: PowerShell scripts hold up
+        shell: pwsh
+        run: ./scripts/check-powershell.ps1
 
   macos-app:
     name: macOS app

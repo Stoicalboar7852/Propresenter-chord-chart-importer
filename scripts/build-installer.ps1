@@ -132,16 +132,18 @@ $outputName = [System.IO.Path]::GetFileNameWithoutExtension($Output)
 $finalPath = Join-Path $outputDirectory "$outputName.exe"
 if (Test-Path $finalPath) { Remove-Item -Force $finalPath }
 
-$architecture = if ($Architecture -eq 'win-arm64') { 'arm64' } else { 'x64' }
+# Not $architecture: PowerShell variable names are case-insensitive, so that would
+# assign to the parameter above and fail its own ValidateSet.
+$innoArchitecture = if ($Architecture -eq 'win-arm64') { 'arm64' } else { 'x64' }
 
-Write-Host "==> Building $finalPath ($architecture)"
+Write-Host "==> Building $finalPath ($innoArchitecture)"
 Write-Host "    with $iscc"
 & $iscc `
     "/DSourceFolder=$sourceFull" `
     "/DOutputDir=$outputDirectory" `
     "/DOutputName=$outputName" `
     "/DAppVersion=$Version" `
-    "/DArch=$architecture" `
+    "/DArch=$innoArchitecture" `
     $authoring | ForEach-Object { if ($_ -match 'error|warning') { "    $_" } }
 if ($LASTEXITCODE -ne 0) { Write-Error 'Inno Setup failed' }
 if (-not (Test-Path $finalPath)) { Write-Error "the compiler reported success but wrote no $finalPath" }
