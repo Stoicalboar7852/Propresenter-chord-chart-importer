@@ -69,6 +69,10 @@ jobs:
             python3 -c "import sys, xml.etree.ElementTree as ET; ET.parse(sys.argv[1])" "$xaml"
           done
 
+      - name: Python discovery holds up
+        shell: pwsh
+        run: ./scripts/test-setup-engine.ps1
+
   macos-app:
     name: macOS app
     runs-on: macos-14
@@ -77,6 +81,31 @@ jobs:
       - name: Compile the SwiftUI app
         working-directory: macos
         run: swift build -c debug
+
+  windows-engine:
+    name: Windows engine setup
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Windows PowerShell 5.1, not pwsh 7: it is what is on a stock Windows machine,
+      # and it is the stricter of the two — it turns a native program's stderr into a
+      # terminating error, which is how looking for an interpreter used to abort the
+      # whole script. Running the real script here is the only way to catch that.
+      - name: Python discovery holds up under Windows PowerShell
+        shell: powershell
+        run: .\scripts\test-setup-engine.ps1
+
+      - name: Set the engine up the way somebody installing it would
+        shell: powershell
+        run: .\scripts\setup-engine.ps1
+
+      - name: The environment it built works
+        shell: powershell
+        run: core\.venv\Scripts\pcci.exe doctor
 
   windows-app:
     name: Windows app

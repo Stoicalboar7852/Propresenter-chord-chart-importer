@@ -34,7 +34,8 @@ if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
 
 if (-not $SkipEngine) {
     Write-Host '==> Building the engine'
-    & (Join-Path $PSScriptRoot 'build-engine.ps1') -OutputDirectory $engineOutput
+    & (Join-Path $PSScriptRoot 'build-engine.ps1') -OutputDirectory $engineOutput `
+        -Architecture $Architecture
 }
 
 Write-Host "==> Publishing the app ($Architecture)"

@@ -6,12 +6,19 @@
     onedir, not onefile: onefile unpacks to a temporary directory on every launch,
     which is slow and trips some antivirus heuristics.
 
+.PARAMETER Architecture
+    win-x64 or win-arm64. Only used when the Python environment has to be created:
+    it picks an interpreter of that architecture so the frozen engine matches the app.
+
 .EXAMPLE
     .\scripts\build-engine.ps1
 #>
 [CmdletBinding()]
 param(
-    [string]$OutputDirectory
+    [string]$OutputDirectory,
+
+    [ValidateSet('win-x64', 'win-arm64')]
+    [string]$Architecture
 )
 
 $ErrorActionPreference = 'Stop'
@@ -24,7 +31,21 @@ $python = Join-Path $core '.venv\Scripts\python.exe'
 
 if (-not (Test-Path $python)) {
     Write-Host '==> No Python environment yet; setting one up'
-    & (Join-Path $PSScriptRoot 'setup-engine.ps1')
+    $setupArguments = @{}
+    if ($Architecture) { $setupArguments['Architecture'] = $Architecture }
+    & (Join-Path $PSScriptRoot 'setup-engine.ps1') @setupArguments
+    if (-not (Test-Path $python)) { Write-Error 'the environment was not created' }
+}
+
+# PyInstaller freezes with the interpreter it runs on, so an x64 environment produces an
+# x64 engine however the app is published. Say so rather than shipping a mismatch.
+if ($Architecture) {
+    $machine = "$(& $python -c 'import platform; print(platform.machine())')".Trim()
+    $wanted = if ($Architecture -eq 'win-arm64') { 'ARM64' } else { 'AMD64' }
+    if ($machine -and $machine -ne $wanted) {
+        Write-Host "    note: core\.venv runs a $machine Python, so the engine will be $machine and"
+        Write-Host "          not $wanted. Delete core\.venv and run this again to pick a match."
+    }
 }
 
 Write-Host '==> Installing PyInstaller'

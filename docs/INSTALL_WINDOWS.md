@@ -21,7 +21,15 @@ you like; it is self-contained and needs no installer.
 
 Requirements: Windows 10 1809 or later, the .NET 8 SDK, and **Python 3.12 or newer**
 (`winget install Python.Python.3.12`). For an ARM machine:
-`.\scripts\build-windows.ps1 -Architecture win-arm64`.
+
+```powershell
+.\scripts\build-windows.ps1 -Architecture win-arm64
+```
+
+On an ARM64 machine, install the ARM64 build of Python. The engine is frozen with
+whichever interpreter builds it, so an x64 Python produces an x64 engine that then runs
+under emulation inside an ARM64 app. The build picks a matching Python when the machine
+has more than one, and says so on screen when it cannot.
 
 ## First launch
 
@@ -30,6 +38,21 @@ anyway**. Once only.
 
 If the zip came from a browser or email, Windows may also block the files inside it.
 Right-click the zip → **Properties** → tick **Unblock** → **OK**, then extract it.
+
+## If the build fails
+
+**`py.exe : No suitable Python runtime found`.** A checkout from before this was fixed.
+The old script asked the launcher for `py -3.12`, which does not match an ARM64 install
+— those register as `3.12-arm64`. `git pull` and run it again: setup now asks the
+launcher what it actually has, with `py -0p`, and also looks through PATH and the usual
+install folders.
+
+**`dotnet not found`.** Install the .NET 8 SDK:
+`winget install Microsoft.DotNet.SDK.8`.
+
+**`core\.venv runs a ... Python`.** The environment was built by an interpreter of a
+different architecture than the app. Harmless, but to fix it delete `core\.venv` and
+build again.
 
 ## What is inside
 
