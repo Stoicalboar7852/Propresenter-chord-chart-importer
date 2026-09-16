@@ -5,23 +5,26 @@
     python3 scripts/make_dmg_background.py --check    # fail if the committed art is stale
 
 Writes ``assets/dmg-background.png`` and ``assets/dmg-background@2x.png``, which
-``scripts/build-macos.sh`` copies into the image as ``.background/``. The window is 660
+``scripts/build-macos.sh`` puts inside the image as ``.background/``. The window is 660
 by 420 points, and the icon positions in that script have to match the plates drawn
 here.
 
-Drawn through PyMuPDF onto a PDF page and rendered at 1x and 2x, so it needs nothing
-the engine does not already depend on and the text uses a built-in font rather than
-whatever happens to be installed.
+Black, with orange mist: soft radial glows painted pixel by pixel, which is a blur
+without needing a blur - a radial falloff is already smooth, so nothing has to be
+convolved afterwards. The mist goes down as a raster, and the arrow, plates and text go
+on top as vectors through PyMuPDF, which is already a dependency and carries its own
+fonts.
 
 **The plates are not decoration.** Finder draws icon labels in the system's text
-colour: black in light appearance, white in dark. Dark text on a dark background is
-unreadable, and so is white text on a light one, so the two label areas sit on
-mid-toned plates that both colours can be read against.
+colour: black in light appearance, white in dark. Black text on a black background is
+unreadable, so the two label areas sit on mid-toned plates that either colour can be
+read against.
 """
 
 from __future__ import annotations
 
 import argparse
+import math
 import sys
 from pathlib import Path
 
@@ -32,44 +35,85 @@ ASSETS = REPO_ROOT / "assets"
 OUTPUTS = ((ASSETS / "dmg-background.png", 1), (ASSETS / "dmg-background@2x.png", 2))
 
 WIDTH, HEIGHT = 660, 420
+#: The mist is painted once at this scale and scaled down for each output.
+MIST_SCALE = 2
 
 #: Where build-macos.sh puts the two icons, as Finder measures them: the centre of a
 #: 128 point icon, from the top left of the window. The label sits just below, so the
-#: plate has to cover both.
-APP_ICON_CENTRE = (170, 200)
-APPLICATIONS_ICON_CENTRE = (490, 200)
+#: plate has to cover both. The app goes on the left, Applications on the right, and
+#: the arrow points from one to the other.
+APP_ICON_CENTRE = (170, 210)
+APPLICATIONS_ICON_CENTRE = (490, 210)
 ICON_SIZE = 128
 PLATE_WIDTH, PLATE_HEIGHT = 196, 182
 PLATE_RADIUS = 18
 
-BACKDROP = (0.086, 0.086, 0.094)  # #161618
-BACKDROP_TOP = (0.145, 0.145, 0.157)  # #252528
-PLATE = (0.337, 0.337, 0.360)  # #56565C, legible under black or white labels
-PLATE_EDGE = (0.451, 0.451, 0.478)
+PLATE = (0.29, 0.29, 0.31)  # legible under a black label or a white one
+PLATE_EDGE = (1.0, 0.478, 0.0, 0.5)
 ORANGE = (1.0, 0.478, 0.0)  # #FF7A00
 ORANGE_DEEP = (1.0, 0.239, 0.0)  # #FF3D00
-HEADING = (0.961, 0.957, 0.949)
-SUBDUED = (0.627, 0.627, 0.651)
+HEADING = (0.98, 0.97, 0.96)
+SUBDUED = (0.72, 0.70, 0.68)
+
+#: Each glow: centre as a fraction of the canvas, radius in the same units, peak
+#: strength, and colour. Overlapping warm and deep orange keeps it from looking like
+#: one flat circle.
+GLOWS: tuple[tuple[float, float, float, float, tuple[int, int, int]], ...] = (
+    (0.22, 0.42, 0.60, 1.15, (0xFF, 0x6A, 0x00)),
+    (0.78, 0.56, 0.56, 1.05, (0xFF, 0x33, 0x00)),
+    (0.50, 0.10, 0.44, 0.62, (0xFF, 0x7A, 0x0A)),
+    (0.50, 0.97, 0.48, 0.58, (0xFF, 0x3D, 0x00)),
+    (0.04, 0.94, 0.34, 0.48, (0xFF, 0x5A, 0x00)),
+    (0.97, 0.06, 0.32, 0.45, (0xFF, 0x70, 0x08)),
+)
 
 
-def draw(page: pymupdf.Page) -> None:
-    # A vertical ramp, painted as strips: MuPDF will not draw an SVG gradient and a
-    # PDF shading pattern is a lot of machinery for sixty rectangles.
-    strips = 60
-    for index in range(strips):
-        fraction = index / (strips - 1)
-        colour = tuple(
-            top + (bottom - top) * fraction
-            for top, bottom in zip(BACKDROP_TOP, BACKDROP, strict=True)
+def paint_mist(width: int, height: int) -> bytes:
+    """Black, with soft orange glows. Returns PNG bytes.
+
+    Each glow falls off as a smoothstep cubed, which is what makes it read as haze
+    rather than as a circle with a gradient in it. Values add and clamp, so where two
+    glows overlap the mist brightens rather than one covering the other.
+    """
+    diagonal = math.hypot(width, height)
+    glows = [
+        (
+            centre_x * width,
+            centre_y * height,
+            radius * diagonal * 0.5,
+            strength,
+            colour,
         )
-        page.draw_rect(
-            pymupdf.Rect(0, HEIGHT * index / strips, WIDTH, HEIGHT * (index + 1) / strips + 1),
-            color=None,
-            fill=colour,
-        )
+        for centre_x, centre_y, radius, strength, colour in GLOWS
+    ]
+
+    out = bytearray(width * height * 3)
+    for y in range(height):
+        row = y * width * 3
+        for x in range(width):
+            red = green = blue = 0.0
+            for centre_x, centre_y, radius, strength, colour in glows:
+                distance = math.hypot(x - centre_x, y - centre_y)
+                if distance >= radius:
+                    continue
+                falloff = 1.0 - distance / radius
+                weight = strength * falloff * falloff
+                red += colour[0] * weight
+                green += colour[1] * weight
+                blue += colour[2] * weight
+            index = row + x * 3
+            out[index] = 255 if red > 255 else int(red)
+            out[index + 1] = 255 if green > 255 else int(green)
+            out[index + 2] = 255 if blue > 255 else int(blue)
+
+    pixmap = pymupdf.Pixmap(pymupdf.csRGB, width, height, bytes(out), False)
+    return bytes(pixmap.tobytes("png"))
+
+
+def draw(page: pymupdf.Page, mist: bytes) -> None:
+    page.insert_image(pymupdf.Rect(0, 0, WIDTH, HEIGHT), stream=mist)
 
     for centre in (APP_ICON_CENTRE, APPLICATIONS_ICON_CENTRE):
-        # Top edge a little above the icon, bottom edge below where the label lands.
         top = centre[1] - ICON_SIZE / 2 - 18
         plate = pymupdf.Rect(
             centre[0] - PLATE_WIDTH / 2,
@@ -77,21 +121,29 @@ def draw(page: pymupdf.Page) -> None:
             centre[0] + PLATE_WIDTH / 2,
             top + PLATE_HEIGHT,
         )
-        page.draw_rect(plate, radius=PLATE_RADIUS / PLATE_HEIGHT, color=PLATE_EDGE, fill=PLATE)
+        page.draw_rect(
+            plate,
+            radius=PLATE_RADIUS / PLATE_HEIGHT,
+            color=PLATE_EDGE[:3],
+            fill=PLATE,
+            fill_opacity=0.74,
+            stroke_opacity=PLATE_EDGE[3],
+            width=1.2,
+        )
 
     draw_arrow(page)
 
     heading = "ProPresenter Chord Chart Importer"
     page.insert_text(
-        (centred(heading, 20, bold=True), 72),
+        (centred(heading, 20, bold=True), 62),
         heading,
         fontsize=20,
         fontname="hebo",
         color=HEADING,
     )
-    instruction = "Drag PCCI into your Applications folder"
+    instruction = "Drag PCCI onto the Applications folder"
     page.insert_text(
-        (centred(instruction, 12), 100),
+        (centred(instruction, 12), 88),
         instruction,
         fontsize=12,
         fontname="helv",
@@ -99,7 +151,7 @@ def draw(page: pymupdf.Page) -> None:
     )
     footer = "Unsigned build - right-click PCCI and choose Open the first time"
     page.insert_text(
-        (centred(footer, 10), 388),
+        (centred(footer, 10), 392),
         footer,
         fontsize=10,
         fontname="helv",
@@ -114,10 +166,10 @@ def centred(text: str, size: float, *, bold: bool = False) -> float:
 
 
 def draw_arrow(page: pymupdf.Page) -> None:
-    """The arrow between the plates: a shaft and a head, level with the two icons."""
-    left = APP_ICON_CENTRE[0] + PLATE_WIDTH / 2 + 18
-    right = APPLICATIONS_ICON_CENTRE[0] - PLATE_WIDTH / 2 - 18
-    middle = APP_ICON_CENTRE[1]
+    """From the app on the left to the Applications folder on the right."""
+    left = APP_ICON_CENTRE[0] + PLATE_WIDTH / 2 + 16
+    right = APPLICATIONS_ICON_CENTRE[0] - PLATE_WIDTH / 2 - 16
+    middle = APP_ICON_CENTRE[1] - 8
     head = 30.0
     half = 8.0
 
@@ -141,9 +193,10 @@ def draw_arrow(page: pymupdf.Page) -> None:
 
 
 def render() -> dict[Path, bytes]:
+    mist = paint_mist(WIDTH * MIST_SCALE, HEIGHT * MIST_SCALE)
     document = pymupdf.open()
     page = document.new_page(width=WIDTH, height=HEIGHT)
-    draw(page)
+    draw(page, mist)
     images: dict[Path, bytes] = {}
     for path, scale in OUTPUTS:
         pixmap = page.get_pixmap(matrix=pymupdf.Matrix(scale, scale), alpha=False)

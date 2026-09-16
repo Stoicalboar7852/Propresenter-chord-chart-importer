@@ -26,9 +26,20 @@ Three things come out, in `build\windows\`:
 |---|---|
 | `win-x64\` | The app as a folder. Self-contained, copy it anywhere, run `Pcci.exe`. |
 | `PCCI-win-x64.zip` | The same folder, zipped, for handing to somebody. |
-| `PCCI-win-x64.msi` | An installer: per-user, into `%LOCALAPPDATA%\Programs\PCCI`, with a Start menu shortcut and an entry in Apps and Features. No administrator needed. |
+| `PCCI-win-x64-setup.exe` | An installer. See below. |
 
-`-NoInstaller` skips the .msi if you only want the portable build.
+`-NoInstaller` skips the setup program if you only want the portable build.
+
+### What the installer asks
+
+| Page | What you get |
+|---|---|
+| Install for | **All users** — Program Files, needs administrator, and everyone who signs in to the machine gets it. **Just me** — your own folder, no administrator, nobody else sees it. |
+| Location | Whatever folder you like. The default follows the choice above: `C:\Program Files\PCCI` for all users, `%LOCALAPPDATA%\Programs\PCCI` for just you. |
+| Desktop shortcut | Off by default, tick to add one. An all-users install puts it on the **public** desktop so it appears for every account; a personal install puts it on yours alone. |
+
+It registers in Apps and Features either way, so it uninstalls like anything else, and
+installing a newer build replaces the old one rather than stacking beside it.
 
 Requirements: Windows 10 1809 or later, the .NET 8 SDK, and **Python 3.12 or newer**
 (`winget install Python.Python.3.12`). For an ARM machine:
@@ -88,6 +99,11 @@ install folders.
 
 **`dotnet not found`.** Install the .NET 8 SDK:
 `winget install Microsoft.DotNet.SDK.8`.
+
+**`no Inno Setup`.** The installer is built with Inno Setup, which the build installs
+for you through Chocolatey or winget when it is missing. If neither is available, get it
+from https://jrsoftware.org/isdl.php, or build without an installer using
+`-NoInstaller`.
 
 **`Microsoft Visual C++ 14.0 or greater is required`**, from a wheel build for
 `grpcio`, `cryptography` or similar. A checkout from before this was fixed: setup used

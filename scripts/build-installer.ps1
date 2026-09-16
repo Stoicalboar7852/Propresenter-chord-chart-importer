@@ -1,34 +1,35 @@
 <#
 .SYNOPSIS
-    Package a built app folder into a Windows installer (.msi).
+    Package a built app folder into a Windows installer.
 
 .DESCRIPTION
-    Uses WiX, which installs as a .NET tool, so the .NET 8 SDK the app already needs is
-    the only prerequisite: no separate installer toolchain, no admin rights.
+    Produces a setup .exe that asks where to go rather than deciding for you:
 
-    The result is per-user. It installs into %LOCALAPPDATA%\Programs\PCCI, adds a Start
-    menu shortcut and an entry in Apps and Features, and never shows a UAC prompt. That
-    is on purpose for an unsigned package: Windows cannot vouch for it, so it should not
-    also be asking for administrator.
+      * all users (Program Files, needs administrator) or just you (your own folder,
+        needs nothing);
+      * any folder you like, on the directory page;
+      * a desktop shortcut, optional. An all-users install puts it on the public
+        desktop so everyone sees it; a personal install puts it on yours.
 
-    There is no code-signing certificate for this project, so SmartScreen warns on first
-    run whichever way it is packaged. See docs/INSTALL_WINDOWS.md.
+    Built with Inno Setup, which is installed automatically if this machine does not
+    have it. There is no code-signing certificate for this project, so SmartScreen
+    warns on first run whichever way it is packaged. See docs/INSTALL_WINDOWS.md.
 
 .PARAMETER Source
     The finished app folder to package: the app, the engine beside it, nothing else.
 
 .PARAMETER Output
-    Where to write the .msi.
+    Where to write the setup .exe.
 
 .PARAMETER Architecture
-    win-x64 (default) or win-arm64. An x64 installer refuses to install on ARM64 and
-    the other way round, so this has to match the build.
+    win-x64 (default) or win-arm64. An ARM64 installer refuses to run on an Intel
+    machine, so this has to match the build.
 
 .PARAMETER Version
-    Four-part product version. Installing a higher one replaces a lower one.
+    Product version, shown in Apps and Features.
 
 .EXAMPLE
-    .\scripts\build-installer.ps1 -Source build\windows\win-x64 -Output build\windows\PCCI-x64.msi
+    .\scripts\build-installer.ps1 -Source build\windows\win-x64 -Output build\windows\PCCI-x64-setup.exe
 #>
 [CmdletBinding()]
 param(
@@ -41,75 +42,117 @@ param(
     [ValidateSet('win-x64', 'win-arm64')]
     [string]$Architecture = 'win-x64',
 
-    [string]$Version = '0.1.0.0'
+    [string]$Version = '0.1.0'
 )
 
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$authoring = Join-Path $repoRoot 'installer\windows\Pcci.wxs'
-$icon = Join-Path $repoRoot 'windows\Pcci\Assets\AppIcon.ico'
+$authoring = Join-Path $repoRoot 'installer\windows\Pcci.iss'
 
 if (-not (Test-Path $Source)) { Write-Error "nothing to package at $Source" }
 if (-not (Test-Path $authoring)) { Write-Error "installer authoring is missing: $authoring" }
-if (-not (Test-Path $icon)) { Write-Error "the app icon is missing: $icon" }
 
 $sourceFull = (Resolve-Path $Source).Path
 if (-not (Get-ChildItem -LiteralPath $sourceFull -File -Recurse | Select-Object -First 1)) {
     Write-Error "$sourceFull is empty"
 }
+$icon = Join-Path $sourceFull 'Assets\AppIcon.ico'
+if (-not (Test-Path $icon)) { Write-Error "the app icon is missing from the build: $icon" }
 
-if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    Write-Error 'dotnet not found: install the .NET 8 SDK (winget install Microsoft.DotNet.SDK.8)'
+function Find-Iscc {
+    <#
+        .SYNOPSIS
+            The Inno Setup compiler, or $null.
+    #>
+    $onPath = Get-Command iscc -ErrorAction SilentlyContinue
+    if ($onPath) { return $onPath.Path }
+    foreach ($root in @($env:ProgramFiles, ${env:ProgramFiles(x86)})) {
+        if (-not $root) { continue }
+        foreach ($version in @('6', '5')) {
+            $candidate = Join-Path $root "Inno Setup $version\ISCC.exe"
+            if (Test-Path $candidate) { return $candidate }
+        }
+    }
+    return $null
 }
 
-# WiX is a .NET tool rather than a separate download. Installing it needs no admin, and
-# a machine that already has it says so on stderr rather than failing.
-if (-not (Get-Command wix -ErrorAction SilentlyContinue)) {
-    Write-Host '==> Installing the WiX toolset (dotnet tool, no admin needed)'
+function Invoke-Quietly {
+    <#
+        .SYNOPSIS
+            Run a program whose chatter on stderr is not a failure.
+    #>
+    param([string]$Executable, [string[]]$Arguments)
+
     $previous = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
     try {
-        & dotnet tool install --global wix --version 5.* 2>&1 | ForEach-Object { "$_" }
+        & $Executable @Arguments 2>&1 | ForEach-Object { "    $_" }
     }
     finally {
         $ErrorActionPreference = $previous
     }
-    # A freshly installed global tool lands in a folder this session may not have on
-    # PATH yet.
-    $toolPath = Join-Path $env:USERPROFILE '.dotnet\tools'
-    if ((Test-Path $toolPath) -and ($env:PATH -notlike "*$toolPath*")) {
-        $env:PATH = "$toolPath;$env:PATH"
-    }
-    if (-not (Get-Command wix -ErrorAction SilentlyContinue)) {
-        Write-Error 'could not install WiX; run: dotnet tool install --global wix'
-    }
 }
 
-$wixArchitecture = if ($Architecture -eq 'win-arm64') { 'arm64' } else { 'x64' }
+$iscc = Find-Iscc
+if (-not $iscc) {
+    Write-Host '==> Installing Inno Setup'
+    # Chocolatey first: it is what build servers have, and it does not need a console
+    # session the way winget sometimes does.
+    if (Get-Command choco -ErrorAction SilentlyContinue) {
+        Invoke-Quietly 'choco' @('install', 'innosetup', '-y', '--no-progress')
+    }
+    elseif (Get-Command winget -ErrorAction SilentlyContinue) {
+        Invoke-Quietly 'winget' @(
+            'install', '--id', 'JRSoftware.InnoSetup', '--exact', '--source', 'winget',
+            '--accept-package-agreements', '--accept-source-agreements'
+        )
+    }
+    $iscc = Find-Iscc
+}
+
+if (-not $iscc) {
+    Write-Host ''
+    Write-Host 'Inno Setup is needed to build the installer and could not be installed.'
+    Write-Host 'Install it from https://jrsoftware.org/isdl.php and run this again, or'
+    Write-Host 'build without one:'
+    Write-Host ''
+    Write-Host '    .\scripts\build-windows.ps1 -NoInstaller'
+    Write-Host ''
+    throw 'no Inno Setup'
+}
+
 $outputDirectory = Split-Path -Parent $Output
-if ($outputDirectory -and -not (Test-Path $outputDirectory)) {
+if (-not $outputDirectory) { $outputDirectory = '.' }
+if (-not (Test-Path $outputDirectory)) {
     New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
 }
-if (Test-Path $Output) { Remove-Item -Force $Output }
+$outputDirectory = (Resolve-Path $outputDirectory).Path
+$outputName = [System.IO.Path]::GetFileNameWithoutExtension($Output)
+$finalPath = Join-Path $outputDirectory "$outputName.exe"
+if (Test-Path $finalPath) { Remove-Item -Force $finalPath }
 
-Write-Host "==> Building $Output ($wixArchitecture)"
-& wix build $authoring `
-    -arch $wixArchitecture `
-    -define "SourceFolder=$sourceFull" `
-    -define "IconFile=$icon" `
-    -define "Version=$Version" `
-    -out $Output
-if ($LASTEXITCODE -ne 0) { Write-Error 'wix build failed' }
-if (-not (Test-Path $Output)) { Write-Error "wix reported success but wrote no $Output" }
+$architecture = if ($Architecture -eq 'win-arm64') { 'arm64' } else { 'x64' }
 
-# An MSI is a compound file; every one starts with the same eight bytes. Checking them
-# is cheap, and a truncated installer that looks fine until somebody runs it is not.
-$signature = [System.IO.File]::ReadAllBytes($Output)[0..7]
-$expected = @(0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1)
-if (Compare-Object $signature $expected) {
-    Write-Error "$Output does not look like an MSI"
+Write-Host "==> Building $finalPath ($architecture)"
+Write-Host "    with $iscc"
+& $iscc `
+    "/DSourceFolder=$sourceFull" `
+    "/DOutputDir=$outputDirectory" `
+    "/DOutputName=$outputName" `
+    "/DAppVersion=$Version" `
+    "/DArch=$architecture" `
+    $authoring | ForEach-Object { if ($_ -match 'error|warning') { "    $_" } }
+if ($LASTEXITCODE -ne 0) { Write-Error 'Inno Setup failed' }
+if (-not (Test-Path $finalPath)) { Write-Error "the compiler reported success but wrote no $finalPath" }
+
+# Every Windows executable starts MZ. A truncated installer that looks fine until
+# somebody double-clicks it is not something to find out about later.
+$signature = [System.IO.File]::ReadAllBytes($finalPath)[0..1]
+if ($signature[0] -ne 0x4D -or $signature[1] -ne 0x5A) {
+    Write-Error "$finalPath does not look like a Windows program"
 }
 
-$size = [math]::Round((Get-Item $Output).Length / 1MB, 1)
-Write-Host "==> Installer built: $Output ($size MB, per-user, unsigned)"
+$size = [math]::Round((Get-Item $finalPath).Length / 1MB, 1)
+Write-Host "==> Installer built: $finalPath ($size MB, unsigned)"
+Write-Host '    It asks where to install and offers a desktop shortcut.'

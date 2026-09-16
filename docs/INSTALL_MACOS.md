@@ -17,9 +17,14 @@ cd Propresenter-chord-chart-importer
 `--check-only` reports without installing. Xcode it can only report on — that one is an
 App Store download.
 
-The disk image is laid out by Finder: background, an arrow to Applications, icons in
-their places. On a machine that refuses that automation the image is still built, just
-plain.
+The disk image is laid out by Finder: the app on the left, Applications on the right, an
+arrow between them, on a black and orange background.
+
+Finder does that layout under automation, and macOS asks permission the first time — a
+prompt saying your terminal wants to control Finder. Allow it and the window looks as
+intended. Refuse it, or run somewhere nothing can answer the prompt, and the build says
+so and carries on: the image still works, it just opens as a plain list. If you missed
+the prompt, it is in **System Settings → Privacy & Security → Automation**.
 
 That is the whole thing. The build script sets up the engine's Python environment the
 first time, so there is nothing to prepare by hand. If you would rather do that step on

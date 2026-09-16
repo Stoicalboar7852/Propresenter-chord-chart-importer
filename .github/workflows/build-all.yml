@@ -56,7 +56,7 @@ jobs:
           name: PCCI-windows-x64
           path: |
             build/windows/PCCI-win-x64.zip
-            build/windows/PCCI-win-x64.msi
+            build/windows/PCCI-win-x64-setup.exe
           if-no-files-found: error
 
   windows-arm64:
@@ -83,7 +83,7 @@ jobs:
           name: PCCI-windows-arm64
           path: |
             build/windows/PCCI-win-arm64.zip
-            build/windows/PCCI-win-arm64.msi
+            build/windows/PCCI-win-arm64-setup.exe
           if-no-files-found: error
 
   macos:

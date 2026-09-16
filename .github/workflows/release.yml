@@ -58,7 +58,7 @@ jobs:
           name: PCCI-windows-x64
           path: |
             build/windows/PCCI-win-x64.zip
-            build/windows/PCCI-win-x64.msi
+            build/windows/PCCI-win-x64-setup.exe
           if-no-files-found: error
 
   publish:
@@ -77,7 +77,7 @@ jobs:
         with:
           files: |
             artifacts/PCCI-macos-arm64/PCCI.dmg
-            artifacts/PCCI-windows-x64/PCCI-win-x64.msi
+            artifacts/PCCI-windows-x64/PCCI-win-x64-setup.exe
             artifacts/PCCI-windows-x64/PCCI-win-x64.zip
           body: |
             ## Installing

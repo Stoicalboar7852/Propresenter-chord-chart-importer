@@ -85,7 +85,7 @@ Compress-Archive -Path "$output\*" -DestinationPath $zip
 
 # Both shapes, every time: a folder to unzip and run, and an installer for people who
 # would rather have a Start menu entry and an uninstaller.
-$installer = Join-Path $repoRoot "build\windows\PCCI-$Architecture.msi"
+$installer = Join-Path $repoRoot "build\windows\PCCI-$Architecture-setup.exe"
 if (-not $NoInstaller) {
     & (Join-Path $PSScriptRoot 'build-installer.ps1') `
         -Source $output -Output $installer -Architecture $Architecture

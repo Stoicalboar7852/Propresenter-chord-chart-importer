@@ -166,4 +166,4 @@ jobs:
         shell: powershell
         run: >
           .\scripts\build-installer.ps1 -Source build\windows\ci-x64
-          -Output build\windows\PCCI-ci.msi
+          -Output build\windows\PCCI-ci-setup.exe

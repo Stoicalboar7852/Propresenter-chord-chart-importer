@@ -124,6 +124,7 @@ if [[ "$MAKE_DMG" == "1" ]]; then
     WRITABLE="$BUILD/PCCI-rw.dmg"
     STAGING="$BUILD/dmg"
     VOLUME="PCCI"
+    MOUNT_POINT="/Volumes/$VOLUME"
     rm -f "$DMG" "$WRITABLE"
     rm -rf "$STAGING"
     mkdir -p "$STAGING/.background"
@@ -131,25 +132,47 @@ if [[ "$MAKE_DMG" == "1" ]]; then
     ln -s /Applications "$STAGING/Applications"
     cp "$REPO_ROOT/assets/dmg-background.png" "$STAGING/.background/background.png"
     cp "$REPO_ROOT/assets/dmg-background@2x.png" "$STAGING/.background/background@2x.png"
+    cp "$MACOS_DIR/Resources/AppIcon.icns" "$STAGING/.VolumeIcon.icns"
 
-    # Read/write first, so Finder can be told where things go, then compressed. The
-    # positions below have to match the plates drawn in make_dmg_background.py.
-    hdiutil create -volname "$VOLUME" -srcfolder "$STAGING" -ov -format UDRW "$WRITABLE" \
-        >/dev/null
-    MOUNT_POINT="$BUILD/mount"
-    # If a previous run died between attach and detach, this is still a mount point,
-    # and rm -rf would be reaching inside a mounted image rather than cleaning up.
-    if mount | grep -q " on $MOUNT_POINT "; then
+    # One file for both resolutions. Finder reads a single background image, so the
+    # retina version has to travel inside a multi-representation TIFF rather than
+    # beside it as @2x.
+    BACKGROUND=".background:background.png"
+    if command -v tiffutil >/dev/null 2>&1; then
+        if tiffutil -cathidpicheck \
+            "$STAGING/.background/background.png" \
+            "$STAGING/.background/background@2x.png" \
+            -out "$STAGING/.background/background.tiff" >/dev/null 2>&1; then
+            BACKGROUND=".background:background.tiff"
+        fi
+    fi
+
+    # Room to write a .DS_Store into. An image sized exactly to its contents has none,
+    # and the layout then fails with no space left on device - which looks exactly like
+    # Finder ignoring the script.
+    STAGING_MB="$(du -sm "$STAGING" | cut -f1)"
+    hdiutil create -volname "$VOLUME" -srcfolder "$STAGING" -ov -format UDRW \
+        -fs HFS+ -size "$(( STAGING_MB + 80 ))m" "$WRITABLE" >/dev/null
+
+    # Mounted where Finder can see it, and browsable. Finder addresses a disk by name
+    # under /Volumes: mounted anywhere else, or with -nobrowse, `tell disk "PCCI"`
+    # finds nothing and the whole layout silently does not happen. That is what made
+    # earlier images come out plain.
+    if [[ -d "$MOUNT_POINT" ]]; then
         hdiutil detach "$MOUNT_POINT" -force -quiet || true
     fi
-    rm -rf "$MOUNT_POINT"
-    mkdir -p "$MOUNT_POINT"
-    hdiutil attach "$WRITABLE" -mountpoint "$MOUNT_POINT" -nobrowse -quiet
+    hdiutil attach "$WRITABLE" -quiet
+    for _ in 1 2 3 4 5 6 7 8 9 10; do
+        [[ -d "$MOUNT_POINT" ]] && break
+        sleep 1
+    done
+    if [[ ! -d "$MOUNT_POINT" ]]; then
+        echo "    could not mount the image at $MOUNT_POINT" >&2
+        exit 1
+    fi
 
-    # Dressing the window means driving Finder, which a machine may refuse: automation
-    # permission is a prompt, and there is nobody to answer it on a build server. A
-    # plain disk image is a perfectly good disk image, so this is allowed to fail.
-    if osascript <<APPLESCRIPT >/dev/null 2>&1
+    LAYOUT_LOG="$BUILD/dmg-layout.log"
+    if osascript >"$LAYOUT_LOG" 2>&1 <<APPLESCRIPT
 tell application "Finder"
     tell disk "$VOLUME"
         open
@@ -157,29 +180,44 @@ tell application "Finder"
         set toolbar visible of container window to false
         set statusbar visible of container window to false
         set the bounds of container window to {200, 140, 860, 588}
-        set options to the icon view options of container window
-        set arrangement of options to not arranged
-        set icon size of options to 128
-        set text size of options to 13
-        set background picture of options to file ".background:background.png"
-        set position of item "PCCI.app" of container window to {170, 200}
-        set position of item "Applications" of container window to {490, 200}
+        set viewOptions to the icon view options of container window
+        set arrangement of viewOptions to not arranged
+        set icon size of viewOptions to 128
+        set text size of viewOptions to 13
+        set background picture of viewOptions to file "$BACKGROUND"
+        set position of item "PCCI.app" of container window to {170, 210}
+        set position of item "Applications" of container window to {490, 210}
         close
         open
         update without registering applications
-        delay 1
+        delay 2
     end tell
 end tell
 APPLESCRIPT
     then
         echo "    window laid out"
     else
-        echo "    (Finder would not lay the window out; the image is plain but fine)"
+        echo "    Finder would not lay the window out:" >&2
+        sed 's/^/      /' "$LAYOUT_LOG" >&2
+        echo "      (the image is still usable, just unstyled)" >&2
+        echo "      If this says \"Not authorized to send Apple events\", allow your" >&2
+        echo "      terminal to control Finder in System Settings > Privacy & Security" >&2
+        echo "      > Automation, then build again." >&2
     fi
 
     sync
+    if [[ -f "$MOUNT_POINT/.DS_Store" ]]; then
+        echo "    layout saved ($(stat -f%z "$MOUNT_POINT/.DS_Store") bytes of .DS_Store)"
+    else
+        echo "    no .DS_Store was written, so the window will open with defaults" >&2
+    fi
+
+    # Makes the mounted volume show the app's icon rather than a blank disk.
+    if [[ -x /usr/bin/SetFile ]]; then
+        /usr/bin/SetFile -a C "$MOUNT_POINT" || true
+    fi
+
     hdiutil detach "$MOUNT_POINT" -quiet || hdiutil detach "$MOUNT_POINT" -force -quiet
-    rmdir "$MOUNT_POINT" 2>/dev/null || true
     hdiutil convert "$WRITABLE" -format UDZO -imagekey zlib-level=9 -o "$DMG" >/dev/null
     rm -f "$WRITABLE"
     echo "==> Built $DMG"
