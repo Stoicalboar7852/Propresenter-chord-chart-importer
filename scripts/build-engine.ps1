@@ -29,22 +29,33 @@ if (-not $OutputDirectory) { $OutputDirectory = Join-Path $repoRoot 'build\engin
 $work = Join-Path $repoRoot 'build\pyinstaller'
 $python = Join-Path $core '.venv\Scripts\python.exe'
 
+$setupArguments = @{}
+if ($Architecture) { $setupArguments['Architecture'] = $Architecture }
+
 if (-not (Test-Path $python)) {
     Write-Host '==> No Python environment yet; setting one up'
-    $setupArguments = @{}
-    if ($Architecture) { $setupArguments['Architecture'] = $Architecture }
     & (Join-Path $PSScriptRoot 'setup-engine.ps1') @setupArguments
     if (-not (Test-Path $python)) { Write-Error 'the environment was not created' }
 }
 
 # PyInstaller freezes with the interpreter it runs on, so an x64 environment produces an
-# x64 engine however the app is published. Say so rather than shipping a mismatch.
+# x64 engine however the app is published. Building for the other architecture on the
+# same machine is a reasonable thing to want - an ARM64 laptop building for an Intel
+# desktop - so the environment is rebuilt around a matching interpreter rather than
+# quietly producing a mismatched sidecar.
 if ($Architecture) {
     $machine = "$(& $python -c 'import platform; print(platform.machine())')".Trim()
     $wanted = if ($Architecture -eq 'win-arm64') { 'ARM64' } else { 'AMD64' }
     if ($machine -and $machine -ne $wanted) {
-        Write-Host "    note: core\.venv runs a $machine Python, so the engine will be $machine and"
-        Write-Host "          not $wanted. Delete core\.venv and run this again to pick a match."
+        Write-Host "==> core\.venv runs a $machine Python but this is a $Architecture build;"
+        Write-Host "    rebuilding it around a $wanted interpreter"
+        & (Join-Path $PSScriptRoot 'setup-engine.ps1') @setupArguments
+        if (-not (Test-Path $python)) { Write-Error 'the environment was not created' }
+        $machine = "$(& $python -c 'import platform; print(platform.machine())')".Trim()
+        if ($machine -ne $wanted) {
+            Write-Host "    note: still a $machine Python - there is no $wanted one installed."
+            Write-Host "          The engine will be $machine and run under emulation."
+        }
     }
 }
 

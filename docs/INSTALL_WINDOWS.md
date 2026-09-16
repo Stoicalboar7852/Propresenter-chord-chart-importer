@@ -9,15 +9,26 @@ SmartScreen just needs one extra click the first time.
 git clone https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer.git
 cd Propresenter-chord-chart-importer
 
+.\scripts\install-deps.ps1        # checks for Python and the .NET SDK, offers to install
 .\scripts\build-windows.ps1
 ```
 
-That is the whole thing. The build script sets up the engine's Python environment the
-first time. To do only that step — to run the command-line tool without building an
-app — use `.\scripts\setup-engine.ps1`.
+`install-deps.ps1` is optional — the build tells you what is missing anyway — but it
+saves a round trip. It never installs anything without asking; `-Yes` skips the prompt
+and `-CheckOnly` reports without installing.
 
-The result is `build\windows\win-x64\` and a zip beside it. Copy the folder wherever
-you like; it is self-contained and needs no installer.
+The build sets up the engine's Python environment the first time. To do only that step —
+to run the command-line tool without building an app — use `.\scripts\setup-engine.ps1`.
+
+Three things come out, in `build\windows\`:
+
+| | |
+|---|---|
+| `win-x64\` | The app as a folder. Self-contained, copy it anywhere, run `Pcci.exe`. |
+| `PCCI-win-x64.zip` | The same folder, zipped, for handing to somebody. |
+| `PCCI-win-x64.msi` | An installer: per-user, into `%LOCALAPPDATA%\Programs\PCCI`, with a Start menu shortcut and an entry in Apps and Features. No administrator needed. |
+
+`-NoInstaller` skips the .msi if you only want the portable build.
 
 Requirements: Windows 10 1809 or later, the .NET 8 SDK, and **Python 3.12 or newer**
 (`winget install Python.Python.3.12`). For an ARM machine:
@@ -25,6 +36,25 @@ Requirements: Windows 10 1809 or later, the .NET 8 SDK, and **Python 3.12 or new
 ```powershell
 .\scripts\build-windows.ps1 -Architecture win-arm64
 ```
+
+### Building for the other architecture
+
+An Intel machine and an ARM machine need different builds. You can make either from
+either, as long as the matching Python is installed:
+
+```powershell
+.\scripts\build-windows.ps1 -Architecture win-x64      # for an Intel machine
+.\scripts\build-windows.ps1 -Architecture win-arm64    # for an ARM machine
+```
+
+The engine is frozen by whichever interpreter builds it, so switching architecture
+rebuilds `core\.venv` around a matching one. If there is no matching Python installed
+the build says so and carries on with what there is — the result still runs, under
+emulation.
+
+To build both, plus the Mac app, without owning both machines, see
+`.\scripts\build-all.ps1` in the README: it runs each build on a GitHub runner and
+downloads the results.
 
 On an ARM64 machine, install the ARM64 build of Python. The engine is frozen with
 whichever interpreter builds it, so an x64 Python produces an x64 engine that then runs
@@ -73,7 +103,7 @@ build again.
 ## What is inside
 
 ```
-PCCI.exe            the app
+Pcci.exe            the app
 engine\pcci.exe     the frozen conversion engine (about 120 MB)
 STAGE_SETUP.md
 ```

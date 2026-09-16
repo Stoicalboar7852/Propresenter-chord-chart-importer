@@ -9,8 +9,17 @@ have one. Everything works; macOS just needs to be told once that you meant to o
 git clone https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer.git
 cd Propresenter-chord-chart-importer
 
+./scripts/install-deps.sh         # checks for Python and Xcode; optional
 ./scripts/build-macos.sh          # add --dmg for a disk image
 ```
+
+`install-deps.sh` never installs anything without asking; `--yes` skips the prompt and
+`--check-only` reports without installing. Xcode it can only report on — that one is an
+App Store download.
+
+The disk image is laid out by Finder: background, an arrow to Applications, icons in
+their places. On a machine that refuses that automation the image is still built, just
+plain.
 
 That is the whole thing. The build script sets up the engine's Python environment the
 first time, so there is nothing to prepare by hand. If you would rather do that step on

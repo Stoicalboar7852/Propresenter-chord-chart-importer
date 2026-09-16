@@ -1,0 +1,109 @@
+name: Build all
+
+# Every target, from wherever you happen to be sitting.
+#
+# This exists because the engine cannot be cross-compiled. PyInstaller freezes using the
+# interpreter it runs on, so a Windows engine has to be built on Windows and an ARM64
+# one on ARM64; and the Mac app needs Xcode, which only runs on macOS. Rather than
+# pretend otherwise, this runs each build on a machine that can actually do it and hands
+# back the artifacts.
+#
+#   Actions -> Build all -> Run workflow
+#   scripts/build-all.sh            (or .ps1) does the same from a terminal
+#
+# Artifacts last 30 days. Tagging a release still goes through release.yml.
+
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: What to build
+        type: choice
+        default: all
+        options:
+          - all
+          - windows-x64
+          - windows-arm64
+          - macos
+      windows_arm_runner:
+        description: >
+          Runner for the ARM64 Windows build. GitHub's windows-11-arm is free for
+          public repositories; point this at a self-hosted label otherwise.
+        default: windows-11-arm
+
+jobs:
+  windows-x64:
+    name: Windows x64
+    if: inputs.targets == 'all' || inputs.targets == 'windows-x64'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Build the app, the zip and the installer
+        run: .\scripts\build-windows.ps1 -Architecture win-x64
+
+      - name: The engine inside it runs
+        run: build\windows\win-x64\engine\pcci.exe doctor
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PCCI-windows-x64
+          path: |
+            build/windows/PCCI-win-x64.zip
+            build/windows/PCCI-win-x64.msi
+          if-no-files-found: error
+
+  windows-arm64:
+    name: Windows ARM64
+    if: inputs.targets == 'all' || inputs.targets == 'windows-arm64'
+    runs-on: ${{ inputs.windows_arm_runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Build the app, the zip and the installer
+        run: .\scripts\build-windows.ps1 -Architecture win-arm64
+
+      - name: The engine inside it runs
+        run: build\windows\win-arm64\engine\pcci.exe doctor
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PCCI-windows-arm64
+          path: |
+            build/windows/PCCI-win-arm64.zip
+            build/windows/PCCI-win-arm64.msi
+          if-no-files-found: error
+
+  macos:
+    name: macOS
+    if: inputs.targets == 'all' || inputs.targets == 'macos'
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build the app and a disk image
+        run: ./scripts/build-macos.sh --dmg
+
+      - name: The engine inside it runs
+        run: build/macos/PCCI.app/Contents/Resources/engine/pcci doctor
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PCCI-macos-arm64
+          path: build/macos/PCCI.dmg
+          if-no-files-found: error

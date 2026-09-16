@@ -28,6 +28,10 @@ about the unsigned-app warning on first launch.
 | **The file format** | **[docs/FORMAT_NOTES.md](docs/FORMAT_NOTES.md)** — what is actually inside a `.pro`, every claim read out of a real export. |
 | **The original brief** | **[docs/BUILD_PROMPT.md](docs/BUILD_PROMPT.md)** — the plan this was built from. |
 
+Not sure what a machine is missing? `./scripts/install-deps.sh` (or
+`.\scripts\install-deps.ps1`) checks for Python, the .NET SDK and Xcode, and offers to
+install what it can.
+
 ## Getting set up
 
 ```bash
@@ -38,6 +42,25 @@ It finds a Python 3.12 or newer, builds `core/.venv`, installs the engine and ch
 result runs. Add `--dev` (`-Dev` on Windows) for the test and lint tooling. The platform
 build scripts call it themselves when the environment is missing, so
 `./scripts/build-macos.sh` alone is enough to get an app.
+
+## Building for a machine you are not sitting at
+
+The engine cannot be cross-compiled. PyInstaller freezes using the interpreter it runs
+on, so a Windows engine has to be built on Windows and an ARM64 one on ARM64, and the
+Mac app needs Xcode, which needs a Mac. Rather than pretend otherwise, one command
+starts each build on a machine that can do it:
+
+```bash
+./scripts/build-all.sh --wait          # or .\scripts\build-all.ps1 -Wait
+```
+
+That runs the **Build all** workflow — Windows x64, Windows ARM64, macOS — and downloads
+the zips, installers and disk image into `build/remote/`. Without the GitHub CLI
+installed, start it from **Actions → Build all → Run workflow** instead.
+
+On one machine you can still cross-build within Windows: `-Architecture win-x64` on an
+ARM64 machine rebuilds the engine environment around an x64 interpreter if you have one
+installed, and says so if you do not.
 
 ## Converting charts
 

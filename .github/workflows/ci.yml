@@ -89,7 +89,7 @@ jobs:
       # A dependency with no Windows ARM64 wheel is compiled from source there, and an
       # ARM64 machine has no C++ or Rust toolchain to compile it with. That is a broken
       # install on a whole platform, found by whoever tries it rather than by us.
-      - name: The engine installs on Windows ARM64 without a compiler
+      - name: The engine installs on Windows without a compiler
         run: python3 scripts/check_windows_arm64.py
 
       # Windows PowerShell reads a .ps1 with no byte-order mark as ANSI, so an em dash
@@ -134,6 +134,13 @@ jobs:
       - name: The environment it built works
         shell: powershell
         run: core\.venv\Scripts\pcci.exe doctor
+
+      # The frozen engine is what actually ships inside the app, and until now nothing
+      # built one on Windows outside a release. It doctors itself and converts a real
+      # chart before this passes.
+      - name: Freeze the engine the way the app ships it
+        shell: powershell
+        run: .\scripts\build-engine.ps1 -Architecture win-x64
 
   windows-app:
     name: Windows app

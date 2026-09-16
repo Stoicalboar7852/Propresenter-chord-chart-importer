@@ -3,8 +3,9 @@
 #
 #   scripts/build-macos.sh [--liquid-glass] [--dmg]
 #
-# --liquid-glass  compile the macOS 26 Liquid Glass path (needs the macOS 26 SDK)
-# --dmg           also produce a disk image
+# --liquid-glass   compile the macOS 26 Liquid Glass path (needs the macOS 26 SDK)
+# --dmg            also produce a disk image
+# --install-missing  install anything the machine is missing, without asking
 #
 # There is no Apple Developer ID for this project, so the app is signed ad-hoc. That is
 # enough for it to run locally; see docs/INSTALL_MACOS.md for the Gatekeeper step a
@@ -17,16 +18,34 @@ BUILD="$REPO_ROOT/build/macos"
 APP="$BUILD/PCCI.app"
 LIQUID_GLASS=0
 MAKE_DMG=0
+INSTALL_MISSING=0
 
 for argument in "$@"; do
     case "$argument" in
         --liquid-glass) LIQUID_GLASS=1 ;;
         --dmg) MAKE_DMG=1 ;;
+        --install-missing) INSTALL_MISSING=1 ;;
         *) echo "unknown option: $argument" >&2; exit 2 ;;
     esac
 done
 
-command -v swift >/dev/null || { echo "swift not found — install Xcode" >&2; exit 1; }
+if [[ "$INSTALL_MISSING" == "1" ]]; then
+    "$REPO_ROOT/scripts/install-deps.sh" --yes
+fi
+
+if ! command -v swift >/dev/null; then
+    cat >&2 <<'MESSAGE'
+swift is not on this machine, so the app cannot be built.
+
+    ./scripts/install-deps.sh     checks what is missing and what to do about it
+
+Xcode comes from the App Store. The engine does not need it:
+
+    ./scripts/setup-engine.sh
+    core/.venv/bin/pcci convert "My Song.docx" -o "My Song.pro"
+MESSAGE
+    exit 1
+fi
 
 # Building SwiftUI needs *full Xcode*, not the Command Line Tools.
 #

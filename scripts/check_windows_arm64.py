@@ -1,24 +1,29 @@
 #!/usr/bin/env python3
-"""Check that the engine installs on Windows ARM64 without a compiler.
+"""Check that the engine installs on Windows without a compiler.
 
-An ARM64 Windows machine has no C++ or Rust toolchain unless somebody installed one.
-A dependency that publishes wheels for other platforms but none for ``win_arm64`` sends
-pip to the source distribution, and the install dies several minutes later asking for
-Microsoft Visual C++ Build Tools. That is how ``pdfplumber`` broke the Windows build:
-it pulls in pdfminer.six, which pulls in ``cryptography``, which is written in Rust and
-ships no ARM64 wheel.
+A Windows machine has no C++ or Rust toolchain unless somebody installed one. A
+dependency that publishes wheels for other platforms but none for this one sends pip to
+the source distribution, and the install dies several minutes later asking for Microsoft
+Visual C++ Build Tools. That is how ``pdfplumber`` broke the Windows build: it pulls in
+pdfminer.six, which pulls in ``cryptography``, which is written in Rust and ships no
+ARM64 wheel.
+
+ARM64 is where this bites, but x64 is checked too: it is the machine most people will
+run this on, and "it works on x64" should be something CI knows rather than something
+anybody assumes.
 
 The rule this enforces:
 
 * a package with a pure-Python wheel (``py3-none-any``) installs anywhere;
-* a package with a ``win_arm64`` wheel installs there;
+* a package with a wheel for the platform being checked installs there;
 * a package with **no** wheels at all is pure Python distributed as a source archive
   (odfpy is one) and builds with nothing more than setuptools;
-* a package with platform wheels but none for ``win_arm64`` is a compiler waiting to
+* a package with platform wheels but none for this platform is a compiler waiting to
   happen, and fails this check.
 
-    python3 scripts/check_windows_arm64.py            # runtime dependencies
-    python3 scripts/check_windows_arm64.py --dev      # and the test tooling
+    python3 scripts/check_windows_arm64.py                      # both, runtime deps
+    python3 scripts/check_windows_arm64.py --platform win_arm64
+    python3 scripts/check_windows_arm64.py --dev                # and the test tooling
 
 The dev extra is expected to fail: grpcio-tools has no ARM64 wheel. It is only needed
 to regenerate the protobuf bindings, which are committed, so nobody has to install it.
@@ -40,6 +45,9 @@ PYPROJECT = REPO_ROOT / "core" / "pyproject.toml"
 #: Frozen with PyInstaller, so the build needs it on the same machine.
 EXTRA_REQUIREMENTS = ("pyinstaller",)
 PYPI = "https://pypi.org/pypi/{name}/{version}/json"
+
+#: The two shapes of Windows this project ships for.
+PLATFORMS = ("win_amd64", "win_arm64")
 
 
 def requirements(include_dev: bool) -> list[str]:
@@ -86,40 +94,53 @@ def release_files(name: str, version: str) -> list[str]:
     return [entry["filename"] for entry in payload["urls"]]
 
 
-def verdict(filenames: list[str]) -> tuple[bool, str]:
+def verdict(filenames: list[str], platform: str) -> tuple[bool, str]:
     wheels = [name for name in filenames if name.endswith(".whl")]
     if not wheels:
         return True, "source only, so pure Python"
     if any(name.endswith("-none-any.whl") for name in wheels):
         return True, "pure Python wheel"
-    if any("win_arm64" in name for name in wheels):
-        return True, "win_arm64 wheel"
-    return False, f"{len(wheels)} wheels, none for win_arm64"
+    if any(platform in name for name in wheels):
+        return True, f"{platform} wheel"
+    return False, f"{len(wheels)} wheels, none for {platform}"
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dev", action="store_true", help="include the dev extra")
+    parser.add_argument(
+        "--platform",
+        choices=PLATFORMS,
+        action="append",
+        help="check one platform (repeatable). Both by default.",
+    )
     arguments = parser.parse_args()
+    platforms = tuple(arguments.platform) if arguments.platform else PLATFORMS
 
     packages = resolve(requirements(arguments.dev))
-    print(f"{len(packages)} packages to install on Windows ARM64\n")
+    # One request per package, not one per package per platform: the answer for every
+    # platform is in the same list of filenames.
+    releases = {(name, version): release_files(name, version) for name, version in packages}
+    print(f"{len(packages)} packages to install\n")
 
-    failures: list[str] = []
-    for name, version in packages:
-        ok, reason = verdict(release_files(name, version))
-        print(f"  {'ok  ' if ok else 'FAIL'}  {name} {version}: {reason}")
-        if not ok:
-            failures.append(f"{name} {version}")
+    failed = False
+    for platform in platforms:
+        print(f"{platform}")
+        failures: list[str] = []
+        for name, version in packages:
+            ok, reason = verdict(releases[(name, version)], platform)
+            print(f"  {'ok  ' if ok else 'FAIL'}  {name} {version}: {reason}")
+            if not ok:
+                failures.append(f"{name} {version}")
+        if failures:
+            failed = True
+            print(f"\n  compiled from source on {platform}: {', '.join(failures)}")
+            print("  That machine has no C++ or Rust toolchain, so the install fails.")
+        print()
 
-    print()
-    if failures:
-        print("These would be compiled from source on Windows ARM64:")
-        for failure in failures:
-            print(f"  {failure}")
-        print("\nAn ARM64 machine has no C++ or Rust toolchain, so the install fails.")
+    if failed:
         return 1
-    print("Every package installs without a compiler.")
+    print("Every package installs without a compiler, on both.")
     return 0
 
 

@@ -13,6 +13,9 @@
 .PARAMETER NoInstaller
     Skip the .msi and produce only the portable folder and zip.
 
+.PARAMETER InstallMissing
+    Install anything this machine is missing (Python, the .NET SDK) without asking.
+
 .EXAMPLE
     .\scripts\build-windows.ps1
     .\scripts\build-windows.ps1 -Architecture win-arm64
@@ -22,7 +25,8 @@ param(
     [ValidateSet('win-x64', 'win-arm64')]
     [string]$Architecture = 'win-x64',
     [switch]$SkipEngine,
-    [switch]$NoInstaller
+    [switch]$NoInstaller,
+    [switch]$InstallMissing
 )
 
 $ErrorActionPreference = 'Stop'
@@ -32,8 +36,21 @@ $project = Join-Path $repoRoot 'windows\Pcci\Pcci.csproj'
 $output = Join-Path $repoRoot "build\windows\$Architecture"
 $engineOutput = Join-Path $repoRoot 'build\engine'
 
+if ($InstallMissing) {
+    & (Join-Path $PSScriptRoot 'install-deps.ps1') -Yes
+}
+
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    Write-Error 'dotnet not found: install the .NET 8 SDK'
+    Write-Host ''
+    Write-Host 'The .NET 8 SDK is not on this machine, and the app cannot be built without it.'
+    Write-Host ''
+    Write-Host '    .\scripts\install-deps.ps1        checks and offers to install it'
+    Write-Host '    winget install Microsoft.DotNet.SDK.8'
+    Write-Host ''
+    Write-Host 'The engine does not need it: .\scripts\setup-engine.ps1 then'
+    Write-Host 'core\.venv\Scripts\pcci convert "My Song.docx" -o "My Song.pro"'
+    Write-Host ''
+    throw 'no .NET SDK'
 }
 
 if (-not $SkipEngine) {
