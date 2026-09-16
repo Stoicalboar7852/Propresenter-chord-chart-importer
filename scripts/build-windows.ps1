@@ -10,6 +10,9 @@
 .PARAMETER Architecture
     win-x64 (default) or win-arm64.
 
+.PARAMETER NoInstaller
+    Skip the .msi and produce only the portable folder and zip.
+
 .EXAMPLE
     .\scripts\build-windows.ps1
     .\scripts\build-windows.ps1 -Architecture win-arm64
@@ -18,7 +21,8 @@
 param(
     [ValidateSet('win-x64', 'win-arm64')]
     [string]$Architecture = 'win-x64',
-    [switch]$SkipEngine
+    [switch]$SkipEngine,
+    [switch]$NoInstaller
 )
 
 $ErrorActionPreference = 'Stop'
@@ -61,8 +65,18 @@ if (-not $doctor.ok) { Write-Error 'the bundled engine failed its doctor check' 
 $zip = Join-Path $repoRoot "build\windows\PCCI-$Architecture.zip"
 if (Test-Path $zip) { Remove-Item -Force $zip }
 Compress-Archive -Path "$output\*" -DestinationPath $zip
+
+# Both shapes, every time: a folder to unzip and run, and an installer for people who
+# would rather have a Start menu entry and an uninstaller.
+$installer = Join-Path $repoRoot "build\windows\PCCI-$Architecture.msi"
+if (-not $NoInstaller) {
+    & (Join-Path $PSScriptRoot 'build-installer.ps1') `
+        -Source $output -Output $installer -Architecture $Architecture
+}
+
 Write-Host "==> Built $output"
 Write-Host "==> Zipped $zip"
+if (-not $NoInstaller) { Write-Host "==> Installer $installer" }
 Write-Host ''
 Write-Host 'Unsigned build: Windows SmartScreen will warn on first launch.'
 Write-Host 'See docs/INSTALL_WINDOWS.md for what to tell people.'

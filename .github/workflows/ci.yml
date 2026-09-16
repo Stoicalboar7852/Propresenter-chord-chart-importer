@@ -52,6 +52,10 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: python ../scripts/make_icons.py --check
 
+      - name: Disk image background matches its script
+        if: matrix.os == 'ubuntu-latest'
+        run: python ../scripts/make_dmg_background.py --check
+
   app-sanity:
     name: desktop app sanity
     runs-on: ubuntu-latest
@@ -142,3 +146,17 @@ jobs:
       - name: Build the WinUI app
         working-directory: windows
         run: dotnet build Pcci.sln -c Release -p:Platform=x64 -v:normal
+
+      # The installer is build tooling like any other, so it gets built here rather
+      # than discovered to be broken on release day. No engine in this folder: the
+      # point is that the authoring compiles and an MSI comes out the far end.
+      - name: Publish the app on its own
+        run: >
+          dotnet publish windows/Pcci/Pcci.csproj -c Release -r win-x64
+          --self-contained true -o build/windows/ci-x64
+
+      - name: Package it into an installer
+        shell: powershell
+        run: >
+          .\scripts\build-installer.ps1 -Source build\windows\ci-x64
+          -Output build\windows\PCCI-ci.msi

@@ -102,12 +102,61 @@ du -sh "$APP"
 if [[ "$MAKE_DMG" == "1" ]]; then
     echo "==> Making a disk image"
     DMG="$BUILD/PCCI.dmg"
-    rm -f "$DMG"
+    WRITABLE="$BUILD/PCCI-rw.dmg"
     STAGING="$BUILD/dmg"
+    VOLUME="PCCI"
+    rm -f "$DMG" "$WRITABLE"
     rm -rf "$STAGING"
-    mkdir -p "$STAGING"
+    mkdir -p "$STAGING/.background"
     cp -R "$APP" "$STAGING/"
     ln -s /Applications "$STAGING/Applications"
-    hdiutil create -volname "PCCI" -srcfolder "$STAGING" -ov -format UDZO "$DMG" >/dev/null
+    cp "$REPO_ROOT/assets/dmg-background.png" "$STAGING/.background/background.png"
+    cp "$REPO_ROOT/assets/dmg-background@2x.png" "$STAGING/.background/background@2x.png"
+
+    # Read/write first, so Finder can be told where things go, then compressed. The
+    # positions below have to match the plates drawn in make_dmg_background.py.
+    hdiutil create -volname "$VOLUME" -srcfolder "$STAGING" -ov -format UDRW "$WRITABLE" \
+        >/dev/null
+    MOUNT_POINT="$BUILD/mount"
+    rm -rf "$MOUNT_POINT"
+    mkdir -p "$MOUNT_POINT"
+    hdiutil attach "$WRITABLE" -mountpoint "$MOUNT_POINT" -nobrowse -quiet
+
+    # Dressing the window means driving Finder, which a machine may refuse: automation
+    # permission is a prompt, and there is nobody to answer it on a build server. A
+    # plain disk image is a perfectly good disk image, so this is allowed to fail.
+    if osascript <<APPLESCRIPT >/dev/null 2>&1
+tell application "Finder"
+    tell disk "$VOLUME"
+        open
+        set current view of container window to icon view
+        set toolbar visible of container window to false
+        set statusbar visible of container window to false
+        set the bounds of container window to {200, 140, 860, 588}
+        set options to the icon view options of container window
+        set arrangement of options to not arranged
+        set icon size of options to 128
+        set text size of options to 13
+        set background picture of options to file ".background:background.png"
+        set position of item "PCCI.app" of container window to {170, 200}
+        set position of item "Applications" of container window to {490, 200}
+        close
+        open
+        update without registering applications
+        delay 1
+    end tell
+end tell
+APPLESCRIPT
+    then
+        echo "    window laid out"
+    else
+        echo "    (Finder would not lay the window out; the image is plain but fine)"
+    fi
+
+    sync
+    hdiutil detach "$MOUNT_POINT" -quiet || hdiutil detach "$MOUNT_POINT" -force -quiet
+    rmdir "$MOUNT_POINT" 2>/dev/null || true
+    hdiutil convert "$WRITABLE" -format UDZO -imagekey zlib-level=9 -o "$DMG" >/dev/null
+    rm -f "$WRITABLE"
     echo "==> Built $DMG"
 fi

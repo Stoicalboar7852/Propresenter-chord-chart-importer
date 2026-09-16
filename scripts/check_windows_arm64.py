@@ -66,7 +66,7 @@ def resolve(declared: list[str]) -> list[tuple[str, str]]:
         str(report),
         *declared,
     ]
-    finished = subprocess.run(command, capture_output=True, text=True)
+    finished = subprocess.run(command, capture_output=True, text=True, check=False)
     if finished.returncode != 0:
         print(finished.stdout, file=sys.stderr)
         print(finished.stderr, file=sys.stderr)

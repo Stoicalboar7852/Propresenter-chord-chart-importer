@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The Windows installer.
+
+  Per-user, deliberately: it installs into %LOCALAPPDATA%\Programs\PCCI and needs no
+  administrator, which matters for an unsigned package. A per-machine install would put
+  a UAC prompt in front of an installer Windows already cannot vouch for.
+
+  Built by scripts/build-installer.ps1, which passes the folder to package in as
+  SourceFolder. Everything in that folder ships, so it must be a finished build: the
+  app, the frozen engine beside it, and nothing else.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <Package
+    Name="ProPresenter Chord Chart Importer"
+    Manufacturer="PCCI"
+    Version="$(Version)"
+    UpgradeCode="96deb8d7-f44b-41bf-bf03-ea801fccac72"
+    Scope="perUser"
+    Compressed="yes">
+
+    <SummaryInformation Description="Chord charts to ProPresenter presentations" />
+
+    <!-- Installing a newer build removes the old one rather than stacking beside it. -->
+    <MajorUpgrade DowngradeErrorMessage="A newer version of PCCI is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon.ico" SourceFile="$(IconFile)" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon.ico" />
+    <Property Id="ARPURLINFOABOUT"
+              Value="https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer" />
+
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="ProgramsFolder" Name="Programs">
+        <Directory Id="INSTALLFOLDER" Name="PCCI" />
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ShortcutFolder" Name="PCCI" />
+    </StandardDirectory>
+
+    <Feature Id="Main" Title="PCCI" Level="1">
+      <ComponentGroupRef Id="ApplicationFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
+    </Feature>
+
+  </Package>
+
+  <Fragment>
+    <!-- Harvested at build time: the published app is hundreds of files and listing
+         them by hand would rot the moment the .NET runtime version changed. -->
+    <ComponentGroup Id="ApplicationFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(SourceFolder)\**" />
+    </ComponentGroup>
+
+    <Component Id="StartMenuShortcut"
+               Directory="ShortcutFolder"
+               Guid="586e76f0-1196-43b6-a166-972715b0f52d">
+      <Shortcut
+        Id="ApplicationShortcut"
+        Name="ProPresenter Chord Chart Importer"
+        Description="Turn chord charts into ProPresenter presentations"
+        Target="[INSTALLFOLDER]Pcci.exe"
+        WorkingDirectory="INSTALLFOLDER"
+        Icon="AppIcon.ico" />
+      <RemoveFolder Id="RemoveShortcutFolder" Directory="ShortcutFolder" On="uninstall" />
+      <!-- A per-user component needs a per-user keypath, and HKCU is the usual one. -->
+      <RegistryValue
+        Root="HKCU"
+        Key="Software\PCCI"
+        Name="installed"
+        Type="integer"
+        Value="1"
+        KeyPath="yes" />
+    </Component>
+  </Fragment>
+
+</Wix>
