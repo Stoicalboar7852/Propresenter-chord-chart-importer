@@ -66,6 +66,9 @@ that anybody can download from, permanently.
 git tag v0.1.0 && git push origin v0.1.0
 ```
 
+Or, without a tag to hand: **Actions -> Release -> Run workflow**, give it a version,
+and it creates the tag on whatever it built.
+
 Nothing has to be installed locally for either: GitHub's macOS runners come with Xcode
 and its Windows runners with the .NET SDK, which is exactly why this works.
 
