@@ -140,6 +140,16 @@ jobs:
             **Windows** — click **More info**, then **Run anyway**. See
             `docs/INSTALL_WINDOWS.md`.
 
+            ## How tested is this
+
+            The conversion engine is covered by 300-odd tests and is checked on Linux,
+            macOS and Windows on every change, including a real conversion through the
+            frozen copy that ships inside each app. Both apps are compiled and packaged
+            by the same automation that produced these files.
+
+            What has *not* happened yet is a Sunday. If something misbehaves, the engine
+            log (the button in the top right) says what it saw, and issues are welcome.
+
             ## Setting up your stage screen
 
             Chords never appear on the audience output. To see them on stage, add a
