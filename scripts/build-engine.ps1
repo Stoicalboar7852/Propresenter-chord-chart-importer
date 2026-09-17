@@ -125,4 +125,27 @@ if (Test-Path $sample) {
     Write-Host '  conversion smoke test passed'
 }
 
+# The clipboard route, which is the one the app drives over stdin. Worth its own check:
+# a frozen binary can read stdin differently from an interpreted one, and on Windows
+# the encoding it reads with is whatever the console decided unless somebody says.
+$pasted = @(
+    'Amazing Grace',
+    '',
+    'Verse 1',
+    'G            C',
+    'Amazing grace how sweet the sound'
+) -join [System.Environment]::NewLine
+$pastedJson = $pasted | & $binary paste -d (Join-Path $work 'pasted') --json
+if ($LASTEXITCODE -ne 0 -or -not $pastedJson) {
+    Write-Error 'the frozen engine could not read a chart from standard input'
+}
+$imported = $pastedJson | ConvertFrom-Json
+if ($imported.title -ne 'Amazing Grace') {
+    Write-Error "clipboard smoke test read the title as '$($imported.title)'"
+}
+if (-not $imported.has_chords) {
+    Write-Error 'clipboard smoke test found no chords in the pasted chart'
+}
+Write-Host '  clipboard smoke test passed'
+
 Write-Host "==> Engine built: $OutputDirectory\pcci"

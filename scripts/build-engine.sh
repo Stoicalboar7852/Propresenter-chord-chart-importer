@@ -104,5 +104,23 @@ if [[ -f "$SAMPLE" ]]; then
     echo "  conversion smoke test passed"
 fi
 
+# The clipboard route, which is the one the apps drive over stdin. Worth its own check:
+# a frozen binary can read stdin differently from an interpreted one, and this is the
+# only path where the app hands the engine bytes rather than a path.
+PASTED=$'Amazing Grace\n\nVerse 1\nG            C\nAmazing grace how sweet the sound\n'
+if ! printf '%s' "$PASTED" | "$BINARY" paste -d "$WORK/pasted" --json > "$WORK/paste.json" 2>/dev/null; then
+    echo "the frozen engine could not read a chart from standard input" >&2
+    exit 1
+fi
+"$PYTHON" - "$WORK/paste.json" <<'CLIPBOARDCHECK'
+import json
+import sys
+
+payload = json.loads(open(sys.argv[1], encoding="utf-8").read())
+assert payload["title"] == "Amazing Grace", payload["title"]
+assert payload["has_chords"], "the frozen engine found no chords in the pasted chart"
+print("  clipboard smoke test passed")
+CLIPBOARDCHECK
+
 echo "==> Engine built: $OUTPUT/pcci"
 du -sh "$OUTPUT/pcci"
