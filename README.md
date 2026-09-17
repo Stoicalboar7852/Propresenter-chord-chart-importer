@@ -138,11 +138,20 @@ it, which is what to do if a site has corrected a chart and you keep getting the
 
 **On the sources.** Only Apple Music's is a documented public API. The others are read
 the way a browser reads them, which means they can change shape or refuse a program
-outright without notice — so no result is ever the only way in. When a site says no, the
-message says so and points at the clipboard, which always works: open the page
-yourself, select the chart, copy, paste. A weekly
+outright without notice — so no result is ever the only way in.
+
+| Source | Supplies | Last checked against the live site |
+|---|---|---|
+| Apple Music | Cover art, album, year, the artist's own spelling | Answers |
+| Ultimate Guitar | Chords and words | Answers |
+| Genius | Words | **Refuses an automated request** (403). May work from a home connection; it would not talk to a GitHub runner. |
+
+When a site says no, the message says which one and points at the clipboard, which
+always works: open the page yourself, select the chart, copy, paste. A weekly
 [Online sources](https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/actions/workflows/online.yml)
-workflow checks that each one is still answering and still shaped the way pcci reads it.
+workflow re-checks that table — a site that answers but has *changed shape* fails it,
+while one that simply refuses is recorded as a skip, because that is the state of the
+world rather than something to fix.
 
 Lyrics are somebody's copyright. What this does is fetch a page you asked for and
 reformat it for your own screens, which is what a worship team's CCLI licence is

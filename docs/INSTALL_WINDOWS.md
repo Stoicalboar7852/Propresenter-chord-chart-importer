@@ -106,8 +106,9 @@ when a site refuses to let a program read it: open the page yourself, select the
 copy, paste.
 
 Only Apple Music's source is a documented public API; the rest are read the way a
-browser reads them, so they can change or say no without warning. When one does, the
-message says which site and suggests the clipboard, which always works.
+browser reads them, so they can change or say no without warning. Genius in particular
+refuses automated requests from some networks. When a source says no, the search says
+which one, carries on with the others, and suggests the clipboard — which always works.
 
 ## First launch
 

@@ -531,3 +531,12 @@ def test_two_different_songs_that_share_a_word_stay_apart() -> None:
     )
 
     assert len(merge([[hymn], [other]])) == 2
+
+
+def test_searching_for_a_link_describes_that_page(cache: Cache) -> None:
+    """One box, two jobs. A caller that forgets to check gets the right answer anyway."""
+    outcome = search(GRACE_TAB, http=http_with(everything_answers()), cache=cache)
+
+    assert outcome.is_url is True
+    assert len(outcome.results) == 1
+    assert outcome.results[0].title == "Amazing Grace"

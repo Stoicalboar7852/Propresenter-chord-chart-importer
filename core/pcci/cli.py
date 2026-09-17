@@ -35,10 +35,10 @@ from pcci.errors import OutputWriteError, PcciError, UserInputError
 from pcci.ingest import supported_extensions
 from pcci.ir import Song
 from pcci.logging_setup import configure_logging, get_logger
-from pcci.online import Cache, FetchedChart, Http, describe_url
+from pcci.online import Cache, FetchedChart, Http
 from pcci.online import search as search_online
 from pcci.online.cache import cache_directory
-from pcci.online.http import looks_like_url, normalise_url
+from pcci.online.http import normalise_url
 from pcci.online.retrieve import import_text, import_url, imports_directory
 from pcci.parse.pipeline import analyze
 from pcci.propresenter.bindings import PROTO_SOURCE_BUILD, PROTO_SOURCE_VERSION, load_bindings
@@ -517,12 +517,9 @@ def search_command(
     def action() -> int:
         text = " ".join(query).strip()
         cache = Cache(enabled=not no_cache)
-        http = Http()
-        outcome = (
-            describe_url(text, http=http, cache=cache)
-            if looks_like_url(text)
-            else search_online(text, limit=limit, http=http, cache=cache)
-        )
+        # A pasted link goes through the same call: search recognises one and describes
+        # that page instead of searching for it.
+        outcome = search_online(text, limit=limit, http=Http(), cache=cache)
 
         def human() -> None:
             for match in outcome.results:

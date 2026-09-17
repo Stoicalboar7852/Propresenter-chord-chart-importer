@@ -38,11 +38,16 @@ def search(
     text = query.strip()
     if not text:
         return SearchOutcome(query=query, notes=["Type a song name, or paste a link to one."])
-    if looks_like_url(text):
-        return SearchOutcome(query=text, is_url=True, results=[], notes=[])
 
     http = http or Http()
     cache = cache or Cache()
+
+    # A link is not a search, but it arrives through the same box, so it is answered
+    # here rather than making every caller check first and leaving the one that forgets
+    # with an empty list and no idea why.
+    if looks_like_url(text):
+        return describe_url(text, http=http, cache=cache)
+
     notes: list[str] = []
     gathered: list[tuple[SearchProvider, list[SongMatch]]] = []
 

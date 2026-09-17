@@ -22,7 +22,9 @@ Nothing yet.
   pasted out of a browser. Results come back as one row per song with its cover art,
   album and year, and each row names the sites it was assembled from. Three sources are
   asked at once and merged, because none of them knows everything: Ultimate Guitar has
-  the chords, Genius has the words, Apple Music has the artwork and the credits.
+  the chords, Genius has the words, Apple Music has the artwork and the credits. Genius
+  refuses automated requests from some networks; when a source says no, the search says
+  which one and carries on with the others.
 - **Import from the clipboard**, the way ProPresenter does it — Cmd+Shift+V on a Mac,
   Ctrl+Shift+V on Windows. Copy a chart from a web page, an email or a PDF and paste it
   straight in. This is also the answer when a site refuses to let a program read it.
