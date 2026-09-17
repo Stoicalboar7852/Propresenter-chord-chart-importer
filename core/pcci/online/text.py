@@ -187,7 +187,7 @@ def safe_filename(name: str, *, fallback: str = "chart") -> str:
 
 
 #: Words that only ever appear in a lyrics site's own furniture, never in a song.
-_CHROME_MARKERS = ("contributor", "translations", "read more", "lyrics")
+_CHROME_MARKERS = ("contributor", "translations", "read more", "embed")
 
 
 def strip_lyrics_site_chrome(text: str) -> str:
@@ -210,11 +210,16 @@ def strip_lyrics_site_chrome(text: str) -> str:
         if not line.strip():
             continue
         bracket = line.find("[")
-        prefix = line[:bracket].lower() if bracket > 0 else line.lower()
-        if not any(marker in prefix for marker in _CHROME_MARKERS):
-            break
-        # Keep the heading, drop everything in front of it; with no heading on the
-        # line there is nothing worth keeping at all.
-        lines[index] = line[bracket:] if bracket > 0 else ""
+        prefix = (line[:bracket] if bracket > 0 else line).strip().lower()
+        furniture = any(marker in prefix for marker in _CHROME_MARKERS)
+        if bracket > 0 and (furniture or prefix.endswith("lyrics")):
+            # There is a heading on this line. Everything in front of it is the
+            # site's, and the heading is the song's.
+            lines[index] = line[bracket:]
+        elif bracket < 0 and furniture:
+            # No heading to rescue, and nothing in the line but furniture.
+            lines[index] = ""
+        # Anything else is the song's own first line - very possibly its title, which
+        # may well end in the word "lyrics" - and is left exactly as it is.
         break
     return "\n".join(lines)

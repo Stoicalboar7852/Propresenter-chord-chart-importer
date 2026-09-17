@@ -447,3 +447,23 @@ def test_a_capitalised_name_after_the_colon_is_the_singer(label: str, expected: 
         raw_label=parsed.raw_label,
     )
     assert section.label == expected
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Amazing Grace Lyrics",
+        "Amazing Grace",
+        "Holy, Holy, Holy - Reginald Heber",
+        "Some Song lyrics and chords",
+    ],
+)
+def test_a_song_of_its_own_first_line_is_never_removed(line: str) -> None:
+    """The narrow escape: stripping furniture must not take the title with it.
+
+    A first line ending in the word "lyrics" is exactly what a title copied off a
+    lyrics site looks like, and the first version of this deleted it.
+    """
+    from pcci.online.text import strip_lyrics_site_chrome
+
+    assert strip_lyrics_site_chrome(line + "\nfirst line") == line + "\nfirst line"
