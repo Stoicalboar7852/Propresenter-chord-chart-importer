@@ -104,6 +104,11 @@ public sealed partial class AppState : ObservableObject
     [ObservableProperty] private int linesPerSlide = 4;
     [ObservableProperty] private string chordDelivery = "both";
     [ObservableProperty] private string chordPlacement = "chords_only";
+    /// <summary>
+    /// Whether ProPresenter paints the inline chords onto the text element itself.
+    /// Off by default: on, they reach the audience screen as well as the stage.
+    /// </summary>
+    [ObservableProperty] private bool chordsOnSlide;
     [ObservableProperty] private string batchStatus = "";
     [ObservableProperty] private bool isBatchRunning;
 
@@ -143,7 +148,8 @@ public sealed partial class AppState : ObservableObject
         LinesPerSlide = LinesPerSlide,
         BalanceLastSlide = true,
         ChordDelivery = ChordDelivery,
-        ChordPlacement = ChordPlacement
+        ChordPlacement = ChordPlacement,
+        ChordsOnSlide = ChordsOnSlide
     };
 
     public async Task AddAsync(IEnumerable<string> paths)
@@ -170,6 +176,18 @@ public sealed partial class AppState : ObservableObject
     {
         Documents.Remove(document);
         if (Selected == document) Selected = Documents.FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Go back to the start screen without losing the list.
+    ///
+    /// The search box and the drop target only appear with nothing selected, so until
+    /// this existed the only way to add a second song was to clear the first.
+    /// </summary>
+    public void ShowAddSong()
+    {
+        Selected = null;
+        Banner = null;
     }
 
     /// <summary>

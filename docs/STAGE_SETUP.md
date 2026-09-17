@@ -60,7 +60,7 @@ Amazing grace how sweet the sound
 
 ---
 
-## Route C — The Chords element (experimental, opt-in)
+## Route C — The Chords element (opt-in)
 
 ProPresenter also has a **Chords** stage element, with a Notation menu offering Chords,
 Numbers, Numerals and Do-Re-Mi. That element does not read the notes or the chart. It
@@ -76,27 +76,34 @@ pcci convert "My Song.docx" -o "My Song.pro" --chords inline+notes   # belt and 
 ```
 
 Then add the **Chords** element to your stage layout instead of Current Slide Notes.
+In the desktop apps this is the **In the slide text (Chords element)** setting.
 
-### Read this before you use it on a Sunday
+### Keeping them off the audience screen
 
-This route is written from the file format's own definitions, because **no ProPresenter
-export this project has seen uses the feature** — not even its own "with chord charts"
-export, which turned out to be page images like Route B. Two things are therefore
-unverified:
+The first version of this route drew the chords on the audience output as well as the
+stage — the chords are not in the slide's text (double-click the text box in the editor
+and you see only the words), but ProPresenter painted them over every screen the text
+element appeared on.
 
-- **It may put chords on the audience output.** The switch that enables it sits on the
-  audience lyric element in ProPresenter's own files. It may be that only the stage
-  element draws them; it may not be. Test with your audience output disconnected, or on
-  a machine that is not driving a service, before you trust it.
-- **The chord may sit a word out.** The field that says where a chord goes is called
-  `end`, and on a Mac-born format that could equally mean a length. Each chord is
-  anchored across the whole word it belongs to, so under either reading it lands on the
-  right word — but that is reasoning, not observation.
+So the drawing is now a separate switch, and it is **off**:
+
+```bash
+pcci convert "My Song.docx" -o "My Song.pro" --chords inline                     # stage only
+pcci convert "My Song.docx" -o "My Song.pro" --chords inline --chords-on-slide   # everywhere
+```
+
+In the apps it is **Draw them on the slide**, under the chord setting, and it only
+appears for the two inline routes. Leave it off unless the congregation is meant to see
+the chords: the Chords stage element reads the stored chords either way.
+
+### One thing still unverified
+
+**The chord may sit a word out.** The field that says where a chord goes is called
+`end`, and on a Mac-born format that could equally mean a length. Each chord is anchored
+across the whole word it belongs to, so under either reading it lands on the right word
+— but that is reasoning, not observation.
 
 Neither `--chords both` nor the default does any of this. You have to ask for it.
-
-If you try it, what happens is worth knowing — especially whether the chords stay off
-the audience screen.
 
 ## Route B — The chord chart
 

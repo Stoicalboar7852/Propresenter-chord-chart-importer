@@ -460,7 +460,8 @@ def test_inline_chords_land_on_the_word_they_belong_to(tmp_path):
         attributes = list(text.attributes.custom_attributes)
         if not attributes:
             continue
-        assert text.chord_pro.enabled is True
+        # Stored, but not painted onto the element - see the audience-output test.
+        assert text.chord_pro.enabled is False
         plain = rtf_to_text(text.rtf_data.decode("utf-8", "replace"), errors="ignore")
         for attribute in attributes:
             placed.append((attribute.chord, plain[attribute.range.start : attribute.range.end]))
@@ -504,3 +505,36 @@ def test_an_instrumental_line_carries_no_inline_chord(tmp_path):
         for attribute in text.attributes.custom_attributes
     ]
     assert chords == ["D"], chords
+
+
+def test_the_chords_are_stored_without_being_drawn_on_the_slide(tmp_path):
+    """The one that was found on a real stage.
+
+    With the draw flag on, ProPresenter paints the chords onto the text element - and
+    that element is the audience output as well as the source the stage Chords element
+    reads. The chords are not in the text itself (the editor's text box holds only the
+    words), so the flag is purely "paint these wherever this is shown". Storing them
+    and drawing them therefore have to be separate, and drawing is off.
+    """
+    from pcci.config import ChordDelivery, ConversionConfig
+    from pcci.convert import convert
+
+    for on_slide in (False, True):
+        output = tmp_path / f"draw-{on_slide}" / "out.pro"
+        convert(
+            _inline_chart(tmp_path),
+            output,
+            ConversionConfig(chord_delivery=ChordDelivery.INLINE, chords_on_slide=on_slide),
+        )
+        for text in _slide_text_elements(output.read_bytes()):
+            if not list(text.attributes.custom_attributes):
+                continue
+            # The chords are stored either way; only the painting changes.
+            assert text.chord_pro.enabled is on_slide
+
+
+def test_asking_for_chords_on_the_audience_screen_is_deliberate():
+    """Nothing reaches the audience output unless the setting says so."""
+    from pcci.config import ConversionConfig
+
+    assert ConversionConfig().chords_on_slide is False

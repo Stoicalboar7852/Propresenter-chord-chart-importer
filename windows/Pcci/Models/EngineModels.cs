@@ -104,6 +104,7 @@ public sealed class EngineConfig
     [JsonPropertyName("balance_last_slide")] public bool BalanceLastSlide { get; set; } = true;
     [JsonPropertyName("chord_delivery")] public string ChordDelivery { get; set; } = "both";
     [JsonPropertyName("chord_placement")] public string ChordPlacement { get; set; } = "chords_only";
+    [JsonPropertyName("chords_on_slide")] public bool ChordsOnSlide { get; set; }
 }
 
 public sealed class ConversionResult

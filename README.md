@@ -14,6 +14,9 @@ Four ways to get a song in:
 - **Paste the chart itself**, the way ProPresenter's own clipboard import works.
   Cmd+Shift+V on a Mac, Ctrl+Shift+V on Windows.
 
+All four are on the start screen, and the **+** at the top of the song list brings that
+screen back without clearing what is already in the list.
+
 A chart with no chords in it — a hymn text, a lyrics sheet — converts just the same.
 
 The project is a headless Python engine plus two native front-ends:

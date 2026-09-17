@@ -129,6 +129,12 @@ def _plan_options(function: Callable[..., Any]) -> Callable[..., Any]:
         help="How chords reach the stage screen (default both).",
     )(function)
     function = click.option(
+        "--chords-on-slide/--no-chords-on-slide",
+        default=None,
+        help="Draw inline chords on the slide itself. This puts them on the AUDIENCE "
+        "output too. Off by default.",
+    )(function)
+    function = click.option(
         "--chord-placement",
         type=click.Choice([choice.value for choice in ChordPlacementStyle]),
         default=None,
@@ -148,6 +154,8 @@ def build_config(**options: Any) -> ConversionConfig:
         config.chord_delivery = ChordDelivery(options["chords"])
     if options.get("chord_placement") is not None:
         config.chord_placement = ChordPlacementStyle(options["chord_placement"])
+    if options.get("chords_on_slide") is not None:
+        config.chords_on_slide = options["chords_on_slide"]
 
     font = config.style.font
     requested_size = options.get("font_size")

@@ -12,6 +12,18 @@
 
     <Grid x:Name="RootGrid" RowDefinitions="Auto,*">
 
+        <!--
+            The pane header button opens the add-song screen rather than a file
+            picker, so the picker keeps the keystroke a Windows user already reaches
+            for.
+        -->
+        <Grid.KeyboardAccelerators>
+            <KeyboardAccelerator
+                Key="O"
+                Invoked="OnOpenFilesAccelerator"
+                Modifiers="Control" />
+        </Grid.KeyboardAccelerators>
+
         <!-- Title bar -->
         <Grid x:Name="TitleBarArea" Grid.Row="0" Height="40" ColumnDefinitions="Auto,*,Auto">
             <TextBlock
@@ -47,14 +59,31 @@
             SelectionChanged="OnQueueSelectionChanged">
 
             <NavigationView.PaneHeader>
-                <StackPanel Margin="12,8" Orientation="Horizontal" Spacing="8">
-                    <Button Click="OnOpenFiles" Style="{StaticResource PcciPrimaryButtonStyle}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon FontSize="14" Glyph="&#xE8E5;" />
-                            <TextBlock Text="Add songs" />
-                        </StackPanel>
+                <Grid Margin="12,8" ColumnDefinitions="*,Auto">
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="Songs" />
+                    <!--
+                        Adding a second song used to mean clearing the first: the search
+                        box and the drop target only show with nothing selected. This
+                        puts that screen one click away without touching the list.
+                    -->
+                    <Button
+                        Grid.Column="1"
+                        AutomationProperties.Name="Add a song"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="OnAddSong"
+                        ToolTipService.ToolTip="Add another song: search, paste a link, or choose a file">
+                        <Button.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="N" Modifiers="Control" />
+                        </Button.KeyboardAccelerators>
+                        <FontIcon FontSize="14" Glyph="&#xE710;" />
                     </Button>
-                </StackPanel>
+                </Grid>
             </NavigationView.PaneHeader>
 
             <NavigationView.PaneFooter>

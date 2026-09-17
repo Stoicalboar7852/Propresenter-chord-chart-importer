@@ -23,9 +23,12 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
   song further down the list was simply unreachable.
 - **`--chords inline`**, an opt-in third route that writes chords into the slide's own
   text so ProPresenter's built-in **Chords** stage element can read them — the only
-  route that can transpose or switch to Nashville numbers. Off by default and
-  experimental: no ProPresenter export has ever been seen using the feature, so whether
-  it also draws chords on the audience output is untested. See `docs/STAGE_SETUP.md`.
+  route that can transpose or switch to Nashville numbers. Off by default. See
+  `docs/STAGE_SETUP.md`.
+- **A plus button at the top of the song list.** The search box and the drop target
+  only show with nothing selected, so adding a second song used to mean clearing the
+  first. On Windows the file picker moved to Ctrl+O, where it was going to be looked
+  for anyway.
 - **LRCLIB** as a source: a free, keyless, open lyrics API, which fills the gap for
   songs no chord site carries.
 - **Musixmatch** as an optional source. It needs your own API key in
@@ -59,6 +62,13 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
   chart, so it says **Songs** now.
 - Clearing the list could lay the start screen out taller than the window and clip it
   top and bottom. It fills the space when there is room and scrolls when there is not.
+- **Inline chords reached the audience screen.** On a real rig the Chords stage element
+  showed them correctly — and so did the audience output, which is the one thing this
+  program exists to prevent. The chords were never in the slide's text; the switch that
+  stores them is also what makes ProPresenter draw them. Drawing is now its own setting,
+  **Draw them on the slide**, and it is off: the stage element reads the stored chords
+  either way. Turn it on (`--chords-on-slide`) only if the congregation is meant to see
+  them.
 
 ## [0.2.0] — 2026-09-17
 

@@ -178,8 +178,11 @@ def _write_inline_chords(text: Any, slide: Slide, config: ConversionConfig) -> i
     * ``IntRange`` calls its second field ``end``, which on a Mac-born format could
       equally be a length. Each chord is therefore anchored across the *word* it sits
       on: under either reading the chord lands on the right word rather than drifting.
-    * ``chord_pro.enabled`` lives on the audience lyric element, so it may well draw
-      the chords on the main output too. Nothing here turns it on by default.
+    * ``chord_pro.enabled`` lives on the audience lyric element, and turning it on
+      does draw the chords on the audience output - observed, not guessed. The chords
+      themselves are not in the text, so that flag is purely "paint these wherever
+      this element is shown". It is therefore off unless ``chords_on_slide`` asks for
+      it, on the reading that the stage element reads the stored chords either way.
 
     Chords on an instrumental line cannot be carried this way - there is no text on
     the slide to anchor them to - so those stay with the notes and the chart.
@@ -200,7 +203,9 @@ def _write_inline_chords(text: Any, slide: Slide, config: ConversionConfig) -> i
         # ProPresenter reads out of the RTF.
         offset += len(lyric) + 1
     if written:
-        text.chord_pro.enabled = True
+        # The chords are stored either way; this only says whether ProPresenter paints
+        # them onto the text element, which includes the audience output.
+        text.chord_pro.enabled = config.chords_on_slide
         text.chord_pro.notation = 0  # NOTATION_CHORDS
     return written
 

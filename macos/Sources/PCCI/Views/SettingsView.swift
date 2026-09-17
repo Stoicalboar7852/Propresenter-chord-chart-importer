@@ -31,11 +31,30 @@ struct SettingsView: View {
                     .fixedSize(horizontal: false, vertical: true)
 
                 if let caution = state.config.chordDelivery.caution {
-                    Label(caution, systemImage: "exclamationmark.triangle.fill")
+                    Label(caution, systemImage: "info.circle")
                         .font(.caption)
-                        .foregroundStyle(Theme.uncertain)
+                        .foregroundStyle(Theme.secondaryText)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 2)
+                }
+
+                if state.config.chordDelivery.isExperimental {
+                    Toggle(
+                        "Draw them on the slide",
+                        isOn: Binding(
+                            get: { state.config.chordsOnSlide },
+                            set: { state.setChordsOnSlide($0) }
+                        )
+                    )
+                    Label(
+                        "This paints the chords onto the lyric text, which puts them on "
+                            + "the audience screen as well as the stage. Off is what you "
+                            + "want unless the congregation is meant to see them.",
+                        systemImage: "exclamationmark.triangle.fill"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(state.config.chordsOnSlide ? Theme.guessed : Theme.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
                 }
             }
 

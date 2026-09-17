@@ -17,6 +17,7 @@ public sealed partial class SettingsDialog : ContentDialog
         _state = state;
 
         Select(ChordDeliveryCombo, state.ChordDelivery);
+        ChordsOnSlideToggle.IsOn = state.ChordsOnSlide;
         UpdateInlineWarning();
         Select(ChordPlacementCombo, state.ChordPlacement);
         ChordProToggle.IsOn = state.WriteChordPro;
@@ -51,7 +52,18 @@ public sealed partial class SettingsDialog : ContentDialog
     private void UpdateInlineWarning()
     {
         var delivery = TagOf(ChordDeliveryCombo);
-        InlineWarning.IsOpen = delivery is "inline" or "inline+notes";
+        var inline = delivery is "inline" or "inline+notes";
+        InlinePanel.Visibility = inline ? Visibility.Visible : Visibility.Collapsed;
+        AudienceWarning.IsOpen = inline && ChordsOnSlideToggle.IsOn;
+    }
+
+    private void OnChordsOnSlideToggled(object sender, RoutedEventArgs args)
+    {
+        UpdateInlineWarning();
+        if (_loading) return;
+        _state.ChordsOnSlide = ChordsOnSlideToggle.IsOn;
+        // Baked into the plan an export sends back, like the delivery route itself.
+        _ = _state.ReplanAllAsync();
     }
 
     private void OnChordPlacementChanged(object sender, SelectionChangedEventArgs args)

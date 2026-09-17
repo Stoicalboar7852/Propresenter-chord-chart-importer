@@ -127,7 +127,8 @@ actor EngineClient {
             "-n", String(config.linesPerSlide),
             config.balanceLastSlide ? "--balance" : "--no-balance",
             "--chords", config.chordDelivery.rawValue,
-            "--chord-placement", config.chordPlacement.rawValue
+            "--chord-placement", config.chordPlacement.rawValue,
+            config.chordsOnSlide ? "--chords-on-slide" : "--no-chords-on-slide"
         ]
     }
 

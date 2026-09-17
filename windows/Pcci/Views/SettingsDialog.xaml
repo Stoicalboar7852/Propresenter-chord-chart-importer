@@ -24,15 +24,35 @@
 
         <!-- Shown only for the two routes that write chords into the slide's own
              text. That is the only route ProPresenter's own Chords element reads, and
-             the only one that can transpose - but nothing has ever been seen using
-             it, so the warning is not decoration. -->
-        <InfoBar
-            x:Name="InlineWarning"
-            IsClosable="False"
-            IsOpen="False"
-            Message="No ProPresenter export has ever been seen using this, and the switch that turns it on sits on the audience text. It may put chords on the audience output. Try it with your audience screen disconnected first."
-            Severity="Warning"
-            Title="Untested route" />
+             the only one that can transpose. Drawing them is a separate switch because
+             on a real stage it painted them onto the audience output too. -->
+        <StackPanel x:Name="InlinePanel" Spacing="8" Visibility="Collapsed">
+            <InfoBar
+                IsClosable="False"
+                IsOpen="True"
+                Message="The chords are stored on the words, which is what ProPresenter's Chords stage element reads. Turn the Chords element on in the stage layout editor to see them."
+                Severity="Informational"
+                Title="Read by the Chords stage element" />
+
+            <ToggleSwitch
+                x:Name="ChordsOnSlideToggle"
+                Header="Draw them on the slide"
+                Toggled="OnChordsOnSlideToggled" />
+
+            <TextBlock
+                Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="This paints the chords onto the lyric text, which puts them on the audience screen as well as the stage. Off is what you want unless the congregation is meant to see them."
+                TextWrapping="Wrap" />
+
+            <InfoBar
+                x:Name="AudienceWarning"
+                IsClosable="False"
+                IsOpen="False"
+                Message="Chords will be drawn wherever this slide appears, including the audience output."
+                Severity="Warning"
+                Title="Not just the stage" />
+        </StackPanel>
 
         <ComboBox
             x:Name="ChordPlacementCombo"

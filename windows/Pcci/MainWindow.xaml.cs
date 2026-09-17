@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Pcci.ViewModels;
 using Windows.ApplicationModel.DataTransfer;
@@ -89,6 +90,11 @@ public sealed partial class MainWindow : Window
         // different questions - "I have this file" and "I need this song" - and the
         // user knows which of those they have before they open the app. The drop
         // target steps aside while results are showing so the list has the room.
+        if (!ReferenceEquals(Navigation.SelectedItem, document))
+        {
+            Navigation.SelectedItem = document;
+        }
+
         var atStart = document is null;
         var showingResults = State.SearchResults.Count > 0 || State.IsSearching;
         SearchPane.Visibility = atStart ? Visibility.Visible : Visibility.Collapsed;
@@ -116,6 +122,21 @@ public sealed partial class MainWindow : Window
         {
             State.Selected = document;
         }
+    }
+
+    /// <summary>
+    /// Back to the search box and the drop target, without emptying the list. Both
+    /// only show with nothing selected, so until this existed the only way to add a
+    /// second song was to clear the first.
+    /// </summary>
+    private void OnAddSong(object sender, RoutedEventArgs args) => State.ShowAddSong();
+
+    private void OnOpenFilesAccelerator(
+        KeyboardAccelerator sender,
+        KeyboardAcceleratorInvokedEventArgs args)
+    {
+        args.Handled = true;
+        OnOpenFiles(sender, new RoutedEventArgs());
     }
 
     private async void OnOpenFiles(object sender, RoutedEventArgs args)

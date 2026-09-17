@@ -141,6 +141,15 @@ final class AppState {
         if selectedID == document.id { selectedID = documents.first?.id }
     }
 
+    /// Go back to the start screen without losing the list.
+    ///
+    /// The search box and the drop target only appear when nothing is selected, so
+    /// until this existed the only way to add a second song was to clear the first.
+    func showAddSong() {
+        selectedID = nil
+        banner = nil
+    }
+
     /// Empty the queue and go back to the drop target. Exported files are left alone:
     /// this clears the list, not anybody's disk.
     func clear() {
@@ -301,6 +310,12 @@ final class AppState {
     func setChordDelivery(_ value: ChordDelivery) {
         guard value != config.chordDelivery else { return }
         config.chordDelivery = value
+        replanEverything()
+    }
+
+    func setChordsOnSlide(_ value: Bool) {
+        guard value != config.chordsOnSlide else { return }
+        config.chordsOnSlide = value
         replanEverything()
     }
 

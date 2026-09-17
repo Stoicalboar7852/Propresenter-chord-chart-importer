@@ -60,6 +60,9 @@ tell you is whether a real search finds the songs your team actually sings.
       over the right syllables (see `STAGE_SETUP.md`).
 - [ ] A stage layout with a **Chord Chart** element shows the chart pages, and the page
       follows the section being sung.
+- [ ] With `--chords inline`, a stage layout with a **Chords** element shows the chords
+      over the words — and the audience output still shows none. Turning **Draw them on
+      the slide** on is the one case where they are meant to appear on both.
 - [ ] Text is legible from the back of the room: font, size and outline came through as
       configured.
 

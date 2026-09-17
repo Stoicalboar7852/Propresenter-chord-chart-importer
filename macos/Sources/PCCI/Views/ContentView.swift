@@ -73,24 +73,22 @@ struct QueueSidebar: View {
     var body: some View {
         @Bindable var state = state
         List(selection: $state.selectedID) {
-            Section("Songs") {
-                ForEach(state.documents) { document in
-                    HStack(spacing: 10) {
-                        Image(systemName: icon(for: document))
-                            .foregroundStyle(document.statusColour)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(document.name)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                            Text(document.statusText)
-                                .font(.caption)
-                                .foregroundStyle(Theme.secondaryText)
-                        }
+            ForEach(state.documents) { document in
+                HStack(spacing: 10) {
+                    Image(systemName: icon(for: document))
+                        .foregroundStyle(document.statusColour)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(document.name)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        Text(document.statusText)
+                            .font(.caption)
+                            .foregroundStyle(Theme.secondaryText)
                     }
-                    .tag(document.id)
-                    .contextMenu {
-                        Button("Remove", role: .destructive) { state.remove(document) }
-                    }
+                }
+                .tag(document.id)
+                .contextMenu {
+                    Button("Remove", role: .destructive) { state.remove(document) }
                 }
             }
         }
@@ -106,6 +104,31 @@ struct QueueSidebar: View {
                     )
                 )
             }
+        }
+        .safeAreaInset(edge: .top) {
+            HStack(spacing: 8) {
+                Text("Songs")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Theme.secondaryText)
+                Spacer()
+                // Adding a second song used to mean clearing the first: the search box
+                // and the drop target only show with nothing selected. This puts that
+                // screen one click away without touching the list.
+                Button {
+                    state.showAddSong()
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.body.weight(.medium))
+                        .frame(width: 22, height: 22)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel("Add a song")
+                .help("Add another song: search, paste a link, or drop a file")
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(.ultraThinMaterial.opacity(0.7))
         }
         .safeAreaInset(edge: .bottom) {
             VStack(alignment: .leading, spacing: 8) {

@@ -162,13 +162,20 @@ That is what makes ProPresenter's Notation menu possible: these are data, not pi
 **No export this project has seen uses it.** The bundle named "with chord charts" is
 page images (below); across all three references there are zero `CustomAttribute`
 entries of any kind, and `chord_pro` appears on every text element with only a colour
-set and `enabled` false. Two things are therefore unresolved, and `pcci` writes this
-only when asked (`--chords inline`):
+set and `enabled` false. `pcci` writes it only when asked (`--chords inline`), and one
+question about it is still open:
 
 1. **`IntRange.end`** — index or length? Nothing observed says which. `pcci` anchors a
    chord across the whole word, which lands correctly under either reading.
-2. **Does enabling it reach the audience output?** The flag is on the audience lyric
-   element. Unknown, and the reason the route is opt-in.
+
+**`chord_pro.enabled` reaches the audience output — observed.** A presentation written
+with `enabled` true was run on a real rig: the Chords stage element showed the chords
+correctly, *and* so did the audience screen. Double-clicking the text box in the editor
+shows only the words, so the chords are not in the text — the flag is what makes
+ProPresenter paint them over whichever screen that element appears on. `pcci` therefore
+writes the attributes with `enabled` **false** by default (`--no-chords-on-slide`); the
+stage element reads the stored chords either way. `--chords-on-slide` turns the drawing
+on for anyone who does want the congregation to see them.
 
 ### 4.4 Chord chart — **answer: a rendered page image, referenced per slide**
 

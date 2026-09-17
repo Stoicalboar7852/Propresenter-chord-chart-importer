@@ -187,9 +187,9 @@ enum ChordDelivery: String, Codable, CaseIterable, Identifiable {
     /// What has not been established about it, or nil when there is nothing to warn about.
     var caution: String? {
         guard isExperimental else { return nil }
-        return "Untested: no ProPresenter export has ever been seen using this, and the "
-            + "switch that enables it sits on the audience text. It may put chords on "
-            + "the audience output. Try it with your audience screen disconnected first."
+        return "The chords are stored on the words, which is what ProPresenter's Chords "
+            + "stage element reads. Leave \u{201C}Draw them on the slide\u{201D} off "
+            + "unless you want them on the audience screen as well."
     }
 }
 
@@ -227,12 +227,41 @@ struct EngineConfig: Codable, Hashable {
     var balanceLastSlide: Bool
     var chordDelivery: ChordDelivery
     var chordPlacement: ChordPlacementStyle
+    /// Whether ProPresenter paints the inline chords onto the text element - which is
+    /// the audience output as well as what the stage element reads.
+    var chordsOnSlide: Bool = false
 
     enum CodingKeys: String, CodingKey {
         case linesPerSlide = "lines_per_slide"
         case balanceLastSlide = "balance_last_slide"
         case chordDelivery = "chord_delivery"
         case chordPlacement = "chord_placement"
+        case chordsOnSlide = "chords_on_slide"
+    }
+
+    init(
+        linesPerSlide: Int,
+        balanceLastSlide: Bool,
+        chordDelivery: ChordDelivery,
+        chordPlacement: ChordPlacementStyle,
+        chordsOnSlide: Bool = false
+    ) {
+        self.linesPerSlide = linesPerSlide
+        self.balanceLastSlide = balanceLastSlide
+        self.chordDelivery = chordDelivery
+        self.chordPlacement = chordPlacement
+        self.chordsOnSlide = chordsOnSlide
+    }
+
+    /// Written out rather than synthesised so that a plan from an engine predating
+    /// `chords_on_slide` still decodes. The synthesised decoder demands every key.
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        linesPerSlide = try values.decode(Int.self, forKey: .linesPerSlide)
+        balanceLastSlide = try values.decode(Bool.self, forKey: .balanceLastSlide)
+        chordDelivery = try values.decode(ChordDelivery.self, forKey: .chordDelivery)
+        chordPlacement = try values.decode(ChordPlacementStyle.self, forKey: .chordPlacement)
+        chordsOnSlide = try values.decodeIfPresent(Bool.self, forKey: .chordsOnSlide) ?? false
     }
 }
 

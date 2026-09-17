@@ -152,7 +152,8 @@ public sealed class EngineClient
         "-n", config.LinesPerSlide.ToString(),
         config.BalanceLastSlide ? "--balance" : "--no-balance",
         "--chords", config.ChordDelivery,
-        "--chord-placement", config.ChordPlacement
+        "--chord-placement", config.ChordPlacement,
+        config.ChordsOnSlide ? "--chords-on-slide" : "--no-chords-on-slide"
     };
 
     public static SlidePlan DecodePlan(string json)
