@@ -115,6 +115,20 @@ public sealed partial class AppState : ObservableObject
     [ObservableProperty] private string? searchedFor;
     /// <summary>The result being downloaded, so its own row can show the progress.</summary>
     [ObservableProperty] private string? importingRef;
+    // Narrowing, for a title a hundred other songs share.
+    [ObservableProperty] private string searchArtist = "";
+    [ObservableProperty] private string searchAlbum = "";
+    [ObservableProperty] private string searchYear = "";
+    /// <summary>How many rows to ask for. Grows when the user asks to see more.</summary>
+    [ObservableProperty] private int searchLimit = 20;
+    /// <summary>How many matched altogether, so the list can offer the rest.</summary>
+    [ObservableProperty] private int searchTotal;
+
+    public bool HasMoreResults => SearchTotal > SearchResults.Count;
+    public bool HasSearchFilters =>
+        !string.IsNullOrWhiteSpace(SearchArtist)
+        || !string.IsNullOrWhiteSpace(SearchAlbum)
+        || !string.IsNullOrWhiteSpace(SearchYear);
 
     public ObservableCollection<ChartDocument> Documents { get; } = new();
     public ObservableCollection<EngineLogLine> LogLines { get; } = new();
@@ -178,6 +192,18 @@ public sealed partial class AppState : ObservableObject
     {
         if (value == LinesPerSlide) return;
         LinesPerSlide = value;
+        await ReplanAllAsync();
+    }
+
+    /// <summary>
+    /// Re-plan every chart already read.
+    ///
+    /// Not optional after a settings change: an export sends the plan back to the
+    /// engine and the plan carries the settings it was made with, so without this a
+    /// setting changed after a chart was read would not apply to it.
+    /// </summary>
+    public async Task ReplanAllAsync()
+    {
         foreach (var document in Documents.ToList())
         {
             if (document.Song is not null) await ReplanAsync(document);
@@ -280,21 +306,26 @@ public sealed partial class AppState : ObservableObject
     // Songs from the web.
 
     /// <summary>Search, or describe a pasted link. The engine decides which this is.</summary>
-    public async Task SearchAsync()
+    public async Task SearchAsync(bool startingOver = true)
     {
         var query = SearchQuery.Trim();
         if (query.Length == 0 || IsSearching) return;
 
+        if (startingOver) SearchLimit = 20;
         IsSearching = true;
         SearchedFor = query;
         try
         {
-            var outcome = await WithEngineValueAsync(engine => engine.SearchAsync(query));
+            var outcome = await WithEngineValueAsync(engine => engine.SearchAsync(
+                query, SearchLimit, SearchArtist.Trim(), SearchAlbum.Trim(), SearchYear.Trim()));
             SearchResults.Clear();
             SearchNotes.Clear();
+            SearchTotal = 0;
             if (outcome is null) return;
             foreach (var match in outcome.Results) SearchResults.Add(match);
             foreach (var note in outcome.Notes) SearchNotes.Add(note);
+            SearchTotal = outcome.TotalFound;
+            OnPropertyChanged(nameof(HasMoreResults));
         }
         finally
         {
@@ -302,10 +333,26 @@ public sealed partial class AppState : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Ask for the next batch. The list is capped so the first search stays quick; a
+    /// song further down was simply unreachable before this existed.
+    /// </summary>
+    public async Task ShowMoreResultsAsync()
+    {
+        if (!HasMoreResults || IsSearching) return;
+        SearchLimit = Math.Min(SearchLimit + 20, 60);
+        await SearchAsync(startingOver: false);
+    }
+
     public void ClearSearch()
     {
         SearchQuery = "";
+        SearchArtist = "";
+        SearchAlbum = "";
+        SearchYear = "";
+        SearchLimit = 20;
         SearchedFor = null;
+        SearchTotal = 0;
         SearchResults.Clear();
         SearchNotes.Clear();
     }

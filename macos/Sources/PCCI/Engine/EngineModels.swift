@@ -139,6 +139,9 @@ struct PlannedSlide: Codable, Hashable, Identifiable {
 
 enum ChordDelivery: String, Codable, CaseIterable, Identifiable {
     case none, notes, chart, both
+    case inline
+    case inlineAndNotes = "inline+notes"
+
     var id: String { rawValue }
 
     var title: String {
@@ -147,7 +150,46 @@ enum ChordDelivery: String, Codable, CaseIterable, Identifiable {
         case .notes: return "Slide notes"
         case .chart: return "Chord chart"
         case .both: return "Notes and chart"
+        case .inline: return "In the slide text (Chords element)"
+        case .inlineAndNotes: return "In the slide text, and slide notes"
         }
+    }
+
+    var explanation: String {
+        switch self {
+        case .none:
+            return "The presentation carries the words only."
+        case .notes:
+            return "A chord-over-lyric block in each slide's notes. Add a Current Slide "
+                + "Notes element to your stage layout."
+        case .chart:
+            return "The whole chart as page images. Add a Chord Chart element."
+        case .both:
+            return "Both of the above, so either stage element works."
+        case .inline, .inlineAndNotes:
+            return "Chords attached to the words themselves, which ProPresenter's own "
+                + "Chords element reads - and the only way it can transpose them or "
+                + "show Nashville numbers."
+        }
+    }
+
+    /// Whether this route writes chords into the slide's own text.
+    var isExperimental: Bool {
+        self == .inline || self == .inlineAndNotes
+    }
+
+    /// Mirrors the engine's own answer, so the settings screen can grey out the notes
+    /// options when nothing is going into the notes.
+    var writesNotes: Bool {
+        self == .notes || self == .both || self == .inlineAndNotes
+    }
+
+    /// What has not been established about it, or nil when there is nothing to warn about.
+    var caution: String? {
+        guard isExperimental else { return nil }
+        return "Untested: no ProPresenter export has ever been seen using this, and the "
+            + "switch that enables it sits on the audience text. It may put chords on "
+            + "the audience output. Try it with your audience screen disconnected first."
     }
 }
 

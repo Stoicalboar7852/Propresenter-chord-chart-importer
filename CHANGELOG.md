@@ -14,6 +14,13 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ### Added
 
+- **A Settings window on macOS** (⌘,). The Mac app had none — chord delivery was fixed
+  in code — so the routes below could only be chosen from the command line.
+- **Search filters**: artist, album and year, in both apps. The artist is not only a
+  filter, it is added to what the sources are asked, which finds songs a bare title
+  never reaches.
+- **Show more results.** Search stopped at one batch with no way to go further, so a
+  song further down the list was simply unreachable.
 - **`--chords inline`**, an opt-in third route that writes chords into the slide's own
   text so ProPresenter's built-in **Chords** stage element can read them — the only
   route that can transpose or switch to Nashville numbers. Off by default and

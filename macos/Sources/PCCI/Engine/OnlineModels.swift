@@ -90,13 +90,18 @@ struct SearchOutcome: Codable {
     var isURL: Bool
     var results: [SongMatch]
     var notes: [String]
+    /// How many matched before the list was cut to the requested size.
+    var totalFound: Int
 
     enum CodingKeys: String, CodingKey {
         case query
         case isURL = "is_url"
         case results
         case notes
+        case totalFound = "total_found"
     }
+
+    var hasMore: Bool { totalFound > results.count }
 }
 
 /// What `fetch` and `paste` report: a chart now sitting on disk.

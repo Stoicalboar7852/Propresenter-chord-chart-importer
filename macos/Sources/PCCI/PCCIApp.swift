@@ -61,6 +61,16 @@ struct PCCIApp: App {
                 .keyboardShortcut("l", modifiers: [.command, .shift])
             }
         }
+
+        // Cmd-comma, where a Mac user looks for it. Chord delivery used to be fixed
+        // in code, which was fine while there were three sensible routes and one
+        // right answer. The route that feeds ProPresenter's own Chords element has to
+        // be chosen deliberately, so there has to be somewhere to choose it.
+        Settings {
+            SettingsView()
+                .environment(state)
+                .tint(Theme.effectiveAccent)
+        }
     }
 
     private func openPanel() {

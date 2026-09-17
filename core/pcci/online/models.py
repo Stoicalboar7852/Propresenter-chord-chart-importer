@@ -100,6 +100,13 @@ class SearchOutcome(BaseModel):
     is_url: bool = False
     results: list[SongMatch] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
+    #: How many matched before the list was cut to the requested size, so a front-end
+    #: can offer to show more rather than leaving the user to wonder.
+    total_found: int = 0
+
+    @property
+    def has_more(self) -> bool:
+        return self.total_found > len(self.results)
 
 
 class FetchedChart(BaseModel):

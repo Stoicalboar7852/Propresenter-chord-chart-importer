@@ -63,7 +63,7 @@ class ITunesSource:
                 "term": query,
                 "entity": "song",
                 "media": "music",
-                "limit": str(max(1, min(limit * 2, 25))),
+                "limit": str(max(1, min(limit * 2, 100))),
             }
         )
         url = f"{SEARCH_ENDPOINT}?{parameters}"

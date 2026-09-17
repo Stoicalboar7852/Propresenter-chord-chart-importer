@@ -23,18 +23,27 @@ from pcci.online.http import Http, looks_like_url, normalise_url
 from pcci.online.models import SearchOutcome, SongMatch, SourceRef, fold
 from pcci.online.sources import SEARCH_PROVIDERS, SearchProvider
 
-DEFAULT_LIMIT = 12
+DEFAULT_LIMIT = 20
 
 
 def search(
     query: str,
     *,
     limit: int = DEFAULT_LIMIT,
+    artist: str | None = None,
+    album: str | None = None,
+    year: int | None = None,
     http: Http | None = None,
     cache: Cache | None = None,
     providers: tuple[SearchProvider, ...] = SEARCH_PROVIDERS,
 ) -> SearchOutcome:
-    """Search every source and return one merged, ranked list."""
+    """Search every source and return one merged, ranked list.
+
+    ``artist``, ``album`` and ``year`` narrow the answer two ways over: the artist is
+    added to what the sources are asked, which finds songs a bare title never reaches,
+    and all three then filter what comes back. A common title is otherwise a wall of
+    other people's songs.
+    """
     text = query.strip()
     if not text:
         return SearchOutcome(query=query, notes=["Type a song name, or paste a link to one."])
@@ -51,11 +60,18 @@ def search(
     notes: list[str] = []
     gathered: list[tuple[SearchProvider, list[SongMatch]]] = []
 
-    # Three independent round trips to three unrelated sites. Run together, a search
-    # takes as long as the slowest one rather than all three added up.
+    # The artist goes into the question, not just the filter afterwards. A bare title
+    # like "Lost" is a thousand songs on any source; "Lost <artist>" is one.
+    asked = " ".join(part for part in (text, (artist or "").strip()) if part)
+    # Ask for more than will be shown: filtering and merging both throw rows away, and
+    # a "show more" that returns nothing new is worse than no button at all.
+    depth = min(max(limit * 2, 24), 60)
+
+    # Independent round trips to unrelated sites. Run together, a search takes as long
+    # as the slowest one rather than all of them added up.
     with ThreadPoolExecutor(max_workers=len(providers) or 1) as pool:
         futures = {
-            pool.submit(_ask, provider, text, limit, http, cache): provider
+            pool.submit(_ask, provider, asked, depth, http, cache): provider
             for provider in providers
         }
         for future, provider in futures.items():
@@ -68,7 +84,11 @@ def search(
     order = {provider.id: index for index, provider in enumerate(providers)}
     gathered.sort(key=lambda pair: order.get(pair[0].id, len(order)))
 
-    results = merge([found for _, found in gathered])
+    results = [
+        match
+        for match in merge([found for _, found in gathered])
+        if matches_filters(match, artist=artist, album=album, year=year)
+    ]
     if not results and not notes:
         notes.append(f"Nothing came back for {text!r}.")
     elif results and not any(match.importable for match in results):
@@ -78,7 +98,13 @@ def search(
             "None of these sources have the words for that one. Open the song on a "
             "lyrics site and paste its link here, or copy the words and use Paste."
         )
-    return SearchOutcome(query=text, is_url=False, results=results[:limit], notes=notes)
+    return SearchOutcome(
+        query=text,
+        is_url=False,
+        results=results[:limit],
+        notes=notes,
+        total_found=len(results),
+    )
 
 
 def _ask(
@@ -206,6 +232,26 @@ def _combine(existing: SongMatch, extra: SongMatch) -> SongMatch:
             combined.sources.append(SourceRef(**source.model_dump()))
             known.add(source.provider)
     return combined
+
+
+def matches_filters(
+    match: SongMatch,
+    *,
+    artist: str | None = None,
+    album: str | None = None,
+    year: int | None = None,
+) -> bool:
+    """Whether a result survives the filters the user set.
+
+    A row that simply does not know its artist or album is kept. Chord sites file a
+    song under whoever typed it up and often under nothing at all, and throwing those
+    away would hide the one row that actually has the chart.
+    """
+    if artist and match.artist and not artists_agree(artist, match.artist):
+        return False
+    if album and match.album and fold(album) not in fold(match.album):
+        return False
+    return not (year and match.year and match.year != year)
 
 
 def artists_agree(left: str | None, right: str | None) -> bool:

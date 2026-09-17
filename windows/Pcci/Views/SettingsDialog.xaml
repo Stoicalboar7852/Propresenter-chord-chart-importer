@@ -17,8 +17,22 @@
             <ComboBoxItem Content="Notes and chart" Tag="both" />
             <ComboBoxItem Content="Slide notes only" Tag="notes" />
             <ComboBoxItem Content="Chord chart only" Tag="chart" />
+            <ComboBoxItem Content="In the slide text (Chords element)" Tag="inline" />
+            <ComboBoxItem Content="In the slide text, and slide notes" Tag="inline+notes" />
             <ComboBoxItem Content="No chords" Tag="none" />
         </ComboBox>
+
+        <!-- Shown only for the two routes that write chords into the slide's own
+             text. That is the only route ProPresenter's own Chords element reads, and
+             the only one that can transpose - but nothing has ever been seen using
+             it, so the warning is not decoration. -->
+        <InfoBar
+            x:Name="InlineWarning"
+            IsClosable="False"
+            IsOpen="False"
+            Message="No ProPresenter export has ever been seen using this, and the switch that turns it on sits on the audience text. It may put chords on the audience output. Try it with your audience screen disconnected first."
+            Severity="Warning"
+            Title="Untested route" />
 
         <ComboBox
             x:Name="ChordPlacementCombo"

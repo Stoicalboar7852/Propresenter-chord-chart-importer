@@ -499,12 +499,23 @@ def build_command(
 
 @cli.command(name="search")
 @click.argument("query", nargs=-1, required=True)
-@click.option("--limit", type=click.IntRange(1, 25), default=12, help="How many results.")
+@click.option("--limit", type=click.IntRange(1, 60), default=20, help="How many results.")
+@click.option("--artist", default=None, help="Only songs by this artist. Also improves the search.")
+@click.option("--album", default=None, help="Only songs from this album.")
+@click.option("--year", type=int, default=None, help="Only songs released in this year.")
 @click.option("--no-cache", is_flag=True, help="Ask the sites again rather than reusing answers.")
 @click.option("--json", "as_json", is_flag=True, help="Emit the results as JSON on stdout.")
 @click.pass_context
 def search_command(
-    context: click.Context, /, query: tuple[str, ...], limit: int, no_cache: bool, as_json: bool
+    context: click.Context,
+    /,
+    query: tuple[str, ...],
+    limit: int,
+    artist: str | None,
+    album: str | None,
+    year: int | None,
+    no_cache: bool,
+    as_json: bool,
 ) -> None:
     """Find a song online by name, or describe a link you have pasted.
 
@@ -519,7 +530,15 @@ def search_command(
         cache = Cache(enabled=not no_cache)
         # A pasted link goes through the same call: search recognises one and describes
         # that page instead of searching for it.
-        outcome = search_online(text, limit=limit, http=Http(), cache=cache)
+        outcome = search_online(
+            text,
+            limit=limit,
+            artist=artist,
+            album=album,
+            year=year,
+            http=Http(),
+            cache=cache,
+        )
 
         def human() -> None:
             for match in outcome.results:
@@ -535,6 +554,11 @@ def search_command(
                 click.echo(f"  note: {note}")
             if not outcome.results:
                 click.echo("Nothing found.")
+            elif outcome.has_more:
+                click.echo(
+                    f"  showing {len(outcome.results)} of {outcome.total_found}; "
+                    f"--limit {min(outcome.total_found, 60)} for the rest"
+                )
 
         emit(json.loads(outcome.model_dump_json()), as_json=as_json, human=human)
         return EXIT_OK

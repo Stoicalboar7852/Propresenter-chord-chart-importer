@@ -83,6 +83,11 @@ public sealed class SearchOutcome
     [JsonPropertyName("is_url")] public bool IsUrl { get; set; }
     [JsonPropertyName("results")] public List<SongMatch> Results { get; set; } = new();
     [JsonPropertyName("notes")] public List<string> Notes { get; set; } = new();
+    /// <summary>How many matched before the list was cut to the requested size.</summary>
+    [JsonPropertyName("total_found")] public int TotalFound { get; set; }
+
+    [JsonIgnore]
+    public bool HasMore => TotalFound > Results.Count;
 }
 
 /// <summary>What fetch and paste report: a chart now sitting on disk.</summary>

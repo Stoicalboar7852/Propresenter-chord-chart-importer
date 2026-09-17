@@ -37,7 +37,9 @@ public sealed partial class SearchView : UserControl
     private void OnStateChanged(object? sender, PropertyChangedEventArgs args)
     {
         if (args.PropertyName is nameof(AppState.IsSearching) or nameof(AppState.SearchedFor)
-            or nameof(AppState.IsBusy) or nameof(AppState.SearchQuery))
+            or nameof(AppState.IsBusy) or nameof(AppState.SearchQuery)
+            or nameof(AppState.SearchTotal) or nameof(AppState.SearchArtist)
+            or nameof(AppState.SearchAlbum) or nameof(AppState.SearchYear))
         {
             Refresh();
         }
@@ -62,6 +64,32 @@ public sealed partial class SearchView : UserControl
 
         SearchButton.IsEnabled = _state.SearchQuery.Trim().Length > 0 && !searching;
         PasteButton.IsEnabled = !_state.IsBusy;
+
+        if (ArtistBox.Text != _state.SearchArtist) ArtistBox.Text = _state.SearchArtist;
+        if (AlbumBox.Text != _state.SearchAlbum) AlbumBox.Text = _state.SearchAlbum;
+        if (YearBox.Text != _state.SearchYear) YearBox.Text = _state.SearchYear;
+        FilterExpander.Header = _state.HasSearchFilters ? "Narrow it down  \u2022" : "Narrow it down";
+
+        var more = _state.HasMoreResults && !searching;
+        ShowMoreButton.Visibility = more ? Visibility.Visible : Visibility.Collapsed;
+        if (more)
+        {
+            ShowMoreButton.Content =
+                $"Show more ({_state.SearchResults.Count} of {_state.SearchTotal})";
+        }
+    }
+
+    private void OnFilterChanged(object sender, TextChangedEventArgs args)
+    {
+        if (_state is null) return;
+        _state.SearchArtist = ArtistBox.Text;
+        _state.SearchAlbum = AlbumBox.Text;
+        _state.SearchYear = YearBox.Text;
+    }
+
+    private async void OnShowMore(object sender, RoutedEventArgs args)
+    {
+        if (_state is not null) await _state.ShowMoreResultsAsync();
     }
 
     private void OnQueryChanged(object sender, TextChangedEventArgs args)

@@ -83,6 +83,19 @@ final class AppState {
     var isSearching = false
     /// The query the current results belong to, so "nothing found" can name it.
     var searchedFor: String?
+    /// Narrowing, for a title a hundred other songs share.
+    var searchArtist = ""
+    var searchAlbum = ""
+    var searchYear = ""
+    /// How many rows to ask for. Grows when the user asks to see more.
+    var searchLimit = 20
+    /// How many matched altogether, so the list can offer the rest.
+    var searchTotal = 0
+
+    var hasMoreResults: Bool { searchTotal > searchResults.count }
+    var hasFilters: Bool {
+        !searchArtist.isEmpty || !searchAlbum.isEmpty || !searchYear.isEmpty
+    }
     /// The result being downloaded, so its own row can show the progress.
     var importingRef: String?
     /// Anything the import wants to warn about, once it has happened.
@@ -282,6 +295,27 @@ final class AppState {
     func setLinesPerSlide(_ value: Int) {
         guard value != config.linesPerSlide else { return }
         config.linesPerSlide = value
+        replanEverything()
+    }
+
+    func setChordDelivery(_ value: ChordDelivery) {
+        guard value != config.chordDelivery else { return }
+        config.chordDelivery = value
+        replanEverything()
+    }
+
+    func setChordPlacement(_ value: ChordPlacementStyle) {
+        guard value != config.chordPlacement else { return }
+        config.chordPlacement = value
+        replanEverything()
+    }
+
+    /// Re-plan every chart already read.
+    ///
+    /// Not optional after a settings change: an export sends the plan back to the
+    /// engine, and the plan carries the settings it was made with. Without this, a
+    /// setting changed after a chart was read would simply not apply to it.
+    private func replanEverything() {
         for document in documents where document.song != nil {
             Task { await replan(document) }
         }
@@ -362,32 +396,56 @@ final class AppState {
     // MARK: Songs from the web
 
     /// Search, or describe a pasted link. The engine decides which this is.
-    func runSearch() async {
+    func runSearch(startingOver: Bool = true) async {
         let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty, !isSearching else { return }
+        if startingOver { searchLimit = 20 }
         isSearching = true
         defer { isSearching = false }
         searchedFor = query
 
+        let limit = searchLimit
+        let artist = searchArtist.trimmed
+        let album = searchAlbum.trimmed
+        let year = searchYear.trimmed
         guard
             let outcome = await withEngineValue({ engine in
                 try EngineClient.decode(
-                    SearchOutcome.self, from: await engine.searchJSON(query), what: "the search"
+                    SearchOutcome.self,
+                    from: await engine.searchJSON(
+                        query, limit: limit, artist: artist, album: album, year: year
+                    ),
+                    what: "the search"
                 )
             })
         else {
             searchResults = []
+            searchTotal = 0
             return
         }
         searchResults = outcome.results
         searchNotes = outcome.notes
+        searchTotal = outcome.totalFound
+    }
+
+    /// Ask for the next batch. The list is capped so the first search stays quick;
+    /// a song further down was simply unreachable before this existed.
+    func showMoreResults() async {
+        guard hasMoreResults, !isSearching else { return }
+        searchLimit = min(searchLimit + 20, 60)
+        await runSearch(startingOver: false)
     }
 
     func clearSearch() {
         searchQuery = ""
+        searchArtist = ""
+        searchAlbum = ""
+        searchYear = ""
+        searchLimit = 20
         searchResults = []
         searchNotes = []
         searchedFor = nil
+        searchTotal = 0
         importNotes = []
     }
 
@@ -451,6 +509,7 @@ final class AppState {
         }
         searchResults = []
         searchedFor = nil
+        searchTotal = 0
     }
 
     /// Run something against the engine that is about no particular document.

@@ -43,6 +43,30 @@
             </Button>
         </Grid>
 
+        <!-- Narrowing, for the songs whose titles a hundred others share. -->
+        <Expander x:Name="FilterExpander" HorizontalAlignment="Stretch" Header="Narrow it down">
+            <Grid ColumnDefinitions="*,*,90" ColumnSpacing="8" Padding="0,4">
+                <TextBox
+                    x:Name="ArtistBox"
+                    Grid.Column="0"
+                    Header="Artist"
+                    KeyDown="OnQueryKeyDown"
+                    TextChanged="OnFilterChanged" />
+                <TextBox
+                    x:Name="AlbumBox"
+                    Grid.Column="1"
+                    Header="Album"
+                    KeyDown="OnQueryKeyDown"
+                    TextChanged="OnFilterChanged" />
+                <TextBox
+                    x:Name="YearBox"
+                    Grid.Column="2"
+                    Header="Year"
+                    KeyDown="OnQueryKeyDown"
+                    TextChanged="OnFilterChanged" />
+            </Grid>
+        </Expander>
+
         <StackPanel
             x:Name="SearchingRow"
             Orientation="Horizontal"
@@ -132,6 +156,14 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+
+        <!-- The list is capped so the first search stays quick. Without this a song
+             further down the results was simply unreachable. -->
+        <Button
+            x:Name="ShowMoreButton"
+            HorizontalAlignment="Stretch"
+            Click="OnShowMore"
+            Visibility="Collapsed" />
 
         <ItemsControl x:Name="NotesList" Visibility="Collapsed">
             <ItemsControl.ItemTemplate>

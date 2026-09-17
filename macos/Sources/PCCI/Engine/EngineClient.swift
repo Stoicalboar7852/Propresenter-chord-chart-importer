@@ -75,8 +75,21 @@ actor EngineClient {
     // MARK: Songs from the web
 
     /// Search every online source the engine knows.
-    func searchJSON(_ query: String, limit: Int = 12) async throws -> Data {
-        try await runRaw(["search", query, "--limit", String(limit), "--json"])
+    ///
+    /// The artist is a filter *and* part of the question: a bare title is a thousand
+    /// songs on any source, and a title with an artist is usually one.
+    func searchJSON(
+        _ query: String,
+        limit: Int = 20,
+        artist: String = "",
+        album: String = "",
+        year: String = ""
+    ) async throws -> Data {
+        var arguments = ["search", query, "--limit", String(limit), "--json"]
+        if !artist.isEmpty { arguments += ["--artist", artist] }
+        if !album.isEmpty { arguments += ["--album", album] }
+        if !year.isEmpty { arguments += ["--year", year] }
+        return try await runRaw(arguments)
     }
 
     /// Download the chart at a link. The engine picks where to keep it and says where.

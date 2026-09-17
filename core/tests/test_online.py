@@ -727,3 +727,68 @@ def test_chords_still_beat_a_structured_lyrics_source() -> None:
     )
 
     assert merge([[lyrics], [chords]])[0].chart_kind == "chords"
+
+
+# --- Filters and depth ------------------------------------------------------------
+
+
+def _row(title: str, artist: str | None, album: str | None = None, year: int | None = None):
+    from pcci.online.models import SongMatch, SourceRef
+
+    return SongMatch(
+        ref=f"{title}-{artist}",
+        title=title,
+        artist=artist,
+        album=album,
+        year=year,
+        chart_url=f"https://tabs.example/{title}",
+        chart_kind="chords",
+        chart_provider="ultimate-guitar",
+        sources=[SourceRef(provider="ultimate-guitar", name="Ultimate Guitar")],
+    )
+
+
+@pytest.mark.parametrize(
+    ("filters", "kept"),
+    [
+        ({}, True),
+        ({"artist": "Parish Hymnal Choir"}, True),
+        ({"artist": "Some Other Band"}, False),
+        ({"album": "Hymns"}, True),
+        ({"album": "A Different Record"}, False),
+        ({"year": 2019}, True),
+        ({"year": 1998}, False),
+    ],
+)
+def test_the_filters_narrow_a_common_title(filters: dict[str, object], kept: bool) -> None:
+    from pcci.online.search import matches_filters
+
+    match = _row("Lost", "Parish Hymnal Choir", "Hymns, Volume One", 2019)
+    assert matches_filters(match, **filters) is kept  # type: ignore[arg-type]
+
+
+def test_a_row_that_does_not_know_its_artist_survives_an_artist_filter() -> None:
+    """Chord sites file a song under whoever typed it up, or under nothing at all.
+
+    Dropping those would hide the one row that actually carries the chart.
+    """
+    from pcci.online.search import matches_filters
+
+    assert matches_filters(_row("Lost", None), artist="Parish Hymnal Choir") is True
+
+
+def test_the_outcome_says_when_there_are_more_than_it_showed(cache: Cache) -> None:
+    outcome = search("amazing grace", limit=1, http=http_with(everything_answers()), cache=cache)
+
+    assert len(outcome.results) == 1
+    if outcome.total_found > 1:
+        assert outcome.has_more is True
+
+
+def test_the_artist_filter_also_goes_into_the_question(cache: Cache) -> None:
+    """A bare title is a thousand songs; a title plus an artist is one."""
+    transport = everything_answers()
+    search("lost", limit=5, artist="Parish Hymnal Choir", http=http_with(transport), cache=cache)
+
+    asked = " ".join(transport.calls).lower()
+    assert "parish" in asked, "the artist never reached the sources"

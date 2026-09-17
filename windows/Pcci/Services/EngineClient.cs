@@ -88,9 +88,18 @@ public sealed class EngineClient
     // Songs from the web. Each of these ends at an ordinary file on disk, which the
     // existing Plan/Build calls then work on exactly as they would on a dropped file.
 
-    public async Task<SearchOutcome> SearchAsync(string query, int limit = 12)
+    /// <summary>
+    /// Search every source. The artist is a filter and part of the question both: a
+    /// bare title is a thousand songs on any source, a title with an artist is one.
+    /// </summary>
+    public async Task<SearchOutcome> SearchAsync(
+        string query, int limit = 20, string artist = "", string album = "", string year = "")
     {
-        var output = await RunAsync(new[] { "search", query, "--limit", limit.ToString(), "--json" });
+        var arguments = new List<string> { "search", query, "--limit", limit.ToString(), "--json" };
+        if (!string.IsNullOrWhiteSpace(artist)) { arguments.Add("--artist"); arguments.Add(artist); }
+        if (!string.IsNullOrWhiteSpace(album)) { arguments.Add("--album"); arguments.Add(album); }
+        if (!string.IsNullOrWhiteSpace(year)) { arguments.Add("--year"); arguments.Add(year); }
+        var output = await RunAsync(arguments);
         return JsonSerializer.Deserialize<SearchOutcome>(output)
             ?? throw new EngineException(EngineError.Local("The search returned nothing readable."));
     }

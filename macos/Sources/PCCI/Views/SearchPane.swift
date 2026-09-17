@@ -12,9 +12,12 @@ struct SearchPane: View {
     @Environment(AppState.self) private var state
     @FocusState private var fieldFocused: Bool
 
+    @State private var showFilters = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             field
+            filters
             if state.isSearching {
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.small)
@@ -71,11 +74,57 @@ struct SearchPane: View {
         .glassPanel(cornerRadius: 12)
     }
 
+    /// Narrowing, for the songs whose titles a hundred others share.
+    @ViewBuilder
+    private var filters: some View {
+        @Bindable var state = state
+        DisclosureGroup(isExpanded: $showFilters) {
+            HStack(spacing: 8) {
+                TextField("Artist", text: $state.searchArtist)
+                    .onSubmit { Task { await state.runSearch() } }
+                TextField("Album", text: $state.searchAlbum)
+                    .onSubmit { Task { await state.runSearch() } }
+                TextField("Year", text: $state.searchYear)
+                    .frame(width: 70)
+                    .onSubmit { Task { await state.runSearch() } }
+            }
+            .textFieldStyle(.roundedBorder)
+            .padding(.top, 6)
+        } label: {
+            HStack(spacing: 6) {
+                Text("Narrow it down")
+                if state.hasFilters {
+                    Text("on")
+                        .font(.caption2.weight(.semibold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 1)
+                        .background(Capsule().fill(Theme.accent.opacity(0.25)))
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(Theme.secondaryText)
+        }
+        .disclosureGroupStyle(.automatic)
+    }
+
     private var results: some View {
         ScrollView {
             LazyVStack(spacing: 8) {
                 ForEach(state.searchResults) { match in
                     SearchResultRow(match: match)
+                }
+                if state.hasMoreResults {
+                    // The list is capped so the first search stays quick. Without this
+                    // a song further down was simply unreachable.
+                    Button {
+                        Task { await state.showMoreResults() }
+                    } label: {
+                        Text("Show more (\(state.searchResults.count) of \(state.searchTotal))")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderless)
+                    .padding(.vertical, 6)
+                    .disabled(state.isSearching)
                 }
             }
             .padding(.bottom, 4)
