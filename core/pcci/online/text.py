@@ -184,3 +184,37 @@ def safe_filename(name: str, *, fallback: str = "chart") -> str:
     if not cleaned or cleaned.casefold() in reserved:
         return fallback
     return cleaned[:80].strip(" .") or fallback
+
+
+#: Words that only ever appear in a lyrics site's own furniture, never in a song.
+_CHROME_MARKERS = ("contributor", "translations", "read more", "lyrics")
+
+
+def strip_lyrics_site_chrome(text: str) -> str:
+    """Remove the page furniture a lyrics site runs into the first section label.
+
+    Genius opens its lyrics block with a contributor count and the song's name, and
+    renders the first section heading on the *same line* with no break:
+
+        7 ContributorsSONG NAME Lyrics[Intro: Someone]
+
+    So the first heading is not a heading, it is the tail of a long line - and every
+    line under it then belongs to no section and is dropped. That is the whole reason
+    an imported song could come back missing its opening.
+
+    Only the first non-blank line is touched, and only when what sits in front of the
+    bracket is recognisably furniture rather than words.
+    """
+    lines = text.split("\n")
+    for index, line in enumerate(lines):
+        if not line.strip():
+            continue
+        bracket = line.find("[")
+        prefix = line[:bracket].lower() if bracket > 0 else line.lower()
+        if not any(marker in prefix for marker in _CHROME_MARKERS):
+            break
+        # Keep the heading, drop everything in front of it; with no heading on the
+        # line there is nothing worth keeping at all.
+        lines[index] = line[bracket:] if bracket > 0 else ""
+        break
+    return "\n".join(lines)

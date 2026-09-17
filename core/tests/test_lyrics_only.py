@@ -354,3 +354,96 @@ def test_the_performer_is_told_apart_from_a_repeat_count(label: str, expected: s
     from pcci.parse.sections import without_performer
 
     assert without_performer(label) == expected
+
+
+# --- What a lyrics site's own page furniture does to the first section -------------
+
+
+GLUED_CHROME = """7 ContributorsSOME SONG Lyrics[Intro: Someone]
+first intro line
+second intro line
+
+[Pre-Chorus: Someone]
+first pre-chorus line
+second pre-chorus line
+
+[Post-Chorus: Someone]
+(La, la, la)
+(Na, na, na)
+
+[Outro: Someone]
+(La, la, la)
+"""
+
+
+def test_page_furniture_does_not_eat_the_first_section(tmp_path: Path) -> None:
+    """Genius runs a contributor count and the song name into the first heading.
+
+    The heading then is not a heading, it is the tail of a long line, and every line
+    under it belongs to no section and is dropped - which is exactly how an imported
+    song came back missing its opening.
+    """
+    from pcci.online.text import strip_lyrics_site_chrome
+
+    path = tmp_path / "glued.txt"
+    path.write_text(strip_lyrics_site_chrome(GLUED_CHROME), encoding="utf-8")
+
+    labels = [section.label for section in analyze(path).sections]
+    assert labels[0] == "Intro", labels
+
+
+def test_a_backing_vocal_is_not_a_section_heading(tmp_path: Path) -> None:
+    """ "(La, la, la)" is short, and .isupper() is true of it, and it was stealing
+    whole sections: promoted to a heading, it left the real section with no lines and
+    a section with no lines is thrown away."""
+    from pcci.online.text import strip_lyrics_site_chrome
+
+    path = tmp_path / "glued.txt"
+    path.write_text(strip_lyrics_site_chrome(GLUED_CHROME), encoding="utf-8")
+
+    labels = [section.label for section in analyze(path).sections]
+    assert labels == ["Intro", "Pre-Chorus", "Post-Chorus", "Outro"], labels
+
+
+@pytest.mark.parametrize(
+    ("line", "kept"),
+    [
+        ("7 ContributorsSOME SONG Lyrics[Intro]", "[Intro]"),
+        ("4 ContributorsSome Song Lyrics[Chorus]", "[Chorus]"),
+        ("12 Contributors", ""),
+        ("[Intro]", "[Intro]"),
+        ("Just a normal first line", "Just a normal first line"),
+    ],
+)
+def test_only_the_furniture_is_removed(line: str, kept: str) -> None:
+    from pcci.online.text import strip_lyrics_site_chrome
+
+    assert strip_lyrics_site_chrome(line + "\nsomething after") == kept + "\nsomething after"
+
+
+@pytest.mark.parametrize(
+    ("label", "expected"),
+    [
+        ("[Build: Someone]", "Build"),
+        ("[Outro: Someone]", "Outro"),
+        ("[Talking: to the band]", "Talking: to the band"),
+    ],
+)
+def test_a_capitalised_name_after_the_colon_is_the_singer(label: str, expected: str) -> None:
+    """A performer is a name and names are capitalised; an aside is not.
+
+    Checks the name the group actually ends up with, which is the type's own name for
+    a section pcci knows and the user's wording for one it does not.
+    """
+    from pcci.ir import Section
+    from pcci.parse.sections import parse_section_label
+
+    parsed = parse_section_label(label)
+    assert parsed is not None
+    section = Section(
+        type=parsed.type,
+        number=parsed.number,
+        variant=parsed.variant,
+        raw_label=parsed.raw_label,
+    )
+    assert section.label == expected

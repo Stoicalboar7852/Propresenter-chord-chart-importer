@@ -22,6 +22,18 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ### Fixed
 
+- An imported song could come back **missing its first section**. Lyrics sites run
+  their own page furniture — a contributor count and the song's name — straight into
+  the first heading with no line break, so the heading was really the tail of a long
+  line and everything under it belonged to no section at all.
+- A backing vocal on its own line, such as one written entirely in brackets, could be
+  mistaken for a section heading. That left the real section with no lines in it, and
+  a section with no lines is discarded — so two more sections went missing.
+- A heading that names who sings it, like `[Build: Someone]`, kept the name in the
+  group label. The name is dropped now, while a genuine aside such as
+  `[Talking: to the band]` is still kept whole.
+- A search that finds the song but nothing carrying its words now says so, and says
+  what to do instead, rather than showing rows whose Import button is simply greyed.
 - Searching found the right song but importing could fetch a **different** one: two
   bands with the same song title were being folded into a single row, so a correct
   result could have someone else's chart behind it.

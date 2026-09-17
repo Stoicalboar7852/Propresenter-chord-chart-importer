@@ -22,7 +22,12 @@ from pcci.online.cache import Cache, cache_directory
 from pcci.online.http import Http, host_of, normalise_url
 from pcci.online.models import FetchedChart, SourceRef
 from pcci.online.sources import CHART_PROVIDERS, ChartProvider
-from pcci.online.text import looks_like_chart, safe_filename, tidy
+from pcci.online.text import (
+    looks_like_chart,
+    safe_filename,
+    strip_lyrics_site_chrome,
+    tidy,
+)
 from pcci.parse.chords import looks_like_chord_line
 from pcci.parse.sections import parse_section_label
 
@@ -100,7 +105,7 @@ def from_text(
     source_name: str = "Clipboard",
 ) -> FetchedChart:
     """Turn pasted text into a chart, working out for itself what kind it is."""
-    body = tidy(text)
+    body = tidy(strip_lyrics_site_chrome(text))
     if not looks_like_chart(body):
         raise NoChartFoundError(
             "There is not enough text there to be a song. Copy the whole chart - "

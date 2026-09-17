@@ -137,6 +137,11 @@ def without_performer(inner: str) -> str | None:
     # "x2", "X 4" and friends are repeat counts, which the label parser wants to keep.
     if re.fullmatch(r"[xX]\s*\d+", performer):
         return None
+    # A performer is a name, and names are capitalised. That is what separates
+    # "[Build: Absolutely]", where the second half is who sings it, from
+    # "[Talking: to the band]", where the whole thing is the label.
+    if not performer[:1].isupper():
+        return None
     return match.group("label").strip() or None
 
 
@@ -265,11 +270,14 @@ def parse_section_label(
                 allow_abbreviations=allow_abbreviations,
                 allow_bare_words=allow_bare_words,
             )
-            if inner_label is not None and inner_label.type is not SectionType.MISC:
+            if inner_label is not None:
+                # Keep the shortened wording even when the type is the catch-all:
+                # "[Build: Absolutely]" is a section called Build, and carrying the
+                # singer's name into the group label helps nobody.
                 return SectionLabel(
                     type=inner_label.type,
                     number=inner_label.number,
-                    raw_label=stripped,
+                    raw_label=shortened if inner_label.type is SectionType.MISC else stripped,
                     confidence=inner_label.confidence,
                     repeat=inner_label.repeat,
                     variant=inner_label.variant,
@@ -614,12 +622,24 @@ def _promote_formatting_headers(classified: list[ClassifiedLine], document: RawD
         # it are F and X. A real Shivers import came out with that as its first group.
         if looks_like_chord_diagram(text):
             continue
+        # A line wrapped in brackets is a backing vocal or an aside, not a heading.
+        # "(I, I, I)" passes every other bar here - it is short, and .isupper() is
+        # true of it because its only letter is I - and it was stealing whole
+        # sections, because a heading immediately after a heading leaves the real
+        # section with no lines at all and it gets dropped.
+        if _WRAPPED_RE.match(text):
+            continue
         emphasised = item.line.heading or item.line.bold or (text.isupper() and len(text) > 1)
         if not emphasised:
             continue
         before = classified[position - 1].kind if position else LineKind.BLANK
         after = classified[position + 1].kind if position + 1 < len(classified) else LineKind.BLANK
-        if before not in (LineKind.BLANK, LineKind.HEADER) and after is not LineKind.BLANK:
+        # Directly under a heading is the first line of that section, never a heading
+        # of its own. Promoting it leaves the section above with nothing in it, and a
+        # section with nothing in it is thrown away.
+        if before is LineKind.HEADER:
+            continue
+        if before is not LineKind.BLANK and after is not LineKind.BLANK:
             continue
         word = re.sub(r"[^a-z]", "", text.lower())
         section_type = _TYPE_BY_KEYWORD.get(word, SectionType.MISC)

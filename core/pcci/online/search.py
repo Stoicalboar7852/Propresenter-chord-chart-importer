@@ -71,6 +71,13 @@ def search(
     results = merge([found for _, found in gathered])
     if not results and not notes:
         notes.append(f"Nothing came back for {text!r}.")
+    elif results and not any(match.importable for match in results):
+        # The song exists, nobody readable has the words. Say what to do rather than
+        # leaving a list of rows whose Import button is greyed out with no explanation.
+        notes.append(
+            "None of these sources have the words for that one. Open the song on a "
+            "lyrics site and paste its link here, or copy the words and use Paste."
+        )
     return SearchOutcome(query=text, is_url=False, results=results[:limit], notes=notes)
 
 

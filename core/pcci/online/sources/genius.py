@@ -23,7 +23,7 @@ from pcci.online.cache import SEARCH_TTL_SECONDS, Cache
 from pcci.online.http import Http
 from pcci.online.models import FetchedChart, SongMatch, SourceRef, Supply, reference_for
 from pcci.online.sources.base import fetch_text, with_credits
-from pcci.online.text import blocks_text, find_all, tidy
+from pcci.online.text import blocks_text, find_all, strip_lyrics_site_chrome, tidy
 
 SEARCH_ENDPOINT = "https://genius.com/api/search/song"
 LYRICS_ATTRIBUTE = "data-lyrics-container"
@@ -119,7 +119,7 @@ class GeniusSource:
     def fetch(self, url: str, *, http: Http, cache: Cache) -> FetchedChart:
         page = fetch_text(url, http=http, cache=cache)
         blocks = blocks_text(page, attribute=LYRICS_ATTRIBUTE)
-        body = tidy("\n".join(blocks))
+        body = tidy(strip_lyrics_site_chrome("\n".join(blocks)))
         if not body.strip():
             raise NoChartFoundError(
                 "pcci could not find the lyrics on that Genius page.",
