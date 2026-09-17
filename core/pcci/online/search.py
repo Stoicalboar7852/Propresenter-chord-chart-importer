@@ -143,6 +143,13 @@ def merge(groups: list[list[SongMatch]]) -> list[SongMatch]:
 #: size we ask for; everyone else serves whatever they happened to store.
 ARTWORK_RANK = {"itunes": 2, "genius": 1}
 
+#: Who to take the words from when two sources both have them. Structure is what
+#: separates them: a source that records where the chorus is produces a presentation
+#: with named, coloured groups, and one that does not produces a run of verses the
+#: user has to name by hand. Coverage decides whether a song appears at all; this
+#: decides which copy of it gets imported.
+WORDS_RANK = {"ultimate-guitar": 4, "genius": 3, "musixmatch": 2, "lrclib": 1}
+
 
 def _combine(existing: SongMatch, extra: SongMatch) -> SongMatch:
     """Fill the gaps in a row from another source's version of the same song.
@@ -165,9 +172,17 @@ def _combine(existing: SongMatch, extra: SongMatch) -> SongMatch:
         if getattr(combined, field) is None:
             setattr(combined, field, getattr(extra, field))
 
-    if _chart_rank(extra.chart_kind) > _chart_rank(combined.chart_kind):
+    mine, theirs = _chart_rank(combined.chart_kind), _chart_rank(extra.chart_kind)
+    better_words = theirs > mine or (
+        theirs == mine
+        and theirs > 0
+        and WORDS_RANK.get(extra.chart_provider or "", 0)
+        > WORDS_RANK.get(combined.chart_provider or "", 0)
+    )
+    if better_words:
         combined.chart_url = extra.chart_url
         combined.chart_kind = extra.chart_kind
+        combined.chart_provider = extra.chart_provider
 
     if extra.artwork_url or extra.artwork_thumb_url:
         mine = (

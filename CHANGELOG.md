@@ -34,6 +34,9 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
   `[Talking: to the band]` is still kept whole.
 - A search that finds the song but nothing carrying its words now says so, and says
   what to do instead, rather than showing rows whose Import button is simply greyed.
+- When two sources both had the words, the one asked first won rather than the better
+  one. A source that records where the chorus is now beats one that only has the lines,
+  so an import comes back with named sections instead of a run of numbered verses.
 - Searching found the right song but importing could fetch a **different** one: two
   bands with the same song title were being folded into a single row, so a correct
   result could have someone else's chart behind it.

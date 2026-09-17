@@ -99,6 +99,7 @@ class GeniusSource:
                     artwork_provider=self.id if (large or thumb) else None,
                     chart_url=page,
                     chart_kind="lyrics",
+                    chart_provider=self.id,
                     sources=[
                         SourceRef(
                             provider=self.id,

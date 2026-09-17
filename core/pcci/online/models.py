@@ -53,6 +53,10 @@ class SongMatch(BaseModel):
     artwork_provider: str | None = None
     chart_url: str | None = None
     chart_kind: ChartKind = "none"
+    #: Which source the words would come from. Two sources can both have the words and
+    #: not be equally useful: one that records where the chorus is beats one that does
+    #: not, however good its coverage. See ``search.WORDS_RANK``.
+    chart_provider: str | None = None
     rating: float | None = None
     votes: int | None = None
     key: str | None = None

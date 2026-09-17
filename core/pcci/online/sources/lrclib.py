@@ -87,6 +87,7 @@ class LrclibSource:
                     year=_year_of(record),
                     chart_url=None if instrumental else page,
                     chart_kind="none" if instrumental else "lyrics",
+                    chart_provider=self.id,
                     sources=[
                         SourceRef(
                             provider=self.id,

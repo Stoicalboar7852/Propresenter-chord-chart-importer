@@ -672,3 +672,58 @@ def test_when_two_credits_could_be_the_same_act(
     from pcci.online.search import artists_agree
 
     assert artists_agree(left, right) is agree
+
+
+def test_the_words_come_from_whichever_source_keeps_the_structure() -> None:
+    """Two sources with the words are not equally useful.
+
+    One that records where the chorus is produces named, coloured groups; one that
+    does not produces a run of verses somebody has to name by hand. Coverage decides
+    whether a song turns up at all - this decides which copy gets imported.
+    """
+    from pcci.online.models import SongMatch, SourceRef
+
+    def row(provider: str, name: str) -> SongMatch:
+        return SongMatch(
+            ref=provider,
+            title="Amazing Grace",
+            artist="Parish Hymnal Choir",
+            chart_url=f"https://{provider}.example/song",
+            chart_kind="lyrics",
+            chart_provider=provider,
+            sources=[
+                SourceRef(provider=provider, name=name, url=f"https://{provider}.example/song")
+            ],
+        )
+
+    # Asked in the order the search asks them: the flat one first.
+    merged = merge([[row("lrclib", "LRCLIB")], [row("genius", "Genius")]])
+
+    assert len(merged) == 1
+    assert merged[0].chart_provider == "genius"
+    assert merged[0].chart_url == "https://genius.example/song"
+
+
+def test_chords_still_beat_a_structured_lyrics_source() -> None:
+    from pcci.online.models import SongMatch, SourceRef
+
+    lyrics = SongMatch(
+        ref="a",
+        title="Amazing Grace",
+        artist="Parish Hymnal Choir",
+        chart_url="https://genius.example/song",
+        chart_kind="lyrics",
+        chart_provider="genius",
+        sources=[SourceRef(provider="genius", name="Genius")],
+    )
+    chords = SongMatch(
+        ref="b",
+        title="Amazing Grace",
+        artist="Parish Hymnal Choir",
+        chart_url="https://tabs.example/song",
+        chart_kind="chords",
+        chart_provider="ultimate-guitar",
+        sources=[SourceRef(provider="ultimate-guitar", name="Ultimate Guitar")],
+    )
+
+    assert merge([[lyrics], [chords]])[0].chart_kind == "chords"

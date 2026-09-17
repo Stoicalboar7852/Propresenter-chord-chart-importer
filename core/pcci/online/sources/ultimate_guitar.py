@@ -135,6 +135,7 @@ class UltimateGuitarSource:
                 artist=artist,
                 chart_url=tab_url,
                 chart_kind=_kind_of(listing_type),
+                chart_provider=self.id,
                 rating=rating,
                 votes=votes,
                 key=tonality if isinstance(tonality, str) and tonality else None,
