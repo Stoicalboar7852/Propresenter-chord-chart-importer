@@ -199,3 +199,30 @@ jobs:
         run: >
           .\scripts\build-installer.ps1 -Source build\windows\ci-x64
           -Output build\windows\PCCI-ci-setup.exe
+
+  # TEMPORARY, again. "If I search for any random song, worship or not, will it turn
+  # into a .pro?" is an empirical question and this environment cannot reach the sites
+  # to answer it. Six songs across four genres, all the way through to a presentation.
+  # Comes out once the answer is written down.
+  song-coverage-once:
+    name: Which songs actually import? (temporary)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the engine
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ./core
+      - name: Try a mixed set list
+        run: >
+          python scripts/probe_online.py --convert
+          "Great Are You Lord"
+          "Washed"
+          "Uptown Funk"
+          "Bohemian Rhapsody"
+          "Shivers Ed Sheeran"
+          "Amazing Grace"
