@@ -77,6 +77,34 @@ The builds on the releases page are made with it, on a macOS 26 runner. They sti
 on macOS 14: the glass sits behind an availability check, so an older Mac gets the
 material and a Mac on 26 gets real glass, from the same download.
 
+## Getting a song in
+
+Four ways, all of which end in the same review screen.
+
+**Drop a file on the window** — Word, PDF, plain text, Markdown, RTF, OpenDocument,
+HTML or ChordPro. A chart with no chords in it, such as a hymn text or a lyrics sheet,
+works just as well as one with chords.
+
+**Search for it.** Type a song name in the box at the top. Every source is asked at
+once and the answers merged into one row per song, so a row can carry chords from one
+site and its cover art from another; each row says which sites it came from and whether
+it has chords, just the words, or nothing importable. **Import** downloads it and drops
+it into the list.
+
+**Paste a link** into the same box — a chord site, a church's own chart page, a Google
+Doc published to the web, a ChordPro file in a repository. When a page lays its chart
+out as preformatted text, which is where the column alignment lives, that is taken
+exactly as it is.
+
+**Paste the chart itself**, the way ProPresenter's own clipboard import works. Copy the
+chart from wherever you are reading it and press **Cmd+Shift+V**. This is also the answer
+when a site refuses to let a program read it: open the page yourself, select the chart,
+copy, paste.
+
+Only Apple Music's source is a documented public API; the rest are read the way a
+browser reads them, so they can change or say no without warning. When one does, the
+message says which site and suggests the clipboard, which always works.
+
 ## First launch
 
 macOS will refuse to open an unsigned app on the first try. Either:

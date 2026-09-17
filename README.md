@@ -4,6 +4,18 @@ Turn a worship chord chart — Word, PDF, plain text, ChordPro, RTF, ODT, HTML �
 ProPresenter 7 `.pro` presentation with named, colour-coded groups, an arrangement, and
 the chords carried through to the stage screen without ever reaching audience output.
 
+Four ways to get a song in:
+
+- **Drop a file on the window**, in any of the formats above.
+- **Search for it by name.** Every source is asked at once and the answers merged into
+  one row per song, with its cover art and the names of the sites each part came from.
+- **Paste a link.** A chord site, a church's own page, a Google Doc published to the
+  web, a ChordPro file in a repository.
+- **Paste the chart itself**, the way ProPresenter's own clipboard import works.
+  Cmd+Shift+V on a Mac, Ctrl+Shift+V on Windows.
+
+A chart with no chords in it — a hymn text, a lyrics sheet — converts just the same.
+
 The project is a headless Python engine plus two native front-ends:
 
 | Part | What it is |
@@ -26,6 +38,7 @@ about the unsigned-app warning on first launch.
 | **Stage screen** | **[docs/STAGE_SETUP.md](docs/STAGE_SETUP.md)** — the ProPresenter side: getting the chords onto a stage display and nowhere near the audience. |
 | **Checking a build** | **[docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)** — the manual pass before you trust it on a Sunday. |
 | **The file format** | **[docs/FORMAT_NOTES.md](docs/FORMAT_NOTES.md)** — what is actually inside a `.pro`, every claim read out of a real export. |
+| **What changed** | **[CHANGELOG.md](CHANGELOG.md)** — every release, and what went into it. |
 | **The original brief** | **[docs/BUILD_PROMPT.md](docs/BUILD_PROMPT.md)** — the plan this was built from. |
 
 Not sure what a machine is missing? `./scripts/install-deps.sh` (or
@@ -101,6 +114,40 @@ core/.venv/bin/pcci convert-all "Sunday 12th" -d "out" --lines-per-slide 4
 `convert-all` takes files, folders, or both, and writes every presentation into one
 folder. Both apps have the same thing behind a Convert All button.
 
+### Songs from the web
+
+```bash
+pcci search "be thou my vision"            # every source, merged, one row per song
+pcci search https://example.com/chart      # a pasted link, described
+pcci fetch  https://example.com/chart -o "Be Thou My Vision.pro"
+pbpaste | pcci paste -o "Be Thou My Vision.pro"     # Get-Clipboard on Windows
+```
+
+`search` asks Apple Music for the artwork and the credits, and the chord and lyric
+sites for the words, then merges them into one row per song. A site that is down, slow
+or refusing us adds a note and the search returns whatever the others found.
+
+`fetch` and `paste` write a chart file and print where it went, so `analyze`, `plan`
+and `build` then work on it exactly as they would on a file you dropped in yourself —
+there is no separate conversion path for songs that came off the web. Add `-o` to go
+straight to a presentation.
+
+Downloaded pages are cached for a day so that searching and then importing is one
+request rather than two. `pcci cache` says where that is; `pcci cache --clear` empties
+it, which is what to do if a site has corrected a chart and you keep getting the old one.
+
+**On the sources.** Only Apple Music's is a documented public API. The others are read
+the way a browser reads them, which means they can change shape or refuse a program
+outright without notice — so no result is ever the only way in. When a site says no, the
+message says so and points at the clipboard, which always works: open the page
+yourself, select the chart, copy, paste. A weekly
+[Online sources](https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/actions/workflows/online.yml)
+workflow checks that each one is still answering and still shaped the way pcci reads it.
+
+Lyrics are somebody's copyright. What this does is fetch a page you asked for and
+reformat it for your own screens, which is what a worship team's CCLI licence is
+generally for — the licence is yours to hold, not the tool's.
+
 ```bash
 cd core
 .venv/bin/python -m pytest
@@ -127,8 +174,9 @@ are vendored from a schema generated from the same build — see
 |---|---|
 | Format reconnaissance | Done. All three reference exports round-trip byte-identically; findings in `docs/FORMAT_NOTES.md`. |
 | Engine | Done. Every format, detection, slide planning, writer, verifier, CLI. |
+| Songs from the web | Search, a pasted link and the clipboard, in the engine and both apps. Offline tests against recorded shapes; a weekly job checks the live sites. |
 | macOS app | Written and compiling; not yet run on a Mac. |
-| Windows app | Written; building in CI. |
+| Windows app | Written and compiling; not yet run on a PC. |
 | Packaging | Engine freezes and self-checks; both apps build unsigned. |
 
 Verified in real ProPresenter 21.4 so far: the exported `.pro` imports, groups and

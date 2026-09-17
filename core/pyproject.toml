@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pcci"
-version = "0.1.0"
+version = "0.2.0"
 description = "ProPresenter Chord Chart Importer engine: chord charts in any common document format to ProPresenter 7 .pro presentations"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -89,6 +89,9 @@ follow_imports = "skip"
 testpaths = ["tests"]
 addopts = "-q"
 filterwarnings = ["ignore::DeprecationWarning:pkg_resources"]
+markers = [
+    "live: reaches the real internet; skipped unless PCCI_LIVE_ONLINE=1 is set",
+]
 
 [tool.coverage.run]
 source = ["pcci"]

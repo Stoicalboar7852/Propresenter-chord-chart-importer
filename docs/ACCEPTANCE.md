@@ -14,6 +14,26 @@ Run through it with a real chart from your own set list, not a fixture.
 - [ ] `pcci analyze "My Song.docx"` lists the sections you would have listed yourself.
       Anything marked *(guessed)* deserves a look.
 
+## Getting a song in from somewhere other than a file
+
+The engine's side of this is tested against recorded responses, because the sites
+themselves cannot be reached from the machines it is developed on. What no test can
+tell you is whether a real search finds the songs your team actually sings.
+
+- [ ] A search for a song you know lists it, with its cover art, near the top.
+- [ ] A row that says **Chords** imports something with chords over the words; a row
+      that says **Lyrics** imports the words alone and says so.
+- [ ] A row marked **No words** cannot be imported and does not pretend it can.
+- [ ] A site being down or refusing us leaves a note under the results and the other
+      sources still answer, rather than the whole search failing.
+- [ ] Pasting a chord-site link into the search box describes that one page.
+- [ ] Copying a chart out of a browser and pressing the paste shortcut imports it, with
+      the chords still over the right words.
+- [ ] Pasting something that is not a song says so in plain words.
+- [ ] A lyrics-only import makes a presentation with no chord chart beside it, and the
+      app says it is lyrics only rather than leaving you to wonder.
+- [ ] The imported song is named after the song, not after a URL or a hash.
+
 ## Import
 
 - [ ] Double-clicking the `.pro`, or dragging it into a ProPresenter playlist, imports

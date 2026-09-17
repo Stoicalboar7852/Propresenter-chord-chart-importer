@@ -56,6 +56,26 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: python ../scripts/make_dmg_background.py --check
 
+      # The version is spelled out in five files that nothing makes agree, and the
+      # release notes are built from the changelog entry for it. A release where the
+      # Mac says one version and Windows says another, or where the notes read "no
+      # changelog entry", is found here rather than by whoever downloads it.
+      - name: One version, and a changelog entry for it
+        if: matrix.os == 'ubuntu-latest'
+        run: python ../scripts/check_version.py
+
+      - name: The release notes assemble
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          python ../scripts/release_notes.py --version "v$(python -c 'import pcci; print(pcci.__version__)')" --output /tmp/notes.md
+          grep -q "What's new in" /tmp/notes.md
+          grep -q "Which file" /tmp/notes.md
+          # The placeholder must not survive into what people read.
+          if grep -q 'CHANGELOG}}' /tmp/notes.md; then
+            echo "the changelog placeholder was not substituted" >&2
+            exit 1
+          fi
+
   app-sanity:
     name: desktop app sanity
     runs-on: ubuntu-latest
