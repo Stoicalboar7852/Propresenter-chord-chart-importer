@@ -34,7 +34,7 @@ struct ContentView: View {
                         .labelStyle(.titleAndIcon)
                 }
                 .disabled(state.documents.isEmpty || state.isBusy)
-                .help("Convert every chart in the list into one folder")
+                .help("Convert every song in the list into one folder")
             }
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -73,7 +73,7 @@ struct QueueSidebar: View {
     var body: some View {
         @Bindable var state = state
         List(selection: $state.selectedID) {
-            Section("Charts") {
+            Section("Songs") {
                 ForEach(state.documents) { document in
                     HStack(spacing: 10) {
                         Image(systemName: icon(for: document))
@@ -98,7 +98,7 @@ struct QueueSidebar: View {
         .overlay {
             if state.documents.isEmpty {
                 ContentUnavailableView(
-                    "No charts yet",
+                    "No songs yet",
                     systemImage: "music.note.list",
                     description: Text(
                         "Search for a song, paste a link, drop a file on the window, "
@@ -127,7 +127,7 @@ struct QueueSidebar: View {
                 }
                 .buttonStyle(GoldenGateButtonStyle())
                 .disabled(state.documents.isEmpty || state.isBusy)
-                .help("Convert every chart in the list into one folder")
+                .help("Convert every song in the list into one folder")
 
                 HStack(spacing: 8) {
                     if let progress = state.batchProgress {
@@ -157,8 +157,8 @@ struct QueueSidebar: View {
     private var countLabel: String {
         switch state.documents.count {
         case 0: return "Nothing loaded"
-        case 1: return "1 chart"
-        case let count: return "\(count) charts"
+        case 1: return "1 song"
+        case let count: return "\(count) songs"
         }
     }
 
@@ -183,17 +183,25 @@ struct StartPane: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
-        VStack(spacing: 14) {
-            SearchPane()
-            if state.searchResults.isEmpty && !state.isSearching {
-                DropTarget()
-            } else {
-                Spacer(minLength: 0)
+        // A ScrollView sized to at least the window, rather than a stack that fills
+        // it. Two views both asking for all the height meant that on a short window
+        // the content laid out taller than the window and was clipped at the top and
+        // bottom - it looked as though the app had been scaled up. This way it fills
+        // the space when there is room and scrolls when there is not.
+        GeometryReader { proxy in
+            ScrollView(.vertical) {
+                VStack(spacing: 14) {
+                    SearchPane()
+                    if state.searchResults.isEmpty && !state.isSearching {
+                        DropTarget()
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
+                .frame(minHeight: proxy.size.height, alignment: .top)
             }
+            .scrollBounceBehavior(.basedOnSize)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 16)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
 

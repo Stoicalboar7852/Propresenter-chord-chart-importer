@@ -30,7 +30,7 @@ from pcci.online.models import (
     Supply,
     reference_for,
 )
-from pcci.online.sources.base import fetch_text
+from pcci.online.sources.base import fetch_text, with_credits
 from pcci.online.text import (
     dig,
     find_first,
@@ -179,20 +179,21 @@ class UltimateGuitarSource:
         tonality = metadata.get("tonality_name")
         capo = metadata.get("capo")
 
-        text = tidy(strip_ultimate_guitar_markup(content))
-        header: list[str] = []
-        if isinstance(title, str) and title.strip():
-            header.append(title.strip())
-        if isinstance(artist, str) and artist.strip():
-            header.append(artist.strip())
+        chart_text = tidy(strip_ultimate_guitar_markup(content))
+        extra: dict[str, str] = {}
         if isinstance(tonality, str) and tonality.strip():
-            header.append(f"Key: {tonality.strip()}")
+            extra["Key"] = tonality.strip()
         if isinstance(capo, int) and capo:
-            header.append(f"Capo: {capo}")
-        body = "\n".join([*header, "", text]) if header else text
+            extra["Capo"] = str(capo)
+        body = with_credits(
+            chart_text,
+            title=title if isinstance(title, str) else None,
+            artist=artist if isinstance(artist, str) else None,
+            extra=extra,
+        )
 
         return FetchedChart(
-            text=body + "\n",
+            text=body,
             suffix=".txt",
             title=title.strip() if isinstance(title, str) and title.strip() else "Chord chart",
             artist=artist if isinstance(artist, str) and artist.strip() else None,

@@ -13,16 +13,32 @@ from __future__ import annotations
 from pcci.online.sources.base import ChartProvider, SearchProvider, fetch_text
 from pcci.online.sources.genius import GENIUS
 from pcci.online.sources.itunes import ITUNES
+from pcci.online.sources.lrclib import LRCLIB
+from pcci.online.sources.musixmatch import MUSIXMATCH
 from pcci.online.sources.page import PAGE
 from pcci.online.sources.ultimate_guitar import ULTIMATE_GUITAR
 
-SEARCH_PROVIDERS: tuple[SearchProvider, ...] = (ULTIMATE_GUITAR, GENIUS, ITUNES)
-CHART_PROVIDERS: tuple[ChartProvider, ...] = (ULTIMATE_GUITAR, GENIUS, PAGE)
+SEARCH_PROVIDERS: tuple[SearchProvider, ...] = (
+    ULTIMATE_GUITAR,
+    LRCLIB,
+    MUSIXMATCH,
+    GENIUS,
+    ITUNES,
+)
+CHART_PROVIDERS: tuple[ChartProvider, ...] = (
+    ULTIMATE_GUITAR,
+    LRCLIB,
+    MUSIXMATCH,
+    GENIUS,
+    PAGE,
+)
 
 __all__ = [
     "CHART_PROVIDERS",
     "GENIUS",
     "ITUNES",
+    "LRCLIB",
+    "MUSIXMATCH",
     "PAGE",
     "SEARCH_PROVIDERS",
     "ULTIMATE_GUITAR",

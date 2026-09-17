@@ -77,7 +77,7 @@ public sealed partial class MainWindow : Window
         var count = State.Documents.Count;
         QueueStatusText.Text = State.BatchStatus.Length > 0
             ? State.BatchStatus
-            : count switch { 0 => "Nothing loaded", 1 => "1 chart", _ => $"{count} charts" };
+            : count switch { 0 => "Nothing loaded", 1 => "1 song", _ => $"{count} songs" };
         ConvertAllButton.IsEnabled = count > 0 && !State.IsBatchRunning;
         ClearButton.IsEnabled = count > 0 && !State.IsBatchRunning;
         if (QueueLinesPerSlide.Value != State.LinesPerSlide)

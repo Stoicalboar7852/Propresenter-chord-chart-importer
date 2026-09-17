@@ -89,6 +89,8 @@ def everything_answers() -> FakeTransport:
     transport.route("amazing-grace-chords-1234567", js_store_page(fixture("ug-tab-store.json")))
     transport.route("genius.com/api/search/song", fixture("genius-search.json"), "application/json")
     transport.route("genius.com/Parish-hymnal-choir", fixture("genius-song.html"))
+    transport.route("lrclib.net/api/search", fixture("lrclib-search.json"), "application/json")
+    transport.route("lrclib.net/api/get/", fixture("lrclib-record.json"), "application/json")
     return transport
 
 

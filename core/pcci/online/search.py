@@ -94,8 +94,11 @@ def merge(groups: list[list[SongMatch]]) -> list[SongMatch]:
     Three rules, loosening as they go, because no two sites file a song the same way:
 
     1. Same folded title *and* artist - the easy case.
-    2. Same folded title. Ultimate Guitar files a song under whoever posted it and
-       Apple under the label's spelling of the band, and those disagree constantly.
+    2. Same folded title, where the artists do not actively disagree. Ultimate Guitar
+       files a song under whoever posted it and Apple under the label's spelling of
+       the band, so one of them being vague has to be tolerated - but two different
+       bands with the same song title are two songs, and merging them put the wrong
+       chart behind a correct-looking row.
     3. Same artist, and one title is the other with a subtitle on the end. "Come Thou
        Fount" and "Come Thou Fount of Every Blessing" are one song; another band's
        "Come Thou Fount" is not, which is why this rule insists the artists match.
@@ -110,7 +113,9 @@ def merge(groups: list[list[SongMatch]]) -> list[SongMatch]:
             title = fold(match.title)
             index = by_pair.get(pair)
             if index is None and title:
-                index = by_title.get(title)
+                candidate = by_title.get(title)
+                if candidate is not None and artists_agree(merged[candidate].artist, match.artist):
+                    index = candidate
             if index is None:
                 index = _same_song_shortened(merged, match)
             if index is None:
@@ -179,6 +184,25 @@ def _combine(existing: SongMatch, extra: SongMatch) -> SongMatch:
             combined.sources.append(SourceRef(**source.model_dump()))
             known.add(source.provider)
     return combined
+
+
+def artists_agree(left: str | None, right: str | None) -> bool:
+    """Whether two credits could be the same act, for merging on title alone.
+
+    One side saying nothing is agreement: a chord site often files a song under the
+    person who typed it up. One side being a fuller version of the other is agreement
+    too, which covers "Some Band" against "Some Band feat. Someone". Two names that
+    are simply different are not, and that is the whole point - a title on its own is
+    not identity, and treating it as one puts one band's chart behind another band's
+    row.
+    """
+    ours, theirs = fold(left or ""), fold(right or "")
+    if not ours or not theirs:
+        return True
+    if ours == theirs:
+        return True
+    shorter, longer = sorted((ours, theirs), key=len)
+    return f" {shorter} " in f" {longer} "
 
 
 def _same_song_shortened(merged: list[SongMatch], match: SongMatch) -> int | None:

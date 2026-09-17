@@ -574,3 +574,101 @@ def test_one_entry_per_site_however_many_listings_merged() -> None:
 
     assert len(merged) == 1
     assert merged[0].source_names == ["Ultimate Guitar", "Apple Music"]
+
+
+# --- LRCLIB, the keyless gap-filler -----------------------------------------------
+
+
+def test_lrclib_finds_songs_and_skips_instrumentals(cache: Cache) -> None:
+    from pcci.online.sources import LRCLIB
+
+    results = LRCLIB.search(
+        "amazing grace", limit=5, http=http_with(everything_answers()), cache=cache
+    )
+
+    assert results[0].title == "Amazing Grace"
+    assert results[0].artist == "Parish Hymnal Choir"
+    assert results[0].album == "Hymns, Volume One"
+    assert results[0].chart_kind == "lyrics"
+    assert results[0].importable
+    # An instrumental has no words by definition, so it is shown but not importable.
+    organ = next(match for match in results if match.artist == "Organ Study")
+    assert organ.importable is False
+    assert organ.chart_kind == "none"
+
+
+def test_lrclib_words_arrive_with_their_credits(cache: Cache, tmp_path: Path) -> None:
+    from pcci.online.sources import LRCLIB
+
+    chart = LRCLIB.fetch(
+        "https://lrclib.net/api/get/3396226", http=http_with(everything_answers()), cache=cache
+    )
+
+    assert chart.title == "Amazing Grace"
+    assert chart.artist == "Parish Hymnal Choir"
+    assert chart.chart_kind == "lyrics"
+    # It has no section headings, and the note says so rather than leaving it to be
+    # discovered on the review screen.
+    assert any("guessed" in note for note in chart.notes)
+
+    song = analyze(retrieve.materialise(chart, tmp_path))
+    assert song.title == "Amazing Grace"
+    assert song.artist == "Parish Hymnal Choir"
+
+
+def test_musixmatch_stays_out_of_the_way_without_a_key(cache: Cache) -> None:
+    """It needs a per-person key, so it contributes nothing until there is one."""
+    from pcci.online.sources import MUSIXMATCH
+
+    transport = everything_answers()
+    assert MUSIXMATCH.search("amazing grace", limit=5, http=http_with(transport), cache=cache) == []
+    assert MUSIXMATCH.owns("https://api.musixmatch.com/ws/1.1/track.lyrics.get?track_id=1") is False
+
+
+# --- The bug that imported the wrong song -----------------------------------------
+
+
+def test_two_bands_with_the_same_song_title_are_two_songs() -> None:
+    """The one that bit: a correct-looking row with another band's chart behind it."""
+    from pcci.online.models import SongMatch, SourceRef
+
+    theirs = SongMatch(
+        ref="a",
+        title="Come Thou Fount",
+        artist="Some Other Band",
+        chart_url="https://tabs.example/other",
+        chart_kind="chords",
+        sources=[SourceRef(provider="ultimate-guitar", name="Ultimate Guitar")],
+    )
+    ours = SongMatch(
+        ref="b",
+        title="Come Thou Fount",
+        artist="Parish Hymnal Choir",
+        album="Hymns, Volume One",
+        sources=[SourceRef(provider="itunes", name="Apple Music")],
+    )
+
+    merged = merge([[theirs], [ours]])
+
+    assert len(merged) == 2, "two different bands' songs were folded into one row"
+    ours_row = next(row for row in merged if row.artist == "Parish Hymnal Choir")
+    assert ours_row.chart_url is None, "took the other band's chart"
+
+
+@pytest.mark.parametrize(
+    ("left", "right", "agree"),
+    [
+        ("Parish Hymnal Choir", "parish hymnal choir", True),
+        ("Parish Hymnal Choir", "Parish Hymnal Choir feat. Someone", True),
+        (None, "Parish Hymnal Choir", True),
+        ("Parish Hymnal Choir", "", True),
+        ("Parish Hymnal Choir", "Some Other Band", False),
+        ("Queen", "Queens of the Stone Age", False),
+    ],
+)
+def test_when_two_credits_could_be_the_same_act(
+    left: str | None, right: str | None, agree: bool
+) -> None:
+    from pcci.online.search import artists_agree
+
+    assert artists_agree(left, right) is agree

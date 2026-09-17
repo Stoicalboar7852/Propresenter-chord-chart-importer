@@ -12,7 +12,26 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **LRCLIB** as a source: a free, keyless, open lyrics API, which fills the gap for
+  songs no chord site carries.
+- **Musixmatch** as an optional source. It needs your own API key in
+  `PCCI_MUSIXMATCH_KEY`, and its free plan returns only part of each song — the import
+  tells you when that has happened rather than handing over a third of the words.
+
+### Fixed
+
+- Searching found the right song but importing could fetch a **different** one: two
+  bands with the same song title were being folded into a single row, so a correct
+  result could have someone else's chart behind it.
+- A song imported from a lyrics site was named after the **band** rather than the song.
+  Those sites write "Artist - Song" and pcci read it the other way round; credits now
+  travel as labelled `Title:` and `Artist:` lines that cannot be misread.
+- The sidebar said "Charts" and counted "charts". Not everything imported is a chord
+  chart, so it says **Songs** now.
+- Clearing the list could lay the start screen out taller than the window and clip it
+  top and bottom. It fills the space when there is room and scrolls when there is not.
 
 ## [0.2.0] — 2026-09-17
 

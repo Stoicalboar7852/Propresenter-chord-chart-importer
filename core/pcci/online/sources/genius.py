@@ -16,13 +16,13 @@ import json
 import urllib.parse
 from typing import Any
 
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
 
 from pcci.errors import NoChartFoundError
 from pcci.online.cache import SEARCH_TTL_SECONDS, Cache
 from pcci.online.http import Http
 from pcci.online.models import FetchedChart, SongMatch, SourceRef, Supply, reference_for
-from pcci.online.sources.base import fetch_text
+from pcci.online.sources.base import fetch_text, with_credits
 from pcci.online.text import blocks_text, find_all, tidy
 
 SEARCH_ENDPOINT = "https://genius.com/api/search/song"
@@ -128,10 +128,9 @@ class GeniusSource:
             )
 
         title, artist = _credits(page, url)
-        header = [part for part in (title, artist) if part]
-        text = "\n".join([*header, "", body]) if header else body
+        text = with_credits(body, title=title, artist=artist)
         return FetchedChart(
-            text=text + "\n",
+            text=text,
             suffix=".txt",
             title=title or "Lyrics",
             artist=artist,
@@ -144,15 +143,15 @@ class GeniusSource:
 def _credits(page: str, url: str) -> tuple[str | None, str | None]:
     """Title and artist, from the page's own metadata or failing that its address."""
     soup = BeautifulSoup(page, "html.parser")
-    element = soup.find("meta", attrs={"property": "og:title"})
-    if isinstance(element, Tag):
+    for element in soup.find_all("meta", attrs={"property": "og:title"}):
         content = element.get("content")
         if isinstance(content, str) and content.strip():
-            # "Artist - Title" is how Genius writes it.
-            artist, separator, title = content.partition(" - ")
-            if separator and title.strip():
-                return _strip_lyrics_suffix(title), artist.strip() or None
-            return _strip_lyrics_suffix(content), None
+            return _split_credit(content)
+    if soup.title and soup.title.string:
+        # "Artist - Song Lyrics | Genius Lyrics"
+        head = str(soup.title.string).split("|")[0]
+        if head.strip():
+            return _split_credit(head)
 
     # genius.com/parish-hymnal-choir-amazing-grace-lyrics
     slug = urllib.parse.urlsplit(url).path.rstrip("/").rsplit("/", 1)[-1]
@@ -160,9 +159,25 @@ def _credits(page: str, url: str) -> tuple[str | None, str | None]:
     return (words.title() or None), None
 
 
+#: Lyrics sites write "Artist - Song", and not always with the same dash. Getting the
+#: two the wrong way round names the presentation after the band, which is what
+#: happened before this looked for more than one separator.
+_CREDIT_SEPARATORS = (" - ", " \u2013 ", " \u2014 ", " \u2012 ", " \u2010 ")
+
+
+def _split_credit(content: str) -> tuple[str | None, str | None]:
+    """``("Song", "Artist")`` from ``"Artist - Song Lyrics"``."""
+    cleaned = _strip_lyrics_suffix(content)
+    for separator in _CREDIT_SEPARATORS:
+        artist, found, title = cleaned.partition(separator)
+        if found and artist.strip() and title.strip():
+            return _strip_lyrics_suffix(title), artist.strip()
+    return cleaned or None, None
+
+
 def _strip_lyrics_suffix(title: str) -> str:
     cleaned = title.strip()
-    for suffix in (" Lyrics", " lyrics"):
+    for suffix in (" Lyrics", " lyrics", " LYRICS"):
         cleaned = cleaned.removesuffix(suffix)
     return cleaned.strip()
 

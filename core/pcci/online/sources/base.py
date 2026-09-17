@@ -68,3 +68,31 @@ def fetch_text(
     text = response.text()
     cache.put(url, text.encode("utf-8"))
     return text
+
+
+def with_credits(
+    body: str,
+    *,
+    title: str | None = None,
+    artist: str | None = None,
+    extra: dict[str, str] | None = None,
+) -> str:
+    """Put the credits above a fetched chart in a form the parser cannot misread.
+
+    Labelled, one per line - ``Title:``, ``Artist:``, ``Key:`` - because the parser
+    recognises those exactly and has to guess at anything else. It used to be bare
+    lines, and a site that writes "Artist - Song" on one line meant the parser split
+    it the other way round and named the presentation after the band.
+    """
+    header: list[str] = []
+    if title and title.strip():
+        header.append(f"Title: {title.strip()}")
+    if artist and artist.strip():
+        header.append(f"Artist: {artist.strip()}")
+    for label, value in (extra or {}).items():
+        if value and str(value).strip():
+            header.append(f"{label}: {str(value).strip()}")
+    if not header:
+        return body if body.endswith("\n") else body + "\n"
+    joined = "\n".join([*header, "", body])
+    return joined if joined.endswith("\n") else joined + "\n"

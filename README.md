@@ -140,11 +140,16 @@ it, which is what to do if a site has corrected a chart and you keep getting the
 the way a browser reads them, which means they can change shape or refuse a program
 outright without notice — so no result is ever the only way in.
 
-| Source | Supplies | Last checked against the live site |
-|---|---|---|
-| Apple Music | Cover art, album, year, the artist's own spelling | Answers |
-| Ultimate Guitar | Chords and words | Answers |
-| Genius | Words | **Refuses an automated request** (403). May work from a home connection; it would not talk to a GitHub runner. |
+| Source | Supplies | Key needed | Last checked against the live site |
+|---|---|---|---|
+| Ultimate Guitar | Chords and words | no | Answers |
+| LRCLIB | Words, for anything with no chord chart | no | Open API, built to be read by software |
+| Apple Music | Cover art, album, year, the artist's own spelling | no | Answers |
+| Musixmatch | Words | **yes** | Dormant unless `PCCI_MUSIXMATCH_KEY` is set. Its free plan returns about 30% of a song, which is not a presentation — the import says so when that happens. |
+| Genius | Words | no | **Refuses an automated request** (403). May work from a home connection; it would not talk to a GitHub runner. |
+
+LRCLIB and Musixmatch store words with no section headings, so verses and choruses are
+guessed from the blank lines and flagged on the review screen for you to name.
 
 Coverage is not worship-only: a run across Great Are You Lord, Washed, Uptown Funk,
 Bohemian Rhapsody, Shivers and Amazing Grace turned all six into presentations with

@@ -51,7 +51,7 @@
                     <Button Click="OnOpenFiles" Style="{StaticResource PcciPrimaryButtonStyle}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon FontSize="14" Glyph="&#xE8E5;" />
-                            <TextBlock Text="Add charts" />
+                            <TextBlock Text="Add songs" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -81,7 +81,7 @@
                         Click="OnConvertAll"
                         Content="Convert all…"
                         Style="{StaticResource PcciPrimaryButtonStyle}"
-                        ToolTipService.ToolTip="Convert every chart in the list into one folder" />
+                        ToolTipService.ToolTip="Convert every song in the list into one folder" />
                     <Grid ColumnDefinitions="*,Auto">
                         <TextBlock
                             x:Name="QueueStatusText"
