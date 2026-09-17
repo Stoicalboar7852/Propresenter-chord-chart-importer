@@ -43,6 +43,12 @@ struct PCCIApp: App {
             CommandGroup(replacing: .newItem) {
                 Button("Open Chart…") { openPanel() }
                     .keyboardShortcut("o")
+                // The same shortcut ProPresenter uses for its own clipboard import, so
+                // anyone who already does this there does not have to learn a second one.
+                Button("Import from Clipboard") {
+                    Task { await state.importFromClipboard() }
+                }
+                .keyboardShortcut("v", modifiers: [.command, .shift])
                 Button("Convert All…") { state.chooseFolderAndConvertAll() }
                     .keyboardShortcut("e", modifiers: [.command, .shift])
                     .disabled(state.documents.isEmpty)

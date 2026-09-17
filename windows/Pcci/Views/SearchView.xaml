@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Pcci.SearchView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:Pcci.Models">
+
+    <StackPanel Padding="24,16,24,0" Spacing="10">
+
+        <!--
+            One field, two jobs: type a song name and it searches every source, paste a
+            link out of a browser and it describes that page instead. The engine works
+            out which it has been given, so there is no mode to pick.
+        -->
+        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+            <TextBox
+                x:Name="QueryBox"
+                Grid.Column="0"
+                KeyDown="OnQueryKeyDown"
+                PlaceholderText="Search for a song, or paste a link"
+                TextChanged="OnQueryChanged" />
+            <Button
+                x:Name="SearchButton"
+                Grid.Column="1"
+                Click="OnSearch"
+                Content="Search"
+                Style="{StaticResource PcciPrimaryButtonStyle}" />
+            <Button
+                x:Name="PasteButton"
+                Grid.Column="2"
+                Click="OnPaste"
+                ToolTipService.ToolTip="Import a chart you have copied from somewhere else">
+                <Button.KeyboardAccelerators>
+                    <!-- The same shortcut ProPresenter uses for its own clipboard
+                         import, so anyone who already does this there does not have
+                         to learn a second one. -->
+                    <KeyboardAccelerator Key="V" Modifiers="Control,Shift" />
+                </Button.KeyboardAccelerators>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon FontSize="14" Glyph="&#xE77F;" />
+                    <TextBlock Text="Paste" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <StackPanel
+            x:Name="SearchingRow"
+            Orientation="Horizontal"
+            Spacing="8"
+            Visibility="Collapsed">
+            <ProgressRing Width="16" Height="16" IsActive="True" />
+            <TextBlock
+                VerticalAlignment="Center"
+                Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="Asking every source…" />
+        </StackPanel>
+
+        <TextBlock
+            x:Name="EmptyText"
+            Foreground="{ThemeResource PcciSecondaryTextBrush}"
+            Style="{StaticResource CaptionTextBlockStyle}"
+            Visibility="Collapsed" />
+
+        <ListView
+            x:Name="ResultsList"
+            MaxHeight="380"
+            SelectionMode="None"
+            Visibility="Collapsed">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:SongMatch">
+                    <Grid
+                        ColumnDefinitions="Auto,*,Auto"
+                        ColumnSpacing="12"
+                        Padding="0,6">
+                        <Border
+                            Grid.Column="0"
+                            Width="48"
+                            Height="48"
+                            Background="{ThemeResource PcciSurfaceRaisedBrush}"
+                            CornerRadius="6">
+                            <Image
+                                Source="{x:Bind ThumbnailUri, Converter={StaticResource UriToImage}}"
+                                Stretch="UniformToFill" />
+                        </Border>
+
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock
+                                MaxLines="1"
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="{x:Bind Title}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                                MaxLines="1"
+                                Style="{StaticResource CaptionTextBlockStyle}"
+                                Text="{x:Bind Subtitle}"
+                                TextTrimming="CharacterEllipsis" />
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Border
+                                    Background="{ThemeResource PcciSurfaceRaisedBrush}"
+                                    CornerRadius="9"
+                                    Padding="7,1">
+                                    <TextBlock
+                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                        Text="{x:Bind WordsLabel}" />
+                                </Border>
+                                <TextBlock
+                                    Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                                    MaxLines="1"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Text="{x:Bind SourceNames}"
+                                    TextTrimming="CharacterEllipsis"
+                                    VerticalAlignment="Center" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!--
+                            A song Apple knows about and nobody has the words for is
+                            worth showing - it confirms pcci found the right song - but
+                            there is nothing behind the button, so it is disabled.
+                        -->
+                        <Button
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            Click="OnImport"
+                            Content="Import"
+                            IsEnabled="{x:Bind Importable}"
+                            Style="{StaticResource PcciPrimaryButtonStyle}"
+                            Tag="{x:Bind}" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <ItemsControl x:Name="NotesList" Visibility="Collapsed">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,2">
+                        <FontIcon
+                            FontSize="12"
+                            Foreground="{ThemeResource PcciUncertainBrush}"
+                            Glyph="&#xE946;"
+                            VerticalAlignment="Top" />
+                        <TextBlock
+                            Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                            MaxWidth="620"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="{x:Bind}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+    </StackPanel>
+</UserControl>

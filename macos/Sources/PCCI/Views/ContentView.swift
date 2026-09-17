@@ -59,7 +59,7 @@ struct ContentView: View {
             if let document = state.selected {
                 DocumentDetail(document: document)
             } else {
-                DropTarget()
+                StartPane()
             }
         }
     }
@@ -100,7 +100,10 @@ struct QueueSidebar: View {
                 ContentUnavailableView(
                     "No charts yet",
                     systemImage: "music.note.list",
-                    description: Text("Drop a chart onto the window, or press \u{2318}O.")
+                    description: Text(
+                        "Search for a song, paste a link, drop a file on the window, "
+                        + "or press \u{2318}O."
+                    )
                 )
             }
         }
@@ -166,6 +169,31 @@ struct QueueSidebar: View {
         case .analysing, .exporting: return "clock"
         default: return "doc.text"
         }
+    }
+}
+
+/// What the window shows with nothing loaded: somewhere to search, somewhere to drop.
+///
+/// Both ways in are on screen at once rather than behind a mode switch, because they
+/// answer different questions - "I have this file" and "I need this song" - and the
+/// user knows which of those they have before they open the app. The drop target steps
+/// aside while results are showing so the list has the room.
+@MainActor
+struct StartPane: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        VStack(spacing: 14) {
+            SearchPane()
+            if state.searchResults.isEmpty && !state.isSearching {
+                DropTarget()
+            } else {
+                Spacer(minLength: 0)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
 

@@ -112,7 +112,7 @@
                 </DataTemplate>
             </NavigationView.MenuItemTemplate>
 
-            <Grid RowDefinitions="Auto,*" AllowDrop="True" DragOver="OnDragOver" Drop="OnDrop">
+            <Grid RowDefinitions="Auto,Auto,*" AllowDrop="True" DragOver="OnDragOver" Drop="OnDrop">
 
                 <!-- Error banner -->
                 <InfoBar
@@ -123,7 +123,14 @@
                     IsOpen="False"
                     Severity="Error" />
 
-                <Grid x:Name="Panes" Grid.Row="1">
+                <!--
+                    Searching sits above the panes rather than inside them: it is a way
+                    in, like the drop target, not a stage a chart passes through. It
+                    steps aside once a chart is loaded and there is something to review.
+                -->
+                <local:SearchView x:Name="SearchPane" Grid.Row="1" />
+
+                <Grid x:Name="Panes" Grid.Row="2">
                     <local:DropView x:Name="DropPane" />
                     <local:ReviewView x:Name="ReviewPane" Visibility="Collapsed" />
                     <local:ExportedView x:Name="ExportedPane" Visibility="Collapsed" />

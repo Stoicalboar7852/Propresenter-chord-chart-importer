@@ -1,6 +1,7 @@
 using System;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.UI;
 
 namespace Pcci;
@@ -36,4 +37,24 @@ public sealed class BoolToVisibilityConverter : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, string language) =>
         value is Microsoft.UI.Xaml.Visibility.Visible;
+}
+
+
+/// <summary>
+/// A cover-art address to something an Image can show.
+///
+/// The engine only ever hands over a URL; the download happens here, in the framework,
+/// which already knows how to do it off the UI thread and cache the result. A song
+/// with no cover, or a cover that fails to load, is a null and an empty frame - never
+/// an error, because the import works perfectly well without a picture.
+/// </summary>
+public sealed class UriToImageSourceConverter : IValueConverter
+{
+    // An empty BitmapImage rather than null: the interface promises a non-null object,
+    // and one with no UriSource simply draws nothing, which is the wanted result.
+    public object Convert(object value, Type targetType, object parameter, string language) =>
+        value is Uri uri ? new BitmapImage(uri) : new BitmapImage();
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
+        throw new NotSupportedException();
 }

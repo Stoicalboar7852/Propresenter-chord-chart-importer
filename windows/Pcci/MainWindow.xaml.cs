@@ -34,13 +34,16 @@ public sealed partial class MainWindow : Window
         {
             if (args.PropertyName is nameof(AppState.Selected) or nameof(AppState.Banner)
                 or nameof(AppState.IsBusy) or nameof(AppState.BatchStatus)
-                or nameof(AppState.IsBatchRunning) or nameof(AppState.LinesPerSlide))
+                or nameof(AppState.IsBatchRunning) or nameof(AppState.LinesPerSlide)
+                or nameof(AppState.IsSearching))
             {
                 UpdatePanes();
             }
         };
         State.Documents.CollectionChanged += (_, _) => UpdatePanes();
+        State.SearchResults.CollectionChanged += (_, _) => UpdatePanes();
 
+        SearchPane.Initialise(State);
         DropPane.Initialise(State);
         ReviewPane.Initialise(State);
         ExportedPane.Initialise(State);
@@ -82,7 +85,14 @@ public sealed partial class MainWindow : Window
             QueueLinesPerSlide.Value = State.LinesPerSlide;
         }
 
-        DropPane.Visibility = document is null ? Visibility.Visible : Visibility.Collapsed;
+        // Both ways in are on screen at once with nothing loaded, because they answer
+        // different questions - "I have this file" and "I need this song" - and the
+        // user knows which of those they have before they open the app. The drop
+        // target steps aside while results are showing so the list has the room.
+        var atStart = document is null;
+        var showingResults = State.SearchResults.Count > 0 || State.IsSearching;
+        SearchPane.Visibility = atStart ? Visibility.Visible : Visibility.Collapsed;
+        DropPane.Visibility = atStart && !showingResults ? Visibility.Visible : Visibility.Collapsed;
         ReviewPane.Visibility = document?.IsReview == true ? Visibility.Visible : Visibility.Collapsed;
         ExportedPane.Visibility = document?.IsExported == true ? Visibility.Visible : Visibility.Collapsed;
         FailurePane.Visibility = document?.IsFailed == true ? Visibility.Visible : Visibility.Collapsed;

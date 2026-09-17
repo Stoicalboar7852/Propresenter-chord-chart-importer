@@ -71,6 +71,23 @@ final class AppState {
     /// How far a Convert All has got, or nil when no batch is running.
     var batchProgress: BatchProgress?
 
+    // MARK: Finding songs online
+
+    /// What is in the search box. A song name, or a link pasted out of a browser -
+    /// the engine works out which, so the user does not have to tell it.
+    var searchQuery = ""
+    var searchResults: [SongMatch] = []
+    /// What the sources had to say for themselves: one of them down, a page with no
+    /// chart in it, a search that found nothing.
+    var searchNotes: [String] = []
+    var isSearching = false
+    /// The query the current results belong to, so "nothing found" can name it.
+    var searchedFor: String?
+    /// The result being downloaded, so its own row can show the progress.
+    var importingRef: String?
+    /// Anything the import wants to warn about, once it has happened.
+    var importNotes: [String] = []
+
     struct BatchProgress: Equatable {
         var done: Int
         var total: Int
@@ -340,5 +357,121 @@ final class AppState {
         }
         alreadyUsed.insert(candidate.lowercased())
         return directory.appendingPathComponent(candidate + ".pro")
+    }
+
+    // MARK: Songs from the web
+
+    /// Search, or describe a pasted link. The engine decides which this is.
+    func runSearch() async {
+        let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty, !isSearching else { return }
+        isSearching = true
+        defer { isSearching = false }
+        searchedFor = query
+
+        guard
+            let outcome = await withEngineValue({ engine in
+                try EngineClient.decode(
+                    SearchOutcome.self, from: await engine.searchJSON(query), what: "the search"
+                )
+            })
+        else {
+            searchResults = []
+            return
+        }
+        searchResults = outcome.results
+        searchNotes = outcome.notes
+    }
+
+    func clearSearch() {
+        searchQuery = ""
+        searchResults = []
+        searchNotes = []
+        searchedFor = nil
+        importNotes = []
+    }
+
+    /// Download a result and put it in the queue, ready to review like any other chart.
+    func importMatch(_ match: SongMatch) async {
+        guard let link = match.chartURL else { return }
+        importingRef = match.ref
+        defer { importingRef = nil }
+        await importLink(link)
+    }
+
+    func importLink(_ link: String) async {
+        guard
+            let imported = await withEngineValue({ engine in
+                try EngineClient.decode(
+                    ImportedChart.self, from: await engine.fetchJSON(url: link), what: "the download"
+                )
+            })
+        else { return }
+        adopt(imported)
+    }
+
+    /// Whatever is on the clipboard, as a chart.
+    ///
+    /// The same door as a link: some words, possibly some chords, and no file. This is
+    /// the way in for every site that will not let a program read it - open the page
+    /// yourself, select the chart, copy, and come back here.
+    func importFromClipboard() async {
+        let pasted = NSPasteboard.general.string(forType: .string) ?? ""
+        guard !pasted.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            banner = EngineError.local(
+                "There is no text on the clipboard to import.",
+                detail: "the pasteboard held no string"
+            )
+            return
+        }
+        guard
+            let imported = await withEngineValue({ engine in
+                try EngineClient.decode(
+                    ImportedChart.self,
+                    from: await engine.pasteJSON(text: pasted),
+                    what: "the pasted chart"
+                )
+            })
+        else { return }
+        adopt(imported)
+    }
+
+    /// Put a freshly imported chart in the queue and select it.
+    private func adopt(_ imported: ImportedChart) {
+        importNotes = imported.notes
+        if let existing = documents.first(where: { $0.url == imported.url }) {
+            // Re-importing the same song overwrites the file it was written to, so the
+            // one already in the list is stale. Read it again rather than adding a
+            // second row pointing at the same path.
+            selectedID = existing.id
+            Task { await analyse(existing) }
+        } else {
+            add(urls: [imported.url])
+            selectedID = documents.first { $0.url == imported.url }?.id ?? selectedID
+        }
+        searchResults = []
+        searchedFor = nil
+    }
+
+    /// Run something against the engine that is about no particular document.
+    ///
+    /// A search has no chart to mark as failed, so a failure here is a banner and a
+    /// nil, rather than the document-shaped error path the conversion flow uses.
+    private func withEngineValue<T>(_ body: (EngineClient) async throws -> T) async -> T? {
+        isBusy = true
+        defer { isBusy = false }
+        do {
+            let engine = try EngineClient()
+            let value = try await body(engine)
+            logLines = await engine.log
+            banner = nil
+            return value
+        } catch let error as EngineError {
+            banner = error
+            return nil
+        } catch {
+            banner = EngineError.local("Something went wrong.", detail: error.localizedDescription)
+            return nil
+        }
     }
 }

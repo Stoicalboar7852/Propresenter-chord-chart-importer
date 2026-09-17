@@ -107,8 +107,20 @@ public sealed partial class AppState : ObservableObject
     [ObservableProperty] private string batchStatus = "";
     [ObservableProperty] private bool isBatchRunning;
 
+    // Finding songs online. The query box takes a song name or a link pasted out of a
+    // browser; the engine works out which, so the user never has to say.
+    [ObservableProperty] private string searchQuery = "";
+    [ObservableProperty] private bool isSearching;
+    /// <summary>The query the current results belong to, so "nothing found" can name it.</summary>
+    [ObservableProperty] private string? searchedFor;
+    /// <summary>The result being downloaded, so its own row can show the progress.</summary>
+    [ObservableProperty] private string? importingRef;
+
     public ObservableCollection<ChartDocument> Documents { get; } = new();
     public ObservableCollection<EngineLogLine> LogLines { get; } = new();
+    public ObservableCollection<SongMatch> SearchResults { get; } = new();
+    /// <summary>What the sources had to say for themselves, and what an import warned.</summary>
+    public ObservableCollection<string> SearchNotes { get; } = new();
 
     public static bool Accepts(string path) => Accepted.Contains(Path.GetExtension(path));
 
@@ -263,6 +275,141 @@ public sealed partial class AppState : ObservableObject
             document.Result = result;
             document.Stage = DocumentStage.Exported;
         });
+    }
+
+    // Songs from the web.
+
+    /// <summary>Search, or describe a pasted link. The engine decides which this is.</summary>
+    public async Task SearchAsync()
+    {
+        var query = SearchQuery.Trim();
+        if (query.Length == 0 || IsSearching) return;
+
+        IsSearching = true;
+        SearchedFor = query;
+        try
+        {
+            var outcome = await WithEngineValueAsync(engine => engine.SearchAsync(query));
+            SearchResults.Clear();
+            SearchNotes.Clear();
+            if (outcome is null) return;
+            foreach (var match in outcome.Results) SearchResults.Add(match);
+            foreach (var note in outcome.Notes) SearchNotes.Add(note);
+        }
+        finally
+        {
+            IsSearching = false;
+        }
+    }
+
+    public void ClearSearch()
+    {
+        SearchQuery = "";
+        SearchedFor = null;
+        SearchResults.Clear();
+        SearchNotes.Clear();
+    }
+
+    /// <summary>Download a result and queue it, ready to review like any other chart.</summary>
+    public async Task ImportMatchAsync(SongMatch match)
+    {
+        if (string.IsNullOrEmpty(match.ChartUrl)) return;
+        ImportingRef = match.Ref;
+        try
+        {
+            await ImportLinkAsync(match.ChartUrl!);
+        }
+        finally
+        {
+            ImportingRef = null;
+        }
+    }
+
+    public async Task ImportLinkAsync(string url)
+    {
+        var imported = await WithEngineValueAsync(engine => engine.FetchAsync(url));
+        if (imported is not null) await AdoptAsync(imported);
+    }
+
+    /// <summary>
+    /// Text copied from somewhere else, as a chart.
+    ///
+    /// The same door as a link: some words, possibly some chords, and no file. This is
+    /// the way in for every site that will not let a program read it - open the page
+    /// yourself, select the chart, copy, and come back here.
+    /// </summary>
+    public async Task ImportPastedAsync(string pasted)
+    {
+        if (string.IsNullOrWhiteSpace(pasted))
+        {
+            Banner = EngineError.Local(
+                "There is no text on the clipboard to import.",
+                "the clipboard held no text");
+            return;
+        }
+        var imported = await WithEngineValueAsync(engine => engine.PasteAsync(pasted));
+        if (imported is not null) await AdoptAsync(imported);
+    }
+
+    /// <summary>Put a freshly imported chart in the list and select it.</summary>
+    private async Task AdoptAsync(ImportedChart imported)
+    {
+        SearchNotes.Clear();
+        foreach (var note in imported.Notes) SearchNotes.Add(note);
+
+        var existing = Documents.FirstOrDefault(
+            document => string.Equals(document.Path, imported.Path, StringComparison.OrdinalIgnoreCase));
+        if (existing is not null)
+        {
+            // Re-importing the same song overwrites the file it was written to, so the
+            // row already in the list is stale. Read it again rather than adding a
+            // second row pointing at the same path.
+            Selected = existing;
+            await AnalyseAsync(existing);
+        }
+        else
+        {
+            await AddAsync(new[] { imported.Path });
+            Selected = Documents.FirstOrDefault(
+                document => string.Equals(document.Path, imported.Path, StringComparison.OrdinalIgnoreCase))
+                ?? Selected;
+        }
+        SearchResults.Clear();
+        SearchedFor = null;
+    }
+
+    /// <summary>
+    /// Run something against the engine that is about no particular document.
+    ///
+    /// A search has no chart to mark as failed, so a failure here is a banner and a
+    /// null, rather than the document-shaped error path the conversion flow uses.
+    /// </summary>
+    private async Task<T?> WithEngineValueAsync<T>(Func<EngineClient, Task<T>> body) where T : class
+    {
+        IsBusy = true;
+        try
+        {
+            var engine = new EngineClient();
+            var value = await body(engine);
+            LogLines.Clear();
+            foreach (var line in engine.Log) LogLines.Add(line);
+            Banner = null;
+            return value;
+        }
+        catch (EngineException exception)
+        {
+            Banner = exception.Error;
+            return null;
+        }
+        catch (Exception exception)
+        {
+            Banner = EngineError.Local("Something went wrong.", exception.Message);
+            return null;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     private async Task WithEngineAsync(ChartDocument document, Func<EngineClient, Task> body)

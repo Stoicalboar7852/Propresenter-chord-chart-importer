@@ -46,6 +46,7 @@
 
     <local:ConfidenceToBrushConverter x:Key="ConfidenceToBrush" />
     <local:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+    <local:UriToImageSourceConverter x:Key="UriToImage" />
 
     <x:Double x:Key="PcciCardCorner">8</x:Double>
 
