@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from pcci.config import ConversionConfig
+from pcci.config import ChordDelivery, ConversionConfig
 from pcci.ir import Line, Section, SectionType, Song
 
 
@@ -154,4 +154,12 @@ def plan_slides(song: Song, config: ConversionConfig | None = None) -> SlidePlan
 
     if not slides:
         warnings.append("The song produced no slides; every section was empty.")
+    if slides and song.chord_count == 0 and config.chord_delivery is not ChordDelivery.NONE:
+        # Words with no chords is a perfectly good presentation - a lyrics sheet, a
+        # hymn text, something pasted out of Genius - but it is also what a chart
+        # whose chord lines were misread looks like, so say which one this is rather
+        # than leaving an empty notes block to be discovered on a Sunday morning.
+        warnings.append(
+            "No chords were found in this chart, so the presentation will have lyrics only."
+        )
     return SlidePlan(song=song, slides=slides, config=config, warnings=warnings)

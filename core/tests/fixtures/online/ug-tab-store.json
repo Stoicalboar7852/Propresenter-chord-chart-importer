@@ -1,0 +1,23 @@
+{
+  "store": {
+    "page": {
+      "data": {
+        "tab": {
+          "id": 1234567,
+          "song_name": "Amazing Grace",
+          "artist_name": "Parish Hymnal Choir",
+          "type": "Chords",
+          "version": 3,
+          "tonality_name": "D",
+          "capo": 2,
+          "tab_url": "https://tabs.ultimate-guitar.com/tab/parish-hymnal-choir/amazing-grace-chords-1234567"
+        },
+        "tab_view": {
+          "wiki_tab": {
+            "content": "[Intro]\r\n[ch]D[/ch]  [ch]A[/ch]  [ch]Bm[/ch]  [ch]G[/ch]\r\n\r\n[Verse 1]\r\n[tab][ch]D[/ch]             [ch]A[/ch]\r\nAmazing grace how sweet the sound\r\n[ch]Bm[/ch]           [ch]G[/ch]\r\nThat saved a wretch like me[/tab]\r\n\r\n[Verse 2]\r\n[tab][ch]D[/ch]      [ch]A[/ch]\r\nI once was lost but now am found\r\nWas blind but now I see[/tab]\r\n"
+          }
+        }
+      }
+    }
+  }
+}

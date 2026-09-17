@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "status": 200
+  },
+  "response": {
+    "sections": [
+      {
+        "type": "song",
+        "hits": [
+          {
+            "type": "song",
+            "result": {
+              "id": 91,
+              "title": "Amazing Grace",
+              "url": "https://genius.com/Parish-hymnal-choir-amazing-grace-lyrics",
+              "song_art_image_url": "https://images.genius.com/big.jpg",
+              "song_art_image_thumbnail_url": "https://images.genius.com/small.jpg",
+              "release_date_components": {
+                "year": 2019,
+                "month": 3,
+                "day": 1
+              },
+              "primary_artist": {
+                "id": 5,
+                "name": "Parish Hymnal Choir"
+              }
+            }
+          },
+          {
+            "type": "song",
+            "result": {
+              "id": 92,
+              "title": "Blessed Assurance",
+              "url": "https://genius.com/Parish-hymnal-choir-blessed-assurance-lyrics",
+              "song_art_image_thumbnail_url": "https://images.genius.com/ba.jpg",
+              "release_date_components": {
+                "year": 2019
+              },
+              "primary_artist": {
+                "id": 5,
+                "name": "Parish Hymnal Choir"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
