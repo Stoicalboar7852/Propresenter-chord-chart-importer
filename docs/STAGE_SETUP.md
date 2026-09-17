@@ -60,6 +60,44 @@ Amazing grace how sweet the sound
 
 ---
 
+## Route C — The Chords element (experimental, opt-in)
+
+ProPresenter also has a **Chords** stage element, with a Notation menu offering Chords,
+Numbers, Numerals and Do-Re-Mi. That element does not read the notes or the chart. It
+reads chords stored *inside the slide's own text* — each chord attached to the word it
+is played on — which is the only one of the three routes that can transpose or
+renotate, because the chords are data rather than a picture or a block of text.
+
+`pcci` can write that:
+
+```bash
+pcci convert "My Song.docx" -o "My Song.pro" --chords inline
+pcci convert "My Song.docx" -o "My Song.pro" --chords inline+notes   # belt and braces
+```
+
+Then add the **Chords** element to your stage layout instead of Current Slide Notes.
+
+### Read this before you use it on a Sunday
+
+This route is written from the file format's own definitions, because **no ProPresenter
+export this project has seen uses the feature** — not even its own "with chord charts"
+export, which turned out to be page images like Route B. Two things are therefore
+unverified:
+
+- **It may put chords on the audience output.** The switch that enables it sits on the
+  audience lyric element in ProPresenter's own files. It may be that only the stage
+  element draws them; it may not be. Test with your audience output disconnected, or on
+  a machine that is not driving a service, before you trust it.
+- **The chord may sit a word out.** The field that says where a chord goes is called
+  `end`, and on a Mac-born format that could equally mean a length. Each chord is
+  anchored across the whole word it belongs to, so under either reading it lands on the
+  right word — but that is reasoning, not observation.
+
+Neither `--chords both` nor the default does any of this. You have to ask for it.
+
+If you try it, what happens is worth knowing — especially whether the chords stay off
+the audience screen.
+
 ## Route B — The chord chart
 
 ProPresenter's own chord-chart feature holds **page images**, not text (this is

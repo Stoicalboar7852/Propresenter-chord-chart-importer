@@ -14,6 +14,11 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ### Added
 
+- **`--chords inline`**, an opt-in third route that writes chords into the slide's own
+  text so ProPresenter's built-in **Chords** stage element can read them — the only
+  route that can transpose or switch to Nashville numbers. Off by default and
+  experimental: no ProPresenter export has ever been seen using the feature, so whether
+  it also draws chords on the audience output is untested. See `docs/STAGE_SETUP.md`.
 - **LRCLIB** as a source: a free, keyless, open lyrics API, which fills the gap for
   songs no chord site carries.
 - **Musixmatch** as an optional source. It needs your own API key in

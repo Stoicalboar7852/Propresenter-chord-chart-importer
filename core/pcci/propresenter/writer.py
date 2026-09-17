@@ -152,6 +152,57 @@ def _build_text_element(element: Any, slide: Slide, config: ConversionConfig) ->
     text.is_superscript_standardized = True
     text.transformDelimiter = TRANSFORM_DELIMITER
     _set_colour(text.chord_pro.color, RGBA(red=0.0, green=0.0, blue=0.0))
+    if config.chord_delivery.writes_inline:
+        _write_inline_chords(text, slide, config)
+
+
+def _word_end(lyric: str, index: int) -> int:
+    """The end of the word starting at ``index``."""
+    end = index
+    while end < len(lyric) and not lyric[end].isspace():
+        end += 1
+    return end
+
+
+def _write_inline_chords(text: Any, slide: Slide, config: ConversionConfig) -> int:
+    """Chords as attributes of the slide's own text, for the Chords stage element.
+
+    ProPresenter can hold a chord as a ``CustomAttribute`` on a range of the lyric
+    text rather than as a separate chart, and its Chords stage element reads those.
+    That is the only route of the three that can transpose or renotate, because the
+    chords are data rather than a picture or a block of monospaced notes.
+
+    Two things here are read off the schema rather than out of a real export, because
+    no export this project has seen uses the feature at all:
+
+    * ``IntRange`` calls its second field ``end``, which on a Mac-born format could
+      equally be a length. Each chord is therefore anchored across the *word* it sits
+      on: under either reading the chord lands on the right word rather than drifting.
+    * ``chord_pro.enabled`` lives on the audience lyric element, so it may well draw
+      the chords on the main output too. Nothing here turns it on by default.
+
+    Chords on an instrumental line cannot be carried this way - there is no text on
+    the slide to anchor them to - so those stay with the notes and the chart.
+    """
+    lines = [line for line in slide.lines if line.lyrics]
+    offset = 0
+    written = 0
+    for line in lines:
+        lyric = line.lyrics.upper() if config.style.all_caps else line.lyrics
+        for placement in line.chords:
+            index = min(placement.char_index, len(lyric))
+            attribute = text.attributes.custom_attributes.add()
+            attribute.range.start = offset + index
+            attribute.range.end = offset + _word_end(lyric, index)
+            attribute.chord = placement.chord
+            written += 1
+        # One character for the break between paragraphs, matching the plain text
+        # ProPresenter reads out of the RTF.
+        offset += len(lyric) + 1
+    if written:
+        text.chord_pro.enabled = True
+        text.chord_pro.notation = 0  # NOTATION_CHORDS
+    return written
 
 
 def _build_cue(
