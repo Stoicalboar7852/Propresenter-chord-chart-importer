@@ -199,3 +199,26 @@ jobs:
         run: >
           .\scripts\build-installer.ps1 -Source build\windows\ci-x64
           -Output build\windows\PCCI-ci-setup.exe
+
+  # TEMPORARY. Two songs that did not come up in search, now that LRCLIB is in the
+  # mix. Comes out once the answer is recorded.
+  coverage-once:
+    name: Do the awkward ones come up now? (temporary)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the engine
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ./core
+      - name: Look for the ones that were missing
+        run: >
+          python scripts/probe_online.py --convert
+          "RSCL it's murph Twin Diplomacy Lost"
+          "Lost RSCL"
+          "John Summit Absolutely DON'T BELIEVE IT"
+          "Washed UPPERROOM"
