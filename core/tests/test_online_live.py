@@ -36,7 +36,7 @@ import pytest
 from pcci.errors import NetworkError
 from pcci.online import Cache, Http, search
 from pcci.online.retrieve import fetch, materialise
-from pcci.online.sources import GENIUS, ITUNES, ULTIMATE_GUITAR
+from pcci.online.sources import GENIUS, ITUNES, LRCLIB, ULTIMATE_GUITAR
 from pcci.parse.pipeline import analyze
 
 #: Status codes that mean "not to you", as opposed to "not any more".
@@ -110,6 +110,21 @@ def test_a_real_chart_downloads_and_parses(http: Http, cache: Cache, tmp_path: P
     assert "[ch]" not in chart.text, "markup reached the chart text"
     song = analyze(materialise(chart, tmp_path))
     assert song.sections, "the downloaded chart parsed into no sections"
+
+
+def test_lrclib_answers_and_still_shapes_its_records_the_same_way(http: Http, cache: Cache) -> None:
+    """The keyless one, and so the one most likely to be carrying the load."""
+    with refusal_is_not_a_failure("LRCLIB"):
+        results = LRCLIB.search(QUERY, limit=5, http=http, cache=cache)
+
+    assert results, "LRCLIB returned nothing - has the search endpoint changed?"
+    importable = [match for match in results if match.importable]
+    if not importable:
+        pytest.skip("every match was instrumental, which is a fair answer")
+
+    with refusal_is_not_a_failure("LRCLIB"):
+        chart = LRCLIB.fetch(importable[0].chart_url or "", http=http, cache=cache)
+    assert len(chart.text.splitlines()) > 4
 
 
 def test_genius_still_labels_its_lyrics_container(http: Http, cache: Cache) -> None:
