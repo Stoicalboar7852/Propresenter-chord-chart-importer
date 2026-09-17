@@ -118,10 +118,17 @@ folder. Both apps have the same thing behind a Convert All button.
 
 ```bash
 pcci search "be thou my vision"            # every source, merged, one row per song
+pcci search "lost" --artist "Some Band"    # narrow a title a hundred songs share
+pcci search "lost" --limit 60              # go past the first batch
 pcci search https://example.com/chart      # a pasted link, described
 pcci fetch  https://example.com/chart -o "Be Thou My Vision.pro"
 pbpaste | pcci paste -o "Be Thou My Vision.pro"     # Get-Clipboard on Windows
 ```
+
+`--artist` is not only a filter: it goes into the question the sources are asked, so it
+finds songs a bare title never reaches. `--album` and `--year` narrow what comes back.
+Both apps have the same three fields under **Narrow it down**, and a **Show more**
+button at the foot of the results.
 
 `search` asks Apple Music for the artwork and the credits, and the chord and lyric
 sites for the words, then merges them into one row per song. A site that is down, slow

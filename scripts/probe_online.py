@@ -3,6 +3,7 @@
 
     python scripts/probe_online.py "Great Are You Lord" "Uptown Funk"
     python scripts/probe_online.py --file setlist.txt --convert
+    python scripts/probe_online.py "Lost" --artist "Some Band" --convert
 
 Searches for each title, reports what came back and from where, and with --convert
 goes the whole way to a .pro so the answer is "yes, 14 slides" rather than "probably".
@@ -28,12 +29,24 @@ from pcci.online import Cache, Http, search  # noqa: E402
 from pcci.online.retrieve import import_url  # noqa: E402
 
 
-def probe(title: str, *, http: Http, cache: Cache, do_convert: bool) -> bool:
+def probe(
+    title: str,
+    *,
+    http: Http,
+    cache: Cache,
+    do_convert: bool,
+    artist: str | None = None,
+    album: str | None = None,
+    year: int | None = None,
+) -> bool:
     """Look one song up and say what happened. True if it could become a presentation."""
-    print(f"\n{title}")
-    print("-" * len(title))
+    heading = title if not artist else f"{title}  (artist: {artist})"
+    print(f"\n{heading}")
+    print("-" * len(heading))
     try:
-        outcome = search(title, limit=6, http=http, cache=cache)
+        outcome = search(
+            title, limit=8, artist=artist, album=album, year=year, http=http, cache=cache
+        )
     except PcciError as error:
         print(f"  search failed: {error.user_message}")
         return False
@@ -44,6 +57,8 @@ def probe(title: str, *, http: Http, cache: Cache, do_convert: bool) -> bool:
         print("  nothing found")
         return False
 
+    if outcome.has_more:
+        print(f"  ({len(outcome.results)} shown of {outcome.total_found} that matched)")
     for match in outcome.results[:3]:
         mark = "importable" if match.importable else "no words  "
         credits = match.subtitle or "unknown artist"
@@ -83,6 +98,9 @@ def main() -> int:
     parser.add_argument(
         "--convert", action="store_true", help="Go the whole way to a .pro for each."
     )
+    parser.add_argument("--artist", default=None, help="Narrow every lookup to this artist.")
+    parser.add_argument("--album", default=None, help="Narrow every lookup to this album.")
+    parser.add_argument("--year", type=int, default=None, help="Narrow every lookup to this year.")
     arguments = parser.parse_args()
 
     titles = list(arguments.songs)
@@ -96,7 +114,15 @@ def main() -> int:
     worked = [
         title
         for title in titles
-        if probe(title, http=http, cache=cache, do_convert=arguments.convert)
+        if probe(
+            title,
+            http=http,
+            cache=cache,
+            do_convert=arguments.convert,
+            artist=arguments.artist,
+            album=arguments.album,
+            year=arguments.year,
+        )
     ]
 
     print(f"\n{len(worked)} of {len(titles)} could become a presentation.")
