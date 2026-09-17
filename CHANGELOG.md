@@ -46,6 +46,18 @@ Nothing yet.
 - Downloaded pages are cached briefly, so searching for a song and then importing it is
   one request rather than two seconds apart. `pcci cache --clear` empties it.
 
+### Fixed
+
+- A chord fingering printed above a chart — `F - X33210`, the kind of thing chord sites
+  put at the top — was being read as a section, so an imported song could open with a
+  group called "F - X33210". Found by importing Shivers for real.
+- A song that several sites knew about listed each of them once per listing, so a
+  popular one read "via Ultimate Guitar, Ultimate Guitar, Ultimate Guitar, Apple Music,
+  Apple Music". One entry per site now.
+- `[Verse 1: A Singer]` — how lyrics sites label a section when they also say who sings
+  it — became a group named after the singer, which never matched the song's other
+  verses or took a verse's colour. It is a verse now, and the original wording is kept.
+
 ### Security
 
 - Every pasted link is checked before it is opened: http and https only, and the

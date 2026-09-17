@@ -146,6 +146,14 @@ outright without notice — so no result is ever the only way in.
 | Ultimate Guitar | Chords and words | Answers |
 | Genius | Words | **Refuses an automated request** (403). May work from a home connection; it would not talk to a GitHub runner. |
 
+Coverage is not worship-only: a run across Great Are You Lord, Washed, Uptown Funk,
+Bohemian Rhapsody, Shivers and Amazing Grace turned all six into presentations with
+their sections intact. To check your own set list before you rely on it:
+
+```bash
+python scripts/probe_online.py --convert "Washed" "Great Are You Lord" "Build My Life"
+```
+
 When a site says no, the message says which one and points at the clipboard, which
 always works: open the page yourself, select the chart, copy, paste. A weekly
 [Online sources](https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/actions/workflows/online.yml)
