@@ -220,9 +220,9 @@ jobs:
       - name: Try a mixed set list
         run: >
           python scripts/probe_online.py --convert
+          "Shivers Ed Sheeran"
           "Great Are You Lord"
           "Washed"
           "Uptown Funk"
           "Bohemian Rhapsody"
-          "Shivers Ed Sheeran"
           "Amazing Grace"

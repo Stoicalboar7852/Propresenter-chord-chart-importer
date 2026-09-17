@@ -212,3 +212,126 @@ def test_a_chart_with_chords_still_gets_its_chart_page(tmp_path: Path) -> None:
 
     assert result.plan.song.chord_count == 2
     assert result.chart_pages, "a song with chords still gets a chord chart"
+
+
+# --- What a chord site puts above the chart ---------------------------------------
+
+
+CHORD_DIAGRAMS = """Some Song
+
+[F - x33210]
+[Am - x02210]
+[x33210]
+
+[Verse 1]
+F            Am
+Amazing grace how sweet the sound
+"""
+
+
+def test_a_chord_fingering_is_not_a_section(tmp_path: Path) -> None:
+    """Chord sites print fingerings in brackets above the chart, and they are short and
+    bracketed, which is exactly what an unrecognised section label looks like. A real
+    import of Shivers came out with a group called "F - X33210"."""
+    path = tmp_path / "diagrams.txt"
+    path.write_text(CHORD_DIAGRAMS, encoding="utf-8")
+
+    song = analyze(path)
+
+    labels = [section.label for section in song.sections]
+    assert labels == ["Verse 1"], labels
+
+
+@pytest.mark.parametrize(
+    "inner",
+    ["F - x33210", "Am - x02210", "x33210", "F#m7 - 242222", "C - X32010"],
+)
+def test_fingerings_are_recognised_as_fingerings(inner: str) -> None:
+    from pcci.parse.sections import looks_like_chord_diagram
+
+    assert looks_like_chord_diagram(inner)
+
+
+@pytest.mark.parametrize(
+    "inner",
+    ["Verse 1", "Chorus", "Bridge 2", "Instrumental", "Tag", "Interlude 1", "Drop"],
+)
+def test_real_section_names_are_not_mistaken_for_fingerings(inner: str) -> None:
+    from pcci.parse.sections import looks_like_chord_diagram
+
+    assert not looks_like_chord_diagram(inner)
+
+
+# --- What a lyrics site puts in its section labels --------------------------------
+
+
+GENIUS_STYLE = """Some Song
+
+[Verse 1: A Singer]
+The first line of the verse here
+The second line of the verse here
+
+[Pre-Chorus: A Singer & Another]
+Building up to something now
+Building up a little more
+
+[Chorus]
+The hook goes around again
+The hook goes around again
+
+[Verse 2: Another]
+Something different happens
+Something different happens
+"""
+
+
+def test_a_label_that_names_the_singer_is_still_that_section(tmp_path: Path) -> None:
+    """Lyrics sites write "[Verse 1: A Singer]", and that is a verse.
+
+    It matters more than it looks. The sites that label sections this way are also the
+    ones that refuse an automated request, so the way their words arrive is somebody
+    copying and pasting them - and a presentation whose groups are called
+    "Verse 1: A Singer" never matches its other verses or gets a verse's colour.
+    """
+    path = tmp_path / "genius.txt"
+    path.write_text(GENIUS_STYLE, encoding="utf-8")
+
+    song = analyze(path)
+
+    assert [section.label for section in song.sections] == [
+        "Verse 1",
+        "Pre-Chorus",
+        "Chorus",
+        "Verse 2",
+    ]
+    # The original wording is still there for anyone who wants it.
+    assert song.sections[0].raw_label == "[Verse 1: A Singer]"
+
+
+def test_a_bracketed_aside_is_not_forced_into_a_section_type(tmp_path: Path) -> None:
+    """Only a real section name survives the colon; the rest is kept whole."""
+    path = tmp_path / "aside.txt"
+    path.write_text(
+        "Some Song\n\n[Talking: to the band]\nTake it away\nTake it away now\n",
+        encoding="utf-8",
+    )
+
+    song = analyze(path)
+
+    assert song.sections[0].label == "Talking: to the band"
+
+
+@pytest.mark.parametrize(
+    ("label", "expected"),
+    [
+        ("Verse 1: A Singer", "Verse 1"),
+        ("Chorus: A Singer & Another", "Chorus"),
+        ("Bridge: Someone, Someone Else", "Bridge"),
+        ("Chorus: x2", None),
+        ("Chorus", None),
+    ],
+)
+def test_the_performer_is_told_apart_from_a_repeat_count(label: str, expected: str | None) -> None:
+    from pcci.parse.sections import without_performer
+
+    assert without_performer(label) == expected

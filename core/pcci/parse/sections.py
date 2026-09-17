@@ -99,6 +99,46 @@ _ABBREVIATION_RE: Final[re.Pattern[str]] = re.compile(
 
 _TRAILING_REPEAT_RE: Final[re.Pattern[str]] = re.compile(r"[\[\(]?\s*[xX]\s*\d+\s*[\]\)]?\s*$")
 
+#: A chord fingering, which chord sites print in brackets above the chart:
+#: ``[F - x33210]``, ``[Am - x02210]``, ``[x33210]``. It is bracketed and it is short,
+#: which is everything an unrecognised section label looks like - and a presentation
+#: with a group called "F - X33210" is how you find out the difference.
+_CHORD_DIAGRAM_RE: Final[re.Pattern[str]] = re.compile(
+    r"""^\s*
+    (?:[A-G][#b\u266f\u266d]?[A-Za-z0-9+\u00b0\u00f8/]*   # an optional chord name
+       \s*[-\u2013\u2014:=]\s*)?                          #   and its separator
+    [xX0-9]{4,8}                                     # the fret positions themselves
+    \s*$""",
+    re.VERBOSE,
+)
+
+
+def looks_like_chord_diagram(text: str) -> bool:
+    """Whether some bracketed text is a fingering rather than a section name."""
+    return bool(_CHORD_DIAGRAM_RE.match(text))
+
+
+#: ``[Verse 1: A Singer]``, ``[Chorus: A Singer & Another]`` - how lyrics sites label a
+#: section when they also say who sings it. The name is not part of the section, and
+#: keeping it means the group is called "Verse 1: A Singer", never matches the other
+#: verses, and loses its colour. Everything after the colon has to be people, though:
+#: ``[Chorus: x2]`` is a repeat count and belongs to the label.
+_PERFORMER_SUFFIX_RE: Final[re.Pattern[str]] = re.compile(
+    r"^(?P<label>[^:]{1,24}):\s*(?P<performer>[A-Za-z][A-Za-z0-9 .,&+'\u2019\-]{0,40})$"
+)
+
+
+def without_performer(inner: str) -> str | None:
+    """``Verse 1`` from ``Verse 1: A Singer``, or None if there is no name to drop."""
+    match = _PERFORMER_SUFFIX_RE.match(inner.strip())
+    if match is None:
+        return None
+    performer = match.group("performer").strip()
+    # "x2", "X 4" and friends are repeat counts, which the label parser wants to keep.
+    if re.fullmatch(r"[xX]\s*\d+", performer):
+        return None
+    return match.group("label").strip() or None
+
 
 @dataclass(frozen=True, slots=True)
 class SectionLabel:
@@ -213,10 +253,32 @@ def parse_section_label(
                         repeat=repeat,
                     )
 
+    # "[Verse 1: A Singer]" is a verse. Try again without the name, and only believe
+    # the answer if it came back as a real section type rather than the catch-all -
+    # otherwise "[Talking: to the band]" would quietly become a section called
+    # "Talking" instead of being kept whole.
+    if stripped.startswith("[") and stripped.endswith("]"):
+        shortened = without_performer(stripped[1:-1])
+        if shortened is not None:
+            inner_label = parse_section_label(
+                f"[{shortened}]",
+                allow_abbreviations=allow_abbreviations,
+                allow_bare_words=allow_bare_words,
+            )
+            if inner_label is not None and inner_label.type is not SectionType.MISC:
+                return SectionLabel(
+                    type=inner_label.type,
+                    number=inner_label.number,
+                    raw_label=stripped,
+                    confidence=inner_label.confidence,
+                    repeat=inner_label.repeat,
+                    variant=inner_label.variant,
+                )
+
     # A bracketed label we do not recognise is still a label: keep the user's words.
     if stripped.startswith("[") and stripped.endswith("]"):
         inner = stripped[1:-1].strip()
-        if inner and len(inner) <= 30:
+        if inner and len(inner) <= 30 and not looks_like_chord_diagram(inner):
             return SectionLabel(
                 type=SectionType.MISC,
                 number=None,

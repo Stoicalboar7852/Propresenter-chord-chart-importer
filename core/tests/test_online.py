@@ -540,3 +540,37 @@ def test_searching_for_a_link_describes_that_page(cache: Cache) -> None:
     assert outcome.is_url is True
     assert len(outcome.results) == 1
     assert outcome.results[0].title == "Amazing Grace"
+
+
+def test_one_entry_per_site_however_many_listings_merged() -> None:
+    """A popular song has six user charts and as many releases. That is two sources."""
+    from pcci.online.models import SongMatch, SourceRef
+
+    def listing(ref: str, url: str) -> SongMatch:
+        return SongMatch(
+            ref=ref,
+            title="Amazing Grace",
+            artist="Parish Hymnal Choir",
+            chart_url=url,
+            chart_kind="chords",
+            sources=[SourceRef(provider="ultimate-guitar", name="Ultimate Guitar", url=url)],
+        )
+
+    def release(ref: str, album: str) -> SongMatch:
+        return SongMatch(
+            ref=ref,
+            title="Amazing Grace",
+            artist="Parish Hymnal Choir",
+            album=album,
+            sources=[SourceRef(provider="itunes", name="Apple Music", url=f"https://a/{ref}")],
+        )
+
+    merged = merge(
+        [
+            [listing("a", "https://tabs/1"), listing("b", "https://tabs/2")],
+            [release("c", "Hymns, Volume One"), release("d", "Hymns Live")],
+        ]
+    )
+
+    assert len(merged) == 1
+    assert merged[0].source_names == ["Ultimate Guitar", "Apple Music"]

@@ -169,10 +169,15 @@ def _combine(existing: SongMatch, extra: SongMatch) -> SongMatch:
             combined.artwork_thumb_url = extra.artwork_thumb_url
             combined.artwork_provider = extra.artwork_provider
 
-    known = {(source.provider, source.url) for source in combined.sources}
+    # One entry per site, not one per listing. A popular song has half a dozen
+    # user-submitted charts and as many Apple releases, and all of them fold into this
+    # row - which read as "via Ultimate Guitar, Ultimate Guitar, Ultimate Guitar,
+    # Apple Music, Apple Music" in the app until this deduplicated them.
+    known = {source.provider for source in combined.sources}
     for source in extra.sources:
-        if (source.provider, source.url) not in known:
+        if source.provider not in known:
             combined.sources.append(SourceRef(**source.model_dump()))
+            known.add(source.provider)
     return combined
 
 
