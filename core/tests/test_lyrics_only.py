@@ -219,9 +219,19 @@ def test_a_chart_with_chords_still_gets_its_chart_page(tmp_path: Path) -> None:
 
 CHORD_DIAGRAMS = """Some Song
 
+F - X33210
+Am - X02210
+x33210
+
+[Verse 1]
+F            Am
+Amazing grace how sweet the sound
+"""
+
+BRACKETED_DIAGRAMS = """Some Song
+
 [F - x33210]
 [Am - x02210]
-[x33210]
 
 [Verse 1]
 F            Am
@@ -239,6 +249,15 @@ def test_a_chord_fingering_is_not_a_section(tmp_path: Path) -> None:
     song = analyze(path)
 
     labels = [section.label for section in song.sections]
+    assert labels == ["Verse 1"], labels
+
+
+def test_a_bracketed_fingering_is_not_a_section_either(tmp_path: Path) -> None:
+    """The same thing by the other route: some charts bracket their fingerings."""
+    path = tmp_path / "bracketed.txt"
+    path.write_text(BRACKETED_DIAGRAMS, encoding="utf-8")
+
+    labels = [section.label for section in analyze(path).sections]
     assert labels == ["Verse 1"], labels
 
 

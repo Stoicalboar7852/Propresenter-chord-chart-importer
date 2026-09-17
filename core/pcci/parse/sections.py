@@ -609,6 +609,11 @@ def _promote_formatting_headers(classified: list[ClassifiedLine], document: RawD
             continue
         if is_chord_token(text):
             continue
+        # "F - X33210" is a fingering, and it clears every other bar here: it is short,
+        # it is three words, and .isupper() is true of it because the only letters in
+        # it are F and X. A real Shivers import came out with that as its first group.
+        if looks_like_chord_diagram(text):
+            continue
         emphasised = item.line.heading or item.line.bold or (text.isupper() and len(text) > 1)
         if not emphasised:
             continue
