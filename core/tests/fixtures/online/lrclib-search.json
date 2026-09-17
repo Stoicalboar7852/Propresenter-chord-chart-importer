@@ -1,0 +1,23 @@
+[
+  {
+    "id": 3396226,
+    "name": "Amazing Grace",
+    "trackName": "Amazing Grace",
+    "artistName": "Parish Hymnal Choir",
+    "albumName": "Hymns, Volume One",
+    "duration": 233,
+    "instrumental": false,
+    "plainLyrics": "Amazing grace how sweet the sound\nThat saved a wretch like me\n\nI once was lost but now am found\nWas blind but now I see\n",
+    "syncedLyrics": "[00:00.00] Amazing grace how sweet the sound"
+  },
+  {
+    "id": 4400001,
+    "trackName": "Amazing Grace",
+    "artistName": "Organ Study",
+    "albumName": "Voluntaries",
+    "duration": 180,
+    "instrumental": true,
+    "plainLyrics": null,
+    "syncedLyrics": null
+  }
+]

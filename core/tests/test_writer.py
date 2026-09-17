@@ -404,3 +404,137 @@ def test_rtf_colour_table_matches_the_configured_colour() -> None:
     rtf = build_rtf(["x"], font=FontSpec(), colour=RGBA(red=1.0, green=0.5, blue=0.0)).decode()
     assert "\\red255\\green128\\blue0" in rtf
     assert "\\csgenericrgb\\c100000\\c50000\\c0" in rtf
+
+
+# --- Chords as attributes of the slide text, for the Chords stage element ----------
+
+
+def _inline_chart(tmp_path):
+    from pathlib import Path
+
+    path = Path(tmp_path) / "inline.txt"
+    path.write_text(
+        "Amazing Grace\n\nVerse 1\n"
+        "D             A\n"
+        "Amazing grace how sweet the sound\n"
+        "Bm           G\n"
+        "That saved a wretch like me\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+def _slide_text_elements(payload: bytes):
+    from pcci.propresenter.bindings import load_bindings
+
+    bindings = load_bindings()
+    presentation = bindings.presentation.Presentation()
+    presentation.ParseFromString(payload)
+    for cue in presentation.cues:
+        for action in cue.actions:
+            if action.HasField("slide"):
+                for element in action.slide.presentation.base_slide.elements:
+                    yield element.element.text
+
+
+def test_inline_chords_land_on_the_word_they_belong_to(tmp_path):
+    """The point of the whole route: a chord is data attached to a word.
+
+    That is what lets ProPresenter transpose it and renotate it, which neither the
+    notes block nor the rasterised chart can ever do.
+    """
+    from striprtf.striprtf import rtf_to_text
+
+    from pcci.config import ChordDelivery, ConversionConfig
+    from pcci.convert import convert
+
+    output = tmp_path / "out" / "inline.pro"
+    convert(
+        _inline_chart(tmp_path),
+        output,
+        ConversionConfig(chord_delivery=ChordDelivery.INLINE),
+    )
+
+    placed: list[tuple[str, str]] = []
+    for text in _slide_text_elements(output.read_bytes()):
+        attributes = list(text.attributes.custom_attributes)
+        if not attributes:
+            continue
+        # Stored, but not painted onto the element - see the audience-output test.
+        assert text.chord_pro.enabled is False
+        plain = rtf_to_text(text.rtf_data.decode("utf-8", "replace"), errors="ignore")
+        for attribute in attributes:
+            placed.append((attribute.chord, plain[attribute.range.start : attribute.range.end]))
+
+    assert placed == [
+        ("D", "Amazing"),
+        ("A", "how"),
+        ("Bm", "That"),
+        ("G", "wretch"),
+    ]
+
+
+def test_the_inline_route_is_never_on_by_default(tmp_path):
+    """It may draw chords on the audience output, so nobody gets it without asking."""
+    from pcci.config import ChordDelivery, ConversionConfig
+    from pcci.convert import convert
+
+    for delivery in (ChordDelivery.BOTH, ChordDelivery.NOTES, ChordDelivery.CHART):
+        output = tmp_path / delivery.value / "out.pro"
+        convert(_inline_chart(tmp_path), output, ConversionConfig(chord_delivery=delivery))
+        for text in _slide_text_elements(output.read_bytes()):
+            assert not list(text.attributes.custom_attributes)
+            assert text.chord_pro.enabled is False
+
+
+def test_an_instrumental_line_carries_no_inline_chord(tmp_path):
+    """There is no text on the slide to anchor it to, so it stays with the notes."""
+    from pathlib import Path
+
+    from pcci.config import ChordDelivery, ConversionConfig
+    from pcci.convert import convert
+
+    path = Path(tmp_path) / "intro.txt"
+    path.write_text("Amazing Grace\n\nIntro\nD  A  Bm  G\n\nVerse 1\nD\nAmazing grace\n", "utf-8")
+    output = tmp_path / "out" / "intro.pro"
+    convert(path, output, ConversionConfig(chord_delivery=ChordDelivery.INLINE))
+
+    chords = [
+        attribute.chord
+        for text in _slide_text_elements(output.read_bytes())
+        for attribute in text.attributes.custom_attributes
+    ]
+    assert chords == ["D"], chords
+
+
+def test_the_chords_are_stored_without_being_drawn_on_the_slide(tmp_path):
+    """The one that was found on a real stage.
+
+    With the draw flag on, ProPresenter paints the chords onto the text element - and
+    that element is the audience output as well as the source the stage Chords element
+    reads. The chords are not in the text itself (the editor's text box holds only the
+    words), so the flag is purely "paint these wherever this is shown". Storing them
+    and drawing them therefore have to be separate, and drawing is off.
+    """
+    from pcci.config import ChordDelivery, ConversionConfig
+    from pcci.convert import convert
+
+    for on_slide in (False, True):
+        output = tmp_path / f"draw-{on_slide}" / "out.pro"
+        convert(
+            _inline_chart(tmp_path),
+            output,
+            ConversionConfig(chord_delivery=ChordDelivery.INLINE, chords_on_slide=on_slide),
+        )
+        for text in _slide_text_elements(output.read_bytes()):
+            if not list(text.attributes.custom_attributes):
+                continue
+            # The chords are stored either way; only the painting changes.
+            assert text.chord_pro.enabled is on_slide
+
+
+def test_asking_for_chords_on_the_audience_screen_is_deliberate():
+    """Nothing reaches the audience output unless the setting says so."""
+    from pcci.config import ConversionConfig
+
+    assert ConversionConfig().chords_on_slide is False

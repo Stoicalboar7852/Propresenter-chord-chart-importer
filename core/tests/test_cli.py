@@ -344,3 +344,157 @@ def test_convert_all_never_overwrites_an_existing_presentation(
     assert result.exit_code == 0
     assert existing.read_bytes() == b"older export"
     assert Path(payload["results"][0]["output"]).name == "GOODBYE YESTERDAY A 2.pro"
+
+
+# --- Songs from the web -----------------------------------------------------------
+#
+# The same contract as everything above - one JSON object on stdout - for the three
+# commands that bring a chart in from somewhere that is not a file. The network is
+# faked; see tests/online_fakes.py for why.
+
+
+@pytest.fixture
+def offline_web(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Point the CLI's own Http and Cache at fakes for the duration of a test."""
+    from tests.online_fakes import everything_answers, http_with
+
+    transport = everything_answers()
+    monkeypatch.setattr("pcci.cli.Http", lambda *_, **__: http_with(transport))
+    monkeypatch.setattr(
+        "pcci.cli.Cache",
+        lambda **kwargs: OnlineCache(directory=tmp_path / "web-cache", **kwargs),
+    )
+
+
+from pcci.online.cache import Cache as OnlineCache  # noqa: E402 - fixture above needs it
+
+
+def test_search_emits_one_json_object(runner: CliRunner, offline_web: None) -> None:
+    result = invoke(runner, "search", "amazing grace", "--json")
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == 0
+    assert payload["is_url"] is False
+    assert payload["results"], "a search that found nothing is not a passing test"
+    first = payload["results"][0]
+    assert first["title"]
+    assert first["chart_url"]
+    assert [source["name"] for source in first["sources"]]
+
+
+def test_search_recognises_a_pasted_link(runner: CliRunner, offline_web: None) -> None:
+    result = invoke(
+        runner,
+        "search",
+        "https://tabs.ultimate-guitar.com/tab/parish-hymnal-choir/amazing-grace-chords-1234567",
+        "--json",
+    )
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == 0
+    assert payload["is_url"] is True
+    assert len(payload["results"]) == 1
+    assert payload["results"][0]["title"] == "Amazing Grace"
+    # Apple filled in the cover for a link that had none.
+    assert payload["results"][0]["artwork_url"]
+
+
+def test_fetch_writes_a_chart_and_says_where(
+    runner: CliRunner, offline_web: None, tmp_path: Path
+) -> None:
+    result = invoke(
+        runner,
+        "fetch",
+        "https://tabs.ultimate-guitar.com/tab/parish-hymnal-choir/amazing-grace-chords-1234567",
+        "-d",
+        str(tmp_path / "imported"),
+        "--json",
+    )
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == 0
+    assert payload["has_chords"] is True
+    assert payload["source"]["name"] == "Ultimate Guitar"
+    written = Path(payload["path"])
+    assert written.exists()
+    assert "[Verse 1]" in written.read_text(encoding="utf-8")
+
+
+def test_fetch_can_go_straight_to_a_presentation(
+    runner: CliRunner, offline_web: None, tmp_path: Path
+) -> None:
+    output = tmp_path / "amazing-grace.pro"
+    result = invoke(
+        runner,
+        "fetch",
+        "https://tabs.ultimate-guitar.com/tab/parish-hymnal-choir/amazing-grace-chords-1234567",
+        "-d",
+        str(tmp_path / "imported"),
+        "-o",
+        str(output),
+        "-n",
+        "2",
+        "--json",
+    )
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == 0
+    assert output.exists()
+    assert payload["converted"]["slides"] >= 1
+
+
+def test_a_link_pcci_cannot_reach_is_a_user_error_not_a_crash(
+    runner: CliRunner, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    from tests.online_fakes import FakeTransport, http_with
+
+    transport = FakeTransport()  # every URL 404s
+    monkeypatch.setattr("pcci.cli.Http", lambda *_, **__: http_with(transport))
+    monkeypatch.setattr("pcci.cli.Cache", lambda **kwargs: OnlineCache(enabled=False))
+
+    result = invoke(runner, "fetch", "https://example.com/not-a-song", "--json")
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == EXIT_USER_INPUT
+    assert payload["error"]["kind"] == "network"
+    assert "example.com" in payload["error"]["user_message"]
+
+
+def test_paste_reads_a_chart_from_standard_input(runner: CliRunner, tmp_path: Path) -> None:
+    pasted = (
+        "HOLY, HOLY, HOLY\n\nVerse 1\nG            C\n"
+        "Holy, holy, holy! Lord God Almighty!\n"
+        "G              C\nEarly in the morning our song shall rise to Thee\n"
+    )
+    result = runner.invoke(
+        cli,
+        ["paste", "-d", str(tmp_path / "imported"), "--json"],
+        input=pasted,
+        obj={},
+        catch_exceptions=False,
+    )
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == 0
+    assert payload["title"] == "HOLY, HOLY, HOLY"
+    assert payload["has_chords"] is True
+    assert Path(payload["path"]).exists()
+
+
+def test_pasting_nothing_useful_is_a_user_error(runner: CliRunner) -> None:
+    result = runner.invoke(
+        cli, ["paste", "--json"], input="Amazing Grace\n", obj={}, catch_exceptions=False
+    )
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == EXIT_USER_INPUT
+    assert payload["error"]["kind"] == "no_chart_found"
+
+
+def test_cache_reports_where_downloads_live(runner: CliRunner) -> None:
+    result = invoke(runner, "cache", "--json")
+    payload = json.loads(result.stdout)
+
+    assert result.exit_code == 0
+    assert payload["pages"]
+    assert payload["imported_charts"]

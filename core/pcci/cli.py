@@ -35,6 +35,11 @@ from pcci.errors import OutputWriteError, PcciError, UserInputError
 from pcci.ingest import supported_extensions
 from pcci.ir import Song
 from pcci.logging_setup import configure_logging, get_logger
+from pcci.online import Cache, FetchedChart, Http
+from pcci.online import search as search_online
+from pcci.online.cache import cache_directory
+from pcci.online.http import normalise_url
+from pcci.online.retrieve import import_text, import_url, imports_directory
 from pcci.parse.pipeline import analyze
 from pcci.propresenter.bindings import PROTO_SOURCE_BUILD, PROTO_SOURCE_VERSION, load_bindings
 from pcci.slides import SlidePlan, plan_slides
@@ -124,6 +129,12 @@ def _plan_options(function: Callable[..., Any]) -> Callable[..., Any]:
         help="How chords reach the stage screen (default both).",
     )(function)
     function = click.option(
+        "--chords-on-slide/--no-chords-on-slide",
+        default=None,
+        help="Draw inline chords on the slide itself. This puts them on the AUDIENCE "
+        "output too. Off by default.",
+    )(function)
+    function = click.option(
         "--chord-placement",
         type=click.Choice([choice.value for choice in ChordPlacementStyle]),
         default=None,
@@ -143,6 +154,8 @@ def build_config(**options: Any) -> ConversionConfig:
         config.chord_delivery = ChordDelivery(options["chords"])
     if options.get("chord_placement") is not None:
         config.chord_placement = ChordPlacementStyle(options["chord_placement"])
+    if options.get("chords_on_slide") is not None:
+        config.chords_on_slide = options["chords_on_slide"]
 
     font = config.style.font
     requested_size = options.get("font_size")
@@ -487,6 +500,247 @@ def build_command(
             )
 
         emit(result.to_dict(), as_json=as_json, human=human)
+        return EXIT_OK
+
+    context.exit(run(action, as_json=as_json))
+
+
+@cli.command(name="search")
+@click.argument("query", nargs=-1, required=True)
+@click.option("--limit", type=click.IntRange(1, 60), default=20, help="How many results.")
+@click.option("--artist", default=None, help="Only songs by this artist. Also improves the search.")
+@click.option("--album", default=None, help="Only songs from this album.")
+@click.option("--year", type=int, default=None, help="Only songs released in this year.")
+@click.option("--no-cache", is_flag=True, help="Ask the sites again rather than reusing answers.")
+@click.option("--json", "as_json", is_flag=True, help="Emit the results as JSON on stdout.")
+@click.pass_context
+def search_command(
+    context: click.Context,
+    /,
+    query: tuple[str, ...],
+    limit: int,
+    artist: str | None,
+    album: str | None,
+    year: int | None,
+    no_cache: bool,
+    as_json: bool,
+) -> None:
+    """Find a song online by name, or describe a link you have pasted.
+
+    Every source is asked at once and the answers are merged into one row per song, so
+    a result can carry chords from one site and its cover art from another. A site
+    that is down contributes a note and the search carries on without it.
+    """
+    configure_logging(verbose=context.obj["verbose"], json_logs=as_json)
+
+    def action() -> int:
+        text = " ".join(query).strip()
+        cache = Cache(enabled=not no_cache)
+        # A pasted link goes through the same call: search recognises one and describes
+        # that page instead of searching for it.
+        outcome = search_online(
+            text,
+            limit=limit,
+            artist=artist,
+            album=album,
+            year=year,
+            http=Http(),
+            cache=cache,
+        )
+
+        def human() -> None:
+            for match in outcome.results:
+                words = "chords" if match.has_chords else match.chart_kind
+                mark = f"[{words}]" if match.importable else "[no words]"
+                click.echo(f"{mark:>10}  {match.title}")
+                if match.subtitle:
+                    click.echo(f"            {match.subtitle}")
+                click.echo(f"            via {', '.join(match.source_names)}")
+                if match.chart_url:
+                    click.echo(f"            {match.chart_url}")
+            for note in outcome.notes:
+                click.echo(f"  note: {note}")
+            if not outcome.results:
+                click.echo("Nothing found.")
+            elif outcome.has_more:
+                click.echo(
+                    f"  showing {len(outcome.results)} of {outcome.total_found}; "
+                    f"--limit {min(outcome.total_found, 60)} for the rest"
+                )
+
+        emit(json.loads(outcome.model_dump_json()), as_json=as_json, human=human)
+        return EXIT_OK
+
+    context.exit(run(action, as_json=as_json))
+
+
+def _import_options(function: Callable[..., Any]) -> Callable[..., Any]:
+    """Options shared by the two commands that bring a chart in from outside."""
+    function = click.option(
+        "-d",
+        "--dir",
+        "directory",
+        type=click.Path(file_okay=False, path_type=Path),
+        default=None,
+        help="Where to save the downloaded chart (default: the app's own cache).",
+    )(function)
+    function = click.option(
+        "-o",
+        "--output",
+        type=click.Path(dir_okay=False, path_type=Path),
+        default=None,
+        help="Also convert it straight to a .pro at this path.",
+    )(function)
+    function = click.option("--json", "as_json", is_flag=True, help="Emit one JSON object.")(
+        function
+    )
+    return function
+
+
+def _imported_payload(
+    path: Path, chart: FetchedChart, converted: dict[str, Any] | None
+) -> dict[str, Any]:
+    """The one object ``fetch`` and ``paste`` put on stdout."""
+    payload: dict[str, Any] = {
+        "path": str(path),
+        "title": chart.title,
+        "artist": chart.artist,
+        "chart_kind": chart.chart_kind,
+        "has_chords": chart.has_chords,
+        "source": chart.source.model_dump(),
+        "notes": chart.notes,
+    }
+    if converted is not None:
+        payload["converted"] = converted
+    return payload
+
+
+def _maybe_convert(
+    path: Path, output: Path | None, options: dict[str, Any]
+) -> dict[str, Any] | None:
+    if output is None:
+        return None
+    return run_conversion(path, output, build_config(**options)).to_dict()
+
+
+def _report_import(path: Path, chart: FetchedChart, converted: dict[str, Any] | None) -> None:
+    click.echo(f"{chart.title} -> {path}")
+    if chart.artist:
+        click.echo(f"  by {chart.artist}, from {chart.source.name}")
+    else:
+        click.echo(f"  from {chart.source.name}")
+    if not chart.has_chords:
+        click.echo("  words only: this source had no chords for it")
+    for note in chart.notes:
+        click.echo(f"  note: {note}")
+    if converted is not None:
+        click.echo(f"  converted to {converted['output']} ({converted['slides']} slides)")
+
+
+@cli.command(name="fetch")
+@click.argument("url")
+@click.option("--no-cache", is_flag=True, help="Download again rather than reusing a saved copy.")
+@_import_options
+@_plan_options
+@_style_options
+@click.pass_context
+def fetch_command(
+    context: click.Context,
+    /,
+    url: str,
+    directory: Path | None,
+    output: Path | None,
+    no_cache: bool,
+    as_json: bool,
+    **options: Any,
+) -> None:
+    """Download the chart at a link and save it where the rest of pcci can read it.
+
+    This writes a chart file and prints where it went; ``analyze``, ``plan`` and
+    ``build`` then work on it exactly as they would on a file you dropped in
+    yourself. Pass ``-o`` to go straight to a presentation instead.
+    """
+    configure_logging(verbose=context.obj["verbose"], json_logs=as_json)
+
+    def action() -> int:
+        cache = Cache(enabled=not no_cache)
+        path, chart = import_url(normalise_url(url), directory, http=Http(), cache=cache)
+        converted = _maybe_convert(path, output, options)
+        emit(
+            _imported_payload(path, chart, converted),
+            as_json=as_json,
+            human=lambda: _report_import(path, chart, converted),
+        )
+        return EXIT_OK
+
+    context.exit(run(action, as_json=as_json))
+
+
+@cli.command(name="paste")
+@click.option("--title", default=None, help="Name the song, instead of reading it off the top.")
+@_import_options
+@_plan_options
+@_style_options
+@click.pass_context
+def paste_command(
+    context: click.Context,
+    /,
+    title: str | None,
+    directory: Path | None,
+    output: Path | None,
+    as_json: bool,
+    **options: Any,
+) -> None:
+    """Read a chart from standard input - what the apps' Import from Clipboard sends.
+
+    Text copied out of a browser, an email or a PDF is the same problem as a link:
+    some words, possibly some chords, and no file. This makes it a file.
+    """
+    configure_logging(verbose=context.obj["verbose"], json_logs=as_json)
+
+    def action() -> int:
+        pasted = sys.stdin.read()
+        path, chart = import_text(pasted, directory, title=title)
+        converted = _maybe_convert(path, output, options)
+        emit(
+            _imported_payload(path, chart, converted),
+            as_json=as_json,
+            human=lambda: _report_import(path, chart, converted),
+        )
+        return EXIT_OK
+
+    context.exit(run(action, as_json=as_json))
+
+
+@cli.command(name="cache")
+@click.option("--clear", is_flag=True, help="Delete everything pcci has downloaded.")
+@click.option("--json", "as_json", is_flag=True, help="Emit one JSON object on stdout.")
+@click.pass_context
+def cache_command(context: click.Context, /, clear: bool, as_json: bool) -> None:
+    """Show, or empty, the copies pcci keeps of pages it has downloaded.
+
+    Worth emptying when a site has corrected a chart and pcci keeps handing you
+    yesterday's. Nothing here is ever the only copy of anything.
+    """
+    configure_logging(verbose=context.obj["verbose"], json_logs=as_json, to_file=False)
+
+    def action() -> int:
+        pages = cache_directory()
+        charts = imports_directory()
+        removed = Cache().clear() if clear else 0
+        payload = {
+            "pages": str(pages),
+            "imported_charts": str(charts),
+            "cleared": removed if clear else None,
+        }
+
+        def human() -> None:
+            click.echo(f"downloaded pages:  {pages}")
+            click.echo(f"imported charts:   {charts}")
+            if clear:
+                click.echo(f"cleared {removed} page(s)")
+
+        emit(payload, as_json=as_json, human=human)
         return EXIT_OK
 
     context.exit(run(action, as_json=as_json))

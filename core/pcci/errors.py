@@ -75,6 +75,24 @@ class DocumentReadError(UserInputError):
     kind = "document_read"
 
 
+class NetworkError(UserInputError):
+    """Something on the web did not answer, or answered with nothing usable.
+
+    Exit code 2 with everything else the user can fix: a typo in a pasted link, a
+    site that is down and a laptop with no wifi all land here, and the front-ends
+    already treat 2 as "tell them what you told me" rather than "something is broken
+    inside pcci".
+    """
+
+    kind = "network"
+
+
+class NoChartFoundError(UserInputError):
+    """The page was fetched and read, and had no song in it."""
+
+    kind = "no_chart_found"
+
+
 class ProtoSchemaMismatchError(PcciError):
     kind = "proto_schema_mismatch"
 

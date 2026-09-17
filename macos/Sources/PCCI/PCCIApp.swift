@@ -43,6 +43,12 @@ struct PCCIApp: App {
             CommandGroup(replacing: .newItem) {
                 Button("Open Chart…") { openPanel() }
                     .keyboardShortcut("o")
+                // The same shortcut ProPresenter uses for its own clipboard import, so
+                // anyone who already does this there does not have to learn a second one.
+                Button("Import from Clipboard") {
+                    Task { await state.importFromClipboard() }
+                }
+                .keyboardShortcut("v", modifiers: [.command, .shift])
                 Button("Convert All…") { state.chooseFolderAndConvertAll() }
                     .keyboardShortcut("e", modifiers: [.command, .shift])
                     .disabled(state.documents.isEmpty)
@@ -54,6 +60,16 @@ struct PCCIApp: App {
                 ))
                 .keyboardShortcut("l", modifiers: [.command, .shift])
             }
+        }
+
+        // Cmd-comma, where a Mac user looks for it. Chord delivery used to be fixed
+        // in code, which was fine while there were three sensible routes and one
+        // right answer. The route that feeds ProPresenter's own Chords element has to
+        // be chosen deliberately, so there has to be somewhere to choose it.
+        Settings {
+            SettingsView()
+                .environment(state)
+                .tint(Theme.effectiveAccent)
         }
     }
 

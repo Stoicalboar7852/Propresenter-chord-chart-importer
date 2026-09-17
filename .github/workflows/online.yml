@@ -1,0 +1,87 @@
+name: Online sources
+
+# Are the song sources still answering, and still shaped the way pcci reads them?
+#
+# Two of the three have no public API and no promise to anybody. The offline tests in
+# test_online.py run against recorded shapes, so the day Ultimate Guitar moves its page
+# data or Genius renames an attribute, those stay green and the feature stops working.
+# This is the canary for that.
+#
+# Deliberately NOT part of CI:
+#
+#   * it needs the open internet, which the development environment does not have;
+#   * a third-party site having a bad afternoon, rate-limiting a shared runner or
+#     blocking a datacentre address has no business turning a merge red.
+#
+# So it runs weekly and on demand, and a failure here is a notification that something
+# out there changed - go and look - rather than a broken build.
+#
+#   Actions -> Online sources -> Run workflow
+
+on:
+  schedule:
+    # Mondays, early. A week is soon enough to hear that a site has been redesigned.
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: online-sources
+  cancel-in-progress: false
+
+jobs:
+  live:
+    name: Do the sources still answer?
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the engine
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Ask the real sources
+        env:
+          PCCI_LIVE_ONLINE: "1"
+        run: pytest tests/test_online_live.py -m live -v
+
+      # Past the library and through the command line the apps actually call, because
+      # those are two different things and only one of them is covered above.
+      - name: Search from the command line
+        run: pcci search "amazing grace" --limit 5
+
+      - name: Import the first result that has words, and convert it
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys
+
+          found = json.loads(
+              subprocess.run(
+                  ["pcci", "search", "amazing grace", "--limit", "8", "--json"],
+                  capture_output=True, text=True, check=True,
+              ).stdout
+          )
+          importable = [row for row in found["results"] if row["chart_url"]]
+          if not importable:
+              print("nothing importable came back:", found["notes"])
+              sys.exit(1)
+
+          chart = json.loads(
+              subprocess.run(
+                  ["pcci", "fetch", importable[0]["chart_url"], "-o", "out.pro", "--json"],
+                  capture_output=True, text=True, check=True,
+              ).stdout
+          )
+          print(f"{chart['title']} -> {chart['converted']['slides']} slides")
+          PY
+
+      - name: The clipboard route, with no network involved at all
+        run: |
+          printf 'Amazing Grace\n\nVerse 1\nG            C\nAmazing grace how sweet the sound\n' \
+            | pcci paste -o pasted.pro --json

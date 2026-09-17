@@ -25,8 +25,12 @@ struct DropTarget: View {
             Button("Choose files…") { openPanel() }
                 .buttonStyle(GoldenGateButtonStyle())
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(48)
+        // A minimum rather than "all of it": this sits under the search box now, and
+        // two views both claiming every point of height is what pushed the content
+        // taller than the window.
+        .frame(maxWidth: .infinity, minHeight: 260)
+        .padding(.vertical, 36)
+        .padding(.horizontal, 48)
         .background {
             RoundedRectangle(cornerRadius: 22)
                 .strokeBorder(

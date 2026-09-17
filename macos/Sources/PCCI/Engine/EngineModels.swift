@@ -139,6 +139,9 @@ struct PlannedSlide: Codable, Hashable, Identifiable {
 
 enum ChordDelivery: String, Codable, CaseIterable, Identifiable {
     case none, notes, chart, both
+    case inline
+    case inlineAndNotes = "inline+notes"
+
     var id: String { rawValue }
 
     var title: String {
@@ -147,7 +150,46 @@ enum ChordDelivery: String, Codable, CaseIterable, Identifiable {
         case .notes: return "Slide notes"
         case .chart: return "Chord chart"
         case .both: return "Notes and chart"
+        case .inline: return "In the slide text (Chords element)"
+        case .inlineAndNotes: return "In the slide text, and slide notes"
         }
+    }
+
+    var explanation: String {
+        switch self {
+        case .none:
+            return "The presentation carries the words only."
+        case .notes:
+            return "A chord-over-lyric block in each slide's notes. Add a Current Slide "
+                + "Notes element to your stage layout."
+        case .chart:
+            return "The whole chart as page images. Add a Chord Chart element."
+        case .both:
+            return "Both of the above, so either stage element works."
+        case .inline, .inlineAndNotes:
+            return "Chords attached to the words themselves, which ProPresenter's own "
+                + "Chords element reads - and the only way it can transpose them or "
+                + "show Nashville numbers."
+        }
+    }
+
+    /// Whether this route writes chords into the slide's own text.
+    var isExperimental: Bool {
+        self == .inline || self == .inlineAndNotes
+    }
+
+    /// Mirrors the engine's own answer, so the settings screen can grey out the notes
+    /// options when nothing is going into the notes.
+    var writesNotes: Bool {
+        self == .notes || self == .both || self == .inlineAndNotes
+    }
+
+    /// What has not been established about it, or nil when there is nothing to warn about.
+    var caution: String? {
+        guard isExperimental else { return nil }
+        return "The chords are stored on the words, which is what ProPresenter's Chords "
+            + "stage element reads. Leave \u{201C}Draw them on the slide\u{201D} off "
+            + "unless you want them on the audience screen as well."
     }
 }
 
@@ -185,12 +227,41 @@ struct EngineConfig: Codable, Hashable {
     var balanceLastSlide: Bool
     var chordDelivery: ChordDelivery
     var chordPlacement: ChordPlacementStyle
+    /// Whether ProPresenter paints the inline chords onto the text element - which is
+    /// the audience output as well as what the stage element reads.
+    var chordsOnSlide: Bool = false
 
     enum CodingKeys: String, CodingKey {
         case linesPerSlide = "lines_per_slide"
         case balanceLastSlide = "balance_last_slide"
         case chordDelivery = "chord_delivery"
         case chordPlacement = "chord_placement"
+        case chordsOnSlide = "chords_on_slide"
+    }
+
+    init(
+        linesPerSlide: Int,
+        balanceLastSlide: Bool,
+        chordDelivery: ChordDelivery,
+        chordPlacement: ChordPlacementStyle,
+        chordsOnSlide: Bool = false
+    ) {
+        self.linesPerSlide = linesPerSlide
+        self.balanceLastSlide = balanceLastSlide
+        self.chordDelivery = chordDelivery
+        self.chordPlacement = chordPlacement
+        self.chordsOnSlide = chordsOnSlide
+    }
+
+    /// Written out rather than synthesised so that a plan from an engine predating
+    /// `chords_on_slide` still decodes. The synthesised decoder demands every key.
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        linesPerSlide = try values.decode(Int.self, forKey: .linesPerSlide)
+        balanceLastSlide = try values.decode(Bool.self, forKey: .balanceLastSlide)
+        chordDelivery = try values.decode(ChordDelivery.self, forKey: .chordDelivery)
+        chordPlacement = try values.decode(ChordPlacementStyle.self, forKey: .chordPlacement)
+        chordsOnSlide = try values.decodeIfPresent(Bool.self, forKey: .chordsOnSlide) ?? false
     }
 }
 

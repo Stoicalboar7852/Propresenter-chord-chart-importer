@@ -60,6 +60,51 @@ Amazing grace how sweet the sound
 
 ---
 
+## Route C — The Chords element (opt-in)
+
+ProPresenter also has a **Chords** stage element, with a Notation menu offering Chords,
+Numbers, Numerals and Do-Re-Mi. That element does not read the notes or the chart. It
+reads chords stored *inside the slide's own text* — each chord attached to the word it
+is played on — which is the only one of the three routes that can transpose or
+renotate, because the chords are data rather than a picture or a block of text.
+
+`pcci` can write that:
+
+```bash
+pcci convert "My Song.docx" -o "My Song.pro" --chords inline
+pcci convert "My Song.docx" -o "My Song.pro" --chords inline+notes   # belt and braces
+```
+
+Then add the **Chords** element to your stage layout instead of Current Slide Notes.
+In the desktop apps this is the **In the slide text (Chords element)** setting.
+
+### Keeping them off the audience screen
+
+The first version of this route drew the chords on the audience output as well as the
+stage — the chords are not in the slide's text (double-click the text box in the editor
+and you see only the words), but ProPresenter painted them over every screen the text
+element appeared on.
+
+So the drawing is now a separate switch, and it is **off**:
+
+```bash
+pcci convert "My Song.docx" -o "My Song.pro" --chords inline                     # stage only
+pcci convert "My Song.docx" -o "My Song.pro" --chords inline --chords-on-slide   # everywhere
+```
+
+In the apps it is **Draw them on the slide**, under the chord setting, and it only
+appears for the two inline routes. Leave it off unless the congregation is meant to see
+the chords: the Chords stage element reads the stored chords either way.
+
+### One thing still unverified
+
+**The chord may sit a word out.** The field that says where a chord goes is called
+`end`, and on a Mac-born format that could equally mean a length. Each chord is anchored
+across the whole word it belongs to, so under either reading it lands on the right word
+— but that is reasoning, not observation.
+
+Neither `--chords both` nor the default does any of this. You have to ask for it.
+
 ## Route B — The chord chart
 
 ProPresenter's own chord-chart feature holds **page images**, not text (this is

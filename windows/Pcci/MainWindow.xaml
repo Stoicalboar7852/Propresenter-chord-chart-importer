@@ -12,6 +12,18 @@
 
     <Grid x:Name="RootGrid" RowDefinitions="Auto,*">
 
+        <!--
+            The pane header button opens the add-song screen rather than a file
+            picker, so the picker keeps the keystroke a Windows user already reaches
+            for.
+        -->
+        <Grid.KeyboardAccelerators>
+            <KeyboardAccelerator
+                Key="O"
+                Invoked="OnOpenFilesAccelerator"
+                Modifiers="Control" />
+        </Grid.KeyboardAccelerators>
+
         <!-- Title bar -->
         <Grid x:Name="TitleBarArea" Grid.Row="0" Height="40" ColumnDefinitions="Auto,*,Auto">
             <TextBlock
@@ -47,14 +59,31 @@
             SelectionChanged="OnQueueSelectionChanged">
 
             <NavigationView.PaneHeader>
-                <StackPanel Margin="12,8" Orientation="Horizontal" Spacing="8">
-                    <Button Click="OnOpenFiles" Style="{StaticResource PcciPrimaryButtonStyle}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <FontIcon FontSize="14" Glyph="&#xE8E5;" />
-                            <TextBlock Text="Add charts" />
-                        </StackPanel>
+                <Grid Margin="12,8" ColumnDefinitions="*,Auto">
+                    <TextBlock
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="Songs" />
+                    <!--
+                        Adding a second song used to mean clearing the first: the search
+                        box and the drop target only show with nothing selected. This
+                        puts that screen one click away without touching the list.
+                    -->
+                    <Button
+                        Grid.Column="1"
+                        AutomationProperties.Name="Add a song"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="OnAddSong"
+                        ToolTipService.ToolTip="Add another song: search, paste a link, or choose a file">
+                        <Button.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="N" Modifiers="Control" />
+                        </Button.KeyboardAccelerators>
+                        <FontIcon FontSize="14" Glyph="&#xE710;" />
                     </Button>
-                </StackPanel>
+                </Grid>
             </NavigationView.PaneHeader>
 
             <NavigationView.PaneFooter>
@@ -81,7 +110,7 @@
                         Click="OnConvertAll"
                         Content="Convert all…"
                         Style="{StaticResource PcciPrimaryButtonStyle}"
-                        ToolTipService.ToolTip="Convert every chart in the list into one folder" />
+                        ToolTipService.ToolTip="Convert every song in the list into one folder" />
                     <Grid ColumnDefinitions="*,Auto">
                         <TextBlock
                             x:Name="QueueStatusText"
@@ -112,7 +141,7 @@
                 </DataTemplate>
             </NavigationView.MenuItemTemplate>
 
-            <Grid RowDefinitions="Auto,*" AllowDrop="True" DragOver="OnDragOver" Drop="OnDrop">
+            <Grid RowDefinitions="Auto,Auto,*" AllowDrop="True" DragOver="OnDragOver" Drop="OnDrop">
 
                 <!-- Error banner -->
                 <InfoBar
@@ -123,7 +152,14 @@
                     IsOpen="False"
                     Severity="Error" />
 
-                <Grid x:Name="Panes" Grid.Row="1">
+                <!--
+                    Searching sits above the panes rather than inside them: it is a way
+                    in, like the drop target, not a stage a chart passes through. It
+                    steps aside once a chart is loaded and there is something to review.
+                -->
+                <local:SearchView x:Name="SearchPane" Grid.Row="1" />
+
+                <Grid x:Name="Panes" Grid.Row="2">
                     <local:DropView x:Name="DropPane" />
                     <local:ReviewView x:Name="ReviewPane" Visibility="Collapsed" />
                     <local:ExportedView x:Name="ExportedPane" Visibility="Collapsed" />

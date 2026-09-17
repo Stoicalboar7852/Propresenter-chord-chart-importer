@@ -107,59 +107,31 @@ jobs:
     permissions:
       contents: write
     steps:
+      # The notes are assembled from CHANGELOG.md and a template in docs/, so the
+      # repository has to be here as well as the built files.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
+
+      - name: Assemble the release notes
+        run: >
+          python3 scripts/release_notes.py
+          --version "${{ inputs.tag || github.ref_name }}"
+          --output release-notes.md
 
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
           name: PCCI ${{ inputs.tag || github.ref_name }}
+          body_path: release-notes.md
           files: |
             artifacts/PCCI-macos-arm64/PCCI.dmg
             artifacts/PCCI-windows-x64/PCCI-win-x64-setup.exe
             artifacts/PCCI-windows-x64/PCCI-win-x64.zip
             artifacts/PCCI-windows-arm64/PCCI-win-arm64-setup.exe
             artifacts/PCCI-windows-arm64/PCCI-win-arm64.zip
-          body: |
-            ## Which file
-
-            | You have | Download |
-            |---|---|
-            | A Mac | `PCCI.dmg` — Apple silicon |
-            | A Windows PC, Intel or AMD | `PCCI-win-x64-setup.exe` |
-            | A Windows PC on ARM (Snapdragon, Surface Pro 11) | `PCCI-win-arm64-setup.exe` |
-
-            Not sure which Windows you have? **Settings → System → About → System
-            type**. The `.zip` files are the same apps as a folder, for anyone who
-            would rather not run an installer.
-
-            The Windows installer asks whether to install for everyone or just you,
-            lets you pick the folder, and can put a shortcut on your desktop.
-
-            ## First launch
-
-            Neither build is signed, so each system will question it once.
-
-            **macOS** — right-click PCCI in Finder and choose **Open**, then **Open**
-            again. See `docs/INSTALL_MACOS.md`.
-
-            **Windows** — click **More info**, then **Run anyway**. See
-            `docs/INSTALL_WINDOWS.md`.
-
-            ## How tested is this
-
-            The conversion engine is covered by 300-odd tests and is checked on Linux,
-            macOS and Windows on every change, including a real conversion through the
-            frozen copy that ships inside each app. Both apps are compiled and packaged
-            by the same automation that produced these files.
-
-            What has *not* happened yet is a Sunday. If something misbehaves, the engine
-            log (the button in the top right) says what it saw, and issues are welcome.
-
-            ## Setting up your stage screen
-
-            Chords never appear on the audience output. To see them on stage, add a
-            **Current Slide Notes** or **Chord Chart** element to your stage layout —
-            `docs/STAGE_SETUP.md` has the steps.
           generate_release_notes: true

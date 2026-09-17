@@ -72,6 +72,40 @@ actor EngineClient {
         )
     }
 
+    // MARK: Songs from the web
+
+    /// Search every online source the engine knows.
+    ///
+    /// The artist is a filter *and* part of the question: a bare title is a thousand
+    /// songs on any source, and a title with an artist is usually one.
+    func searchJSON(
+        _ query: String,
+        limit: Int = 20,
+        artist: String = "",
+        album: String = "",
+        year: String = ""
+    ) async throws -> Data {
+        var arguments = ["search", query, "--limit", String(limit), "--json"]
+        if !artist.isEmpty { arguments += ["--artist", artist] }
+        if !album.isEmpty { arguments += ["--album", album] }
+        if !year.isEmpty { arguments += ["--year", year] }
+        return try await runRaw(arguments)
+    }
+
+    /// Download the chart at a link. The engine picks where to keep it and says where.
+    func fetchJSON(url: String) async throws -> Data {
+        try await runRaw(["fetch", url, "--json"])
+    }
+
+    /// Hand the engine text copied from somewhere else.
+    ///
+    /// It goes over stdin rather than a temporary file so a chart the user copied out
+    /// of an email never touches the disk as a file nobody asked for; the engine
+    /// writes it out itself, once, under a name taken from the song.
+    func pasteJSON(text: String) async throws -> Data {
+        try await runRaw(["paste", "--json"], input: Data(text.utf8))
+    }
+
     /// Build from a plan the user has reviewed and possibly edited.
     func buildJSON(plan: Data, to destination: URL, writeChordPro: Bool) async throws -> Data {
         let temporary = try Self.writeTemporary(plan, prefix: "pcci-plan")
@@ -93,7 +127,8 @@ actor EngineClient {
             "-n", String(config.linesPerSlide),
             config.balanceLastSlide ? "--balance" : "--no-balance",
             "--chords", config.chordDelivery.rawValue,
-            "--chord-placement", config.chordPlacement.rawValue
+            "--chord-placement", config.chordPlacement.rawValue,
+            config.chordsOnSlide ? "--chords-on-slide" : "--no-chords-on-slide"
         ]
     }
 
@@ -120,10 +155,25 @@ actor EngineClient {
         )
     }
 
+    // MARK: Decoding
+
+    /// Decode any of the engine's payloads, saying which one failed rather than
+    /// letting a `DecodingError` reach the user as a wall of Swift.
+    static func decode<T: Decodable>(_ type: T.Type, from data: Data, what: String) throws -> T {
+        do {
+            return try JSONDecoder().decode(type, from: data)
+        } catch {
+            throw EngineError.local(
+                "PCCI could not read what the engine said about \(what).",
+                detail: "\(error)"
+            )
+        }
+    }
+
     // MARK: Process plumbing
 
     /// Run the engine and return stdout, turning a non-zero exit into a typed error.
-    private func runRaw(_ arguments: [String]) async throws -> Data {
+    private func runRaw(_ arguments: [String], input: Data? = nil) async throws -> Data {
         log.removeAll()
         let process = Process()
         process.executableURL = executableURL
@@ -133,6 +183,8 @@ actor EngineClient {
         let errPipe = Pipe()
         process.standardOutput = outPipe
         process.standardError = errPipe
+        let inPipe = input.map { _ in Pipe() }
+        if let inPipe { process.standardInput = inPipe }
 
         do {
             try process.run()
@@ -141,6 +193,16 @@ actor EngineClient {
                 "PCCI could not start its conversion engine.",
                 detail: "\(executableURL.path): \(error.localizedDescription)"
             )
+        }
+
+        // Written off the calling thread and closed straight after: the engine reads
+        // stdin to the end before it answers, so writing it inline would deadlock as
+        // soon as the text outgrew a pipe buffer.
+        if let inPipe, let input {
+            DispatchQueue.global(qos: .userInitiated).async {
+                inPipe.fileHandleForWriting.write(input)
+                try? inPipe.fileHandleForWriting.close()
+            }
         }
 
         let outData = try await Self.readToEnd(outPipe)

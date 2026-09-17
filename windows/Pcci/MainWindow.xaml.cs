@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Pcci.ViewModels;
 using Windows.ApplicationModel.DataTransfer;
@@ -34,13 +35,16 @@ public sealed partial class MainWindow : Window
         {
             if (args.PropertyName is nameof(AppState.Selected) or nameof(AppState.Banner)
                 or nameof(AppState.IsBusy) or nameof(AppState.BatchStatus)
-                or nameof(AppState.IsBatchRunning) or nameof(AppState.LinesPerSlide))
+                or nameof(AppState.IsBatchRunning) or nameof(AppState.LinesPerSlide)
+                or nameof(AppState.IsSearching))
             {
                 UpdatePanes();
             }
         };
         State.Documents.CollectionChanged += (_, _) => UpdatePanes();
+        State.SearchResults.CollectionChanged += (_, _) => UpdatePanes();
 
+        SearchPane.Initialise(State);
         DropPane.Initialise(State);
         ReviewPane.Initialise(State);
         ExportedPane.Initialise(State);
@@ -74,7 +78,7 @@ public sealed partial class MainWindow : Window
         var count = State.Documents.Count;
         QueueStatusText.Text = State.BatchStatus.Length > 0
             ? State.BatchStatus
-            : count switch { 0 => "Nothing loaded", 1 => "1 chart", _ => $"{count} charts" };
+            : count switch { 0 => "Nothing loaded", 1 => "1 song", _ => $"{count} songs" };
         ConvertAllButton.IsEnabled = count > 0 && !State.IsBatchRunning;
         ClearButton.IsEnabled = count > 0 && !State.IsBatchRunning;
         if (QueueLinesPerSlide.Value != State.LinesPerSlide)
@@ -82,7 +86,19 @@ public sealed partial class MainWindow : Window
             QueueLinesPerSlide.Value = State.LinesPerSlide;
         }
 
-        DropPane.Visibility = document is null ? Visibility.Visible : Visibility.Collapsed;
+        // Both ways in are on screen at once with nothing loaded, because they answer
+        // different questions - "I have this file" and "I need this song" - and the
+        // user knows which of those they have before they open the app. The drop
+        // target steps aside while results are showing so the list has the room.
+        if (!ReferenceEquals(Navigation.SelectedItem, document))
+        {
+            Navigation.SelectedItem = document;
+        }
+
+        var atStart = document is null;
+        var showingResults = State.SearchResults.Count > 0 || State.IsSearching;
+        SearchPane.Visibility = atStart ? Visibility.Visible : Visibility.Collapsed;
+        DropPane.Visibility = atStart && !showingResults ? Visibility.Visible : Visibility.Collapsed;
         ReviewPane.Visibility = document?.IsReview == true ? Visibility.Visible : Visibility.Collapsed;
         ExportedPane.Visibility = document?.IsExported == true ? Visibility.Visible : Visibility.Collapsed;
         FailurePane.Visibility = document?.IsFailed == true ? Visibility.Visible : Visibility.Collapsed;
@@ -106,6 +122,21 @@ public sealed partial class MainWindow : Window
         {
             State.Selected = document;
         }
+    }
+
+    /// <summary>
+    /// Back to the search box and the drop target, without emptying the list. Both
+    /// only show with nothing selected, so until this existed the only way to add a
+    /// second song was to clear the first.
+    /// </summary>
+    private void OnAddSong(object sender, RoutedEventArgs args) => State.ShowAddSong();
+
+    private void OnOpenFilesAccelerator(
+        KeyboardAccelerator sender,
+        KeyboardAcceleratorInvokedEventArgs args)
+    {
+        args.Handled = true;
+        OnOpenFiles(sender, new RoutedEventArgs());
     }
 
     private async void OnOpenFiles(object sender, RoutedEventArgs args)

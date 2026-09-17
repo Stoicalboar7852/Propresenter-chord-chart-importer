@@ -21,20 +21,37 @@ MAX_LINES_PER_SLIDE = 10
 
 
 class ChordDelivery(StrEnum):
-    """How chords reach the stage screen."""
+    """How chords reach the stage screen.
+
+    ``INLINE`` is the newer route and is **not** part of ``BOTH``. It writes the chords
+    into the slide's own text so ProPresenter's built-in Chords stage element can read
+    them - which would also give transposition and Nashville numbers, neither of which
+    the other routes can do. It is opt-in for one reason: in ProPresenter's own export
+    the switch that turns it on sits on the *audience* lyric element, so there is a
+    real possibility it draws the chords on the main output as well as the stage. That
+    has never been observed either way, and it is the one outcome this project exists
+    to prevent, so nobody gets it without asking. See docs/STAGE_SETUP.md.
+    """
 
     NONE = "none"
     NOTES = "notes"
     CHART = "chart"
     BOTH = "both"
+    INLINE = "inline"
+    INLINE_NOTES = "inline+notes"
 
     @property
     def writes_notes(self) -> bool:
-        return self in (ChordDelivery.NOTES, ChordDelivery.BOTH)
+        return self in (ChordDelivery.NOTES, ChordDelivery.BOTH, ChordDelivery.INLINE_NOTES)
 
     @property
     def writes_chart(self) -> bool:
         return self in (ChordDelivery.CHART, ChordDelivery.BOTH)
+
+    @property
+    def writes_inline(self) -> bool:
+        """Chords as attributes of the slide text, for the Chords stage element."""
+        return self in (ChordDelivery.INLINE, ChordDelivery.INLINE_NOTES)
 
 
 class ChordPlacementStyle(StrEnum):
@@ -171,6 +188,18 @@ class ConversionConfig(BaseModel):
     chord_delivery: ChordDelivery = ChordDelivery.BOTH
     chord_placement: ChordPlacementStyle = ChordPlacementStyle.CHORDS_ONLY
     include_annotations_in_notes: bool = True
+    #: Whether ProPresenter *draws* the inline chords on the text element itself.
+    #:
+    #: Observed, on a real stage: with this on, the Chords stage element shows the
+    #: chords correctly - and so does the audience output, which is the one thing this
+    #: project exists to prevent. The chords are not in the text (the editor's text box
+    #: is just the words), so this flag is what makes ProPresenter paint them over
+    #: whichever screen that element appears on.
+    #:
+    #: Off by default, on the reading that the flag governs drawing and the stage
+    #: element reads the stored chords regardless. Only turn it on to get the chords
+    #: back on the audience screen deliberately.
+    chords_on_slide: bool = False
     category: str = "Song"
     style: SlideStyle = Field(default_factory=SlideStyle)
     group_colours: dict[SectionType, RGBA] = Field(

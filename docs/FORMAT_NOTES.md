@@ -143,6 +143,40 @@ So notes are **RTF, not plain text**, `\fs48` = 24 pt, white. 31 of 33 cues carr
 same note. This is Route A: a monospaced chord-over-lyric block goes here, and notes
 never reach audience output.
 
+### 4.4b Chords as text attributes — **in the schema, in no export**
+
+Separately from the page images below, the schema carries a second, richer mechanism:
+
+```
+Graphics.Text.chord_pro = 12   ChordPro { enabled, notation, color }
+    Notation: NOTATION_CHORDS | NUMBERS | NUMERALS | DO_RE_MI
+Graphics.Text.attributes.custom_attributes = 13   repeated CustomAttribute
+    CustomAttribute { IntRange range = 1; oneof { ... string chord = 7; ... } }
+Slide.Element.DataLink.chord_pro_chart = 29       ChordProChart {}   (an empty marker)
+```
+
+So a chord can be a string attached to a range of the lyric text, and the stage
+element that displays them is a distinct DataLink from the page-image one at field 5.
+That is what makes ProPresenter's Notation menu possible: these are data, not pixels.
+
+**No export this project has seen uses it.** The bundle named "with chord charts" is
+page images (below); across all three references there are zero `CustomAttribute`
+entries of any kind, and `chord_pro` appears on every text element with only a colour
+set and `enabled` false. `pcci` writes it only when asked (`--chords inline`), and one
+question about it is still open:
+
+1. **`IntRange.end`** — index or length? Nothing observed says which. `pcci` anchors a
+   chord across the whole word, which lands correctly under either reading.
+
+**`chord_pro.enabled` reaches the audience output — observed.** A presentation written
+with `enabled` true was run on a real rig: the Chords stage element showed the chords
+correctly, *and* so did the audience screen. Double-clicking the text box in the editor
+shows only the words, so the chords are not in the text — the flag is what makes
+ProPresenter paint them over whichever screen that element appears on. `pcci` therefore
+writes the attributes with `enabled` **false** by default (`--no-chords-on-slide`); the
+stage element reads the stored chords either way. `--chords-on-slide` turns the drawing
+on for anyone who does want the congregation to see them.
+
 ### 4.4 Chord chart — **answer: a rendered page image, referenced per slide**
 
 This is the finding that changes the design. ProPresenter does **not** store the chord

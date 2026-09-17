@@ -78,11 +78,16 @@ def build(
     directory = output.parent
 
     chart: ChartRender | None = None
-    if config.chord_delivery.writes_chart:
+    if config.chord_delivery.writes_chart and plan.song.chord_count:
         # The chart is a chord chart: it always carries the words, whatever the notes
         # block is set to. chord_placement describes the notes, not the chart.
         chart = render_chart_pages(plan.song, directory, stem=output.stem)
         logger.info("rendered %d chord chart page(s)", len(chart.pages))
+    elif config.chord_delivery.writes_chart:
+        # A lyrics-only song has no chart to attach. Rendering one anyway would leave
+        # a PNG of the words beside the presentation and point every slide at it,
+        # which is a puzzle for whoever opens the folder rather than a feature.
+        logger.info("no chords in this song, so no chord chart page was rendered")
 
     presentation = build_presentation(
         plan,

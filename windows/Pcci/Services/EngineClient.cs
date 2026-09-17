@@ -85,6 +85,47 @@ public sealed class EngineClient
         }
     }
 
+    // Songs from the web. Each of these ends at an ordinary file on disk, which the
+    // existing Plan/Build calls then work on exactly as they would on a dropped file.
+
+    /// <summary>
+    /// Search every source. The artist is a filter and part of the question both: a
+    /// bare title is a thousand songs on any source, a title with an artist is one.
+    /// </summary>
+    public async Task<SearchOutcome> SearchAsync(
+        string query, int limit = 20, string artist = "", string album = "", string year = "")
+    {
+        var arguments = new List<string> { "search", query, "--limit", limit.ToString(), "--json" };
+        if (!string.IsNullOrWhiteSpace(artist)) { arguments.Add("--artist"); arguments.Add(artist); }
+        if (!string.IsNullOrWhiteSpace(album)) { arguments.Add("--album"); arguments.Add(album); }
+        if (!string.IsNullOrWhiteSpace(year)) { arguments.Add("--year"); arguments.Add(year); }
+        var output = await RunAsync(arguments);
+        return JsonSerializer.Deserialize<SearchOutcome>(output)
+            ?? throw new EngineException(EngineError.Local("The search returned nothing readable."));
+    }
+
+    /// <summary>Download the chart at a link. The engine picks where to keep it.</summary>
+    public async Task<ImportedChart> FetchAsync(string url)
+    {
+        var output = await RunAsync(new[] { "fetch", url, "--json" });
+        return JsonSerializer.Deserialize<ImportedChart>(output)
+            ?? throw new EngineException(EngineError.Local("The download returned nothing readable."));
+    }
+
+    /// <summary>
+    /// Hand the engine text copied from somewhere else.
+    ///
+    /// It goes over stdin rather than a temporary file so a chart copied out of an
+    /// email never lands on disk as a file nobody asked for; the engine writes it out
+    /// itself, once, under a name taken from the song.
+    /// </summary>
+    public async Task<ImportedChart> PasteAsync(string text)
+    {
+        var output = await RunAsync(new[] { "paste", "--json" }, input: text);
+        return JsonSerializer.Deserialize<ImportedChart>(output)
+            ?? throw new EngineException(EngineError.Local("The pasted chart could not be read."));
+    }
+
     public async Task<ConversionResult> BuildAsync(SlidePlan plan, string destination, bool writeChordPro)
     {
         var payload = Encoding.UTF8.GetBytes(plan.Raw?.ToJsonString() ?? "{}");
@@ -111,7 +152,8 @@ public sealed class EngineClient
         "-n", config.LinesPerSlide.ToString(),
         config.BalanceLastSlide ? "--balance" : "--no-balance",
         "--chords", config.ChordDelivery,
-        "--chord-placement", config.ChordPlacement
+        "--chord-placement", config.ChordPlacement,
+        config.ChordsOnSlide ? "--chords-on-slide" : "--no-chords-on-slide"
     };
 
     public static SlidePlan DecodePlan(string json)
@@ -131,7 +173,7 @@ public sealed class EngineClient
     private async Task<JsonNode?> RunJsonAsync(IEnumerable<string> arguments) =>
         JsonNode.Parse(await RunAsync(arguments));
 
-    private async Task<string> RunAsync(IEnumerable<string> arguments)
+    private async Task<string> RunAsync(IEnumerable<string> arguments, string? input = null)
     {
         Log.Clear();
         var info = new ProcessStartInfo
@@ -139,10 +181,16 @@ public sealed class EngineClient
             FileName = _executable,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            RedirectStandardInput = input is not null,
             UseShellExecute = false,
             CreateNoWindow = true,
             StandardOutputEncoding = Encoding.UTF8,
-            StandardErrorEncoding = Encoding.UTF8
+            StandardErrorEncoding = Encoding.UTF8,
+            // Explicitly UTF-8 with no byte-order mark. The default here is the
+            // console's code page, which on a Windows machine is whatever ANSI
+            // codepage that machine happens to use - and a chart pasted from a web
+            // page is full of characters that do not survive one.
+            StandardInputEncoding = input is null ? null : new UTF8Encoding(false)
         };
         foreach (var argument in arguments)
         {
@@ -163,6 +211,14 @@ public sealed class EngineClient
 
         var stdoutTask = process.StandardOutput.ReadToEndAsync();
         var stderrTask = process.StandardError.ReadToEndAsync();
+        if (input is not null)
+        {
+            // Written after the readers are started and closed straight after: the
+            // engine reads stdin to the end before it answers, so writing it with
+            // nobody draining stdout would deadlock on a long chart.
+            await process.StandardInput.WriteAsync(input);
+            process.StandardInput.Close();
+        }
         await process.WaitForExitAsync();
         var stdout = await stdoutTask;
         var stderr = await stderrTask;

@@ -99,6 +99,51 @@ _ABBREVIATION_RE: Final[re.Pattern[str]] = re.compile(
 
 _TRAILING_REPEAT_RE: Final[re.Pattern[str]] = re.compile(r"[\[\(]?\s*[xX]\s*\d+\s*[\]\)]?\s*$")
 
+#: A chord fingering, which chord sites print in brackets above the chart:
+#: ``[F - x33210]``, ``[Am - x02210]``, ``[x33210]``. It is bracketed and it is short,
+#: which is everything an unrecognised section label looks like - and a presentation
+#: with a group called "F - X33210" is how you find out the difference.
+_CHORD_DIAGRAM_RE: Final[re.Pattern[str]] = re.compile(
+    r"""^\s*
+    (?:[A-G][#b\u266f\u266d]?[A-Za-z0-9+\u00b0\u00f8/]*   # an optional chord name
+       \s*[-\u2013\u2014:=]\s*)?                          #   and its separator
+    [xX0-9]{4,8}                                     # the fret positions themselves
+    \s*$""",
+    re.VERBOSE,
+)
+
+
+def looks_like_chord_diagram(text: str) -> bool:
+    """Whether some bracketed text is a fingering rather than a section name."""
+    return bool(_CHORD_DIAGRAM_RE.match(text))
+
+
+#: ``[Verse 1: A Singer]``, ``[Chorus: A Singer & Another]`` - how lyrics sites label a
+#: section when they also say who sings it. The name is not part of the section, and
+#: keeping it means the group is called "Verse 1: A Singer", never matches the other
+#: verses, and loses its colour. Everything after the colon has to be people, though:
+#: ``[Chorus: x2]`` is a repeat count and belongs to the label.
+_PERFORMER_SUFFIX_RE: Final[re.Pattern[str]] = re.compile(
+    r"^(?P<label>[^:]{1,24}):\s*(?P<performer>[A-Za-z][A-Za-z0-9 .,&+'\u2019\-]{0,40})$"
+)
+
+
+def without_performer(inner: str) -> str | None:
+    """``Verse 1`` from ``Verse 1: A Singer``, or None if there is no name to drop."""
+    match = _PERFORMER_SUFFIX_RE.match(inner.strip())
+    if match is None:
+        return None
+    performer = match.group("performer").strip()
+    # "x2", "X 4" and friends are repeat counts, which the label parser wants to keep.
+    if re.fullmatch(r"[xX]\s*\d+", performer):
+        return None
+    # A performer is a name, and names are capitalised. That is what separates
+    # "[Build: Absolutely]", where the second half is who sings it, from
+    # "[Talking: to the band]", where the whole thing is the label.
+    if not performer[:1].isupper():
+        return None
+    return match.group("label").strip() or None
+
 
 @dataclass(frozen=True, slots=True)
 class SectionLabel:
@@ -213,10 +258,35 @@ def parse_section_label(
                         repeat=repeat,
                     )
 
+    # "[Verse 1: A Singer]" is a verse. Try again without the name, and only believe
+    # the answer if it came back as a real section type rather than the catch-all -
+    # otherwise "[Talking: to the band]" would quietly become a section called
+    # "Talking" instead of being kept whole.
+    if stripped.startswith("[") and stripped.endswith("]"):
+        shortened = without_performer(stripped[1:-1])
+        if shortened is not None:
+            inner_label = parse_section_label(
+                f"[{shortened}]",
+                allow_abbreviations=allow_abbreviations,
+                allow_bare_words=allow_bare_words,
+            )
+            if inner_label is not None:
+                # Keep the shortened wording even when the type is the catch-all:
+                # "[Build: Absolutely]" is a section called Build, and carrying the
+                # singer's name into the group label helps nobody.
+                return SectionLabel(
+                    type=inner_label.type,
+                    number=inner_label.number,
+                    raw_label=shortened if inner_label.type is SectionType.MISC else stripped,
+                    confidence=inner_label.confidence,
+                    repeat=inner_label.repeat,
+                    variant=inner_label.variant,
+                )
+
     # A bracketed label we do not recognise is still a label: keep the user's words.
     if stripped.startswith("[") and stripped.endswith("]"):
         inner = stripped[1:-1].strip()
-        if inner and len(inner) <= 30:
+        if inner and len(inner) <= 30 and not looks_like_chord_diagram(inner):
             return SectionLabel(
                 type=SectionType.MISC,
                 number=None,
@@ -547,12 +617,29 @@ def _promote_formatting_headers(classified: list[ClassifiedLine], document: RawD
             continue
         if is_chord_token(text):
             continue
+        # "F - X33210" is a fingering, and it clears every other bar here: it is short,
+        # it is three words, and .isupper() is true of it because the only letters in
+        # it are F and X. A real Shivers import came out with that as its first group.
+        if looks_like_chord_diagram(text):
+            continue
+        # A line wrapped in brackets is a backing vocal or an aside, not a heading.
+        # "(I, I, I)" passes every other bar here - it is short, and .isupper() is
+        # true of it because its only letter is I - and it was stealing whole
+        # sections, because a heading immediately after a heading leaves the real
+        # section with no lines at all and it gets dropped.
+        if _WRAPPED_RE.match(text):
+            continue
         emphasised = item.line.heading or item.line.bold or (text.isupper() and len(text) > 1)
         if not emphasised:
             continue
         before = classified[position - 1].kind if position else LineKind.BLANK
         after = classified[position + 1].kind if position + 1 < len(classified) else LineKind.BLANK
-        if before not in (LineKind.BLANK, LineKind.HEADER) and after is not LineKind.BLANK:
+        # Directly under a heading is the first line of that section, never a heading
+        # of its own. Promoting it leaves the section above with nothing in it, and a
+        # section with nothing in it is thrown away.
+        if before is LineKind.HEADER:
+            continue
+        if before is not LineKind.BLANK and after is not LineKind.BLANK:
             continue
         word = re.sub(r"[^a-z]", "", text.lower())
         section_type = _TYPE_BY_KEYWORD.get(word, SectionType.MISC)
