@@ -102,7 +102,12 @@ public sealed partial class AppState : ObservableObject
     [ObservableProperty] private bool isBusy;
     [ObservableProperty] private bool writeChordPro;
     [ObservableProperty] private int linesPerSlide = 4;
-    [ObservableProperty] private string chordDelivery = "both";
+    /// <summary>Which program the files are written for. Decides the writer and the extension.</summary>
+    [ObservableProperty] private string exportTarget = "propresenter";
+    // Chords into the slide text for the Chords stage element, and into the notes as
+    // well: both are stage-only, and a layout with one of the two elements on it still
+    // gets the chords.
+    [ObservableProperty] private string chordDelivery = "inline+notes";
     [ObservableProperty] private string chordPlacement = "chords_only";
     /// <summary>
     /// Whether ProPresenter paints the inline chords onto the text element itself.
@@ -147,6 +152,7 @@ public sealed partial class AppState : ObservableObject
     {
         LinesPerSlide = LinesPerSlide,
         BalanceLastSlide = true,
+        ExportTarget = ExportTarget,
         ChordDelivery = ChordDelivery,
         ChordPlacement = ChordPlacement,
         ChordsOnSlide = ChordsOnSlide
@@ -250,7 +256,7 @@ public sealed partial class AppState : ObservableObject
                 if (document.Song is null || document.Plan is null) continue;
 
                 var name = Path.GetFileNameWithoutExtension(document.Path);
-                await ExportAsync(document, FreePath(directory, name, used));
+                await ExportAsync(document, FreePath(directory, name, used, Extension));
             }
         }
         finally
@@ -260,22 +266,33 @@ public sealed partial class AppState : ObservableObject
         }
     }
 
+    /// <summary>The file extension a target writes: .pro for ProPresenter, .show for FreeShow.</summary>
+    public static string ExtensionFor(string target) => target == "freeshow" ? ".show" : ".pro";
+
+    /// <summary>What to call the program on screen.</summary>
+    public static string NameFor(string target) => target == "freeshow" ? "FreeShow" : "ProPresenter";
+
+    /// <summary>The extension the current settings will write.</summary>
+    public string Extension => ExtensionFor(ExportTarget);
+
     /// <summary>
-    /// <c>directory\name.pro</c>, numbered rather than overwritten. Two folders of
-    /// charts can easily each hold a Great Are You Lord, and a batch that quietly wrote
-    /// one over the other would be worse than no batch at all.
+    /// <c>directory\name.pro</c> (or <c>.show</c>), numbered rather than overwritten.
+    /// Two folders of charts can easily each hold a Great Are You Lord, and a batch
+    /// that quietly wrote one over the other would be worse than no batch at all.
     /// </summary>
-    public static string FreePath(string directory, string name, HashSet<string> used)
+    public static string FreePath(
+        string directory, string name, HashSet<string> used, string extension = ".pro")
     {
         var candidate = name;
         var counter = 2;
-        while (used.Contains(candidate) || File.Exists(Path.Combine(directory, candidate + ".pro")))
+        while (used.Contains(candidate)
+               || File.Exists(Path.Combine(directory, candidate + extension)))
         {
             candidate = $"{name} {counter}";
             counter++;
         }
         used.Add(candidate);
-        return Path.Combine(directory, candidate + ".pro");
+        return Path.Combine(directory, candidate + extension);
     }
 
     public async Task AnalyseAsync(ChartDocument document)

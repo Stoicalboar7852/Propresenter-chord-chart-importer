@@ -13,6 +13,24 @@ struct SettingsView: View {
     var body: some View {
         @Bindable var state = state
         Form {
+            Section("Export") {
+                Picker(
+                    "Write files for",
+                    selection: Binding(
+                        get: { state.config.exportTarget },
+                        set: { state.setExportTarget($0) }
+                    )
+                ) {
+                    ForEach(ExportTarget.allCases) { target in
+                        Text(target.title).tag(target)
+                    }
+                }
+                Text(state.config.exportTarget.explanation)
+                    .font(.caption)
+                    .foregroundStyle(Theme.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
             Section("Chords") {
                 Picker(
                     "Reach the stage screen by",
@@ -25,12 +43,23 @@ struct SettingsView: View {
                         Text(delivery.title).tag(delivery)
                     }
                 }
-                Text(state.config.chordDelivery.explanation)
+                Text(state.config.chordDelivery.explanation(for: state.config.exportTarget))
                     .font(.caption)
                     .foregroundStyle(Theme.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
 
-                if let caution = state.config.chordDelivery.caution {
+                if !state.config.chordDelivery.isSupported(by: state.config.exportTarget) {
+                    Label(
+                        "\(state.config.exportTarget.title) cannot do this. The chords "
+                            + "will not reach the stage screen until you pick another route.",
+                        systemImage: "exclamationmark.triangle.fill"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(Theme.guessed)
+                    .fixedSize(horizontal: false, vertical: true)
+                }
+
+                if let caution = state.config.chordDelivery.caution(for: state.config.exportTarget) {
                     Label(caution, systemImage: "info.circle")
                         .font(.caption)
                         .foregroundStyle(Theme.secondaryText)

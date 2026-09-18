@@ -27,6 +27,7 @@ from pcci.config import (
     ChordDelivery,
     ChordPlacementStyle,
     ConversionConfig,
+    ExportTarget,
     FontSpec,
 )
 from pcci.convert import build as build_from_plan
@@ -111,6 +112,13 @@ def _style_options(function: Callable[..., Any]) -> Callable[..., Any]:
 def _plan_options(function: Callable[..., Any]) -> Callable[..., Any]:
     """Options that describe how the song is split and how chords travel."""
     function = click.option(
+        "-t",
+        "--target",
+        type=click.Choice([choice.value for choice in ExportTarget]),
+        default=None,
+        help="Which program the file is for: propresenter (.pro) or freeshow (.show).",
+    )(function)
+    function = click.option(
         "-n",
         "--lines-per-slide",
         type=click.IntRange(MIN_LINES_PER_SLIDE, MAX_LINES_PER_SLIDE),
@@ -126,7 +134,7 @@ def _plan_options(function: Callable[..., Any]) -> Callable[..., Any]:
         "--chords",
         type=click.Choice([choice.value for choice in ChordDelivery]),
         default=None,
-        help="How chords reach the stage screen (default both).",
+        help="How chords reach the stage screen (default inline+notes).",
     )(function)
     function = click.option(
         "--chords-on-slide/--no-chords-on-slide",
@@ -146,6 +154,8 @@ def _plan_options(function: Callable[..., Any]) -> Callable[..., Any]:
 def build_config(**options: Any) -> ConversionConfig:
     """Turn CLI options into a ConversionConfig, leaving unset options at their default."""
     config = ConversionConfig()
+    if options.get("target") is not None:
+        config.export_target = ExportTarget(options["target"])
     if options.get("lines_per_slide") is not None:
         config.lines_per_slide = options["lines_per_slide"]
     if options.get("balance") is not None:
@@ -216,8 +226,10 @@ def expand_sources(sources: tuple[Path, ...]) -> list[Path]:
     return found
 
 
-def unique_destination(directory: Path, source: Path, taken: set[str]) -> Path:
-    """``directory/<name>.pro``, with a number appended rather than overwriting.
+def unique_destination(
+    directory: Path, source: Path, taken: set[str], extension: str = ".pro"
+) -> Path:
+    """``directory/<name><extension>``, numbered rather than overwriting.
 
     Two folders can easily hold a Verse 1 and a Verse 1, and a batch that silently
     wrote one over the other would be worse than useless.
@@ -225,11 +237,11 @@ def unique_destination(directory: Path, source: Path, taken: set[str]) -> Path:
     stem = source.stem
     candidate = stem
     counter = 2
-    while candidate.casefold() in taken or (directory / f"{candidate}.pro").exists():
+    while candidate.casefold() in taken or (directory / f"{candidate}{extension}").exists():
         candidate = f"{stem} {counter}"
         counter += 1
     taken.add(candidate.casefold())
-    return directory / f"{candidate}.pro"
+    return directory / f"{candidate}{extension}"
 
 
 def _load_song(path: Path) -> Song:
@@ -249,7 +261,7 @@ def _load_song(path: Path) -> Song:
 @click.option("-v", "--verbose", is_flag=True, help="Log at debug level.")
 @click.pass_context
 def cli(context: click.Context, /, verbose: bool) -> None:
-    """Turn chord charts into ProPresenter presentations."""
+    """Turn chord charts into ProPresenter or FreeShow presentations."""
     context.ensure_object(dict)
     context.obj["verbose"] = verbose
 
@@ -259,7 +271,7 @@ def cli(context: click.Context, /, verbose: bool) -> None:
 @click.option("-o", "--output", type=click.Path(dir_okay=False, path_type=Path), default=None)
 @_plan_options
 @_style_options
-@click.option("--chordpro", is_flag=True, help="Also write a .cho sidecar next to the .pro.")
+@click.option("--chordpro", is_flag=True, help="Also write a .cho sidecar beside the file.")
 @click.option("--json", "as_json", is_flag=True, help="Emit one JSON object on stdout.")
 @click.pass_context
 def convert(
@@ -271,12 +283,12 @@ def convert(
     chordpro: bool,
     **options: Any,
 ) -> None:
-    """Read a chord chart and write a ProPresenter presentation."""
+    """Read a chord chart and write a presentation for ProPresenter or FreeShow."""
     configure_logging(verbose=context.obj["verbose"], json_logs=as_json)
 
     def action() -> int:
         config = build_config(**options)
-        destination = output or source.with_suffix(".pro")
+        destination = output or source.with_suffix(config.export_target.extension)
         result = run_conversion(source, destination, config, write_chordpro=chordpro)
 
         def human() -> None:
@@ -308,7 +320,7 @@ def convert(
 )
 @_plan_options
 @_style_options
-@click.option("--chordpro", is_flag=True, help="Also write a .cho sidecar beside each .pro.")
+@click.option("--chordpro", is_flag=True, help="Also write a .cho sidecar beside each file.")
 @click.option("--json", "as_json", is_flag=True, help="Emit one JSON object on stdout.")
 @click.pass_context
 def convert_all(
@@ -348,7 +360,9 @@ def convert_all(
         taken: set[str] = set()
         first_failure = EXIT_OK
         for chart in charts:
-            destination = unique_destination(output_dir, chart, taken)
+            destination = unique_destination(
+                output_dir, chart, taken, config.export_target.extension
+            )
             try:
                 result = run_conversion(chart, destination, config, write_chordpro=chordpro)
             except PcciError as error:

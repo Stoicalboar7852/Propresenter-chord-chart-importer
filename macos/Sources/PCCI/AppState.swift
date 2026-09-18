@@ -57,10 +57,13 @@ final class ChartDocument: Identifiable {
 final class AppState {
     var documents: [ChartDocument] = []
     var selectedID: ChartDocument.ID?
+    // Chords into the slide text for the Chords stage element, and into the notes as
+    // well: both are stage-only, and a layout with one of the two elements on it still
+    // gets the chords.
     var config = EngineConfig(
         linesPerSlide: 4,
         balanceLastSlide: true,
-        chordDelivery: .both,
+        chordDelivery: .inlineAndNotes,
         chordPlacement: .chordsOnly
     )
     var writeChordPro = false
@@ -313,6 +316,12 @@ final class AppState {
         replanEverything()
     }
 
+    func setExportTarget(_ value: ExportTarget) {
+        guard value != config.exportTarget else { return }
+        config.exportTarget = value
+        replanEverything()
+    }
+
     func setChordsOnSlide(_ value: Bool) {
         guard value != config.chordsOnSlide else { return }
         config.chordsOnSlide = value
@@ -380,6 +389,7 @@ final class AppState {
             let destination = Self.freePath(
                 in: directory,
                 named: document.url.deletingPathExtension().lastPathComponent,
+                extension: config.exportTarget.fileExtension,
                 alreadyUsed: &used
             )
             await export(document, to: destination)
@@ -389,23 +399,30 @@ final class AppState {
         banner = nil
     }
 
-    /// `<directory>/<name>.pro`, numbered rather than overwritten.
+    /// `<directory>/<name>.<extension>`, numbered rather than overwritten.
     ///
     /// Two folders of charts can easily each hold a Great Are You Lord, and a batch
     /// that quietly wrote one over the other would be worse than no batch at all.
-    static func freePath(in directory: URL, named name: String, alreadyUsed: inout Set<String>) -> URL {
+    static func freePath(
+        in directory: URL,
+        named name: String,
+        extension fileExtension: String,
+        alreadyUsed: inout Set<String>
+    ) -> URL {
         var candidate = name
         var counter = 2
         while alreadyUsed.contains(candidate.lowercased())
             || FileManager.default.fileExists(
-                atPath: directory.appendingPathComponent(candidate + ".pro").path
+                atPath: directory.appendingPathComponent(candidate).appendingPathExtension(
+                    fileExtension
+                ).path
             )
         {
             candidate = "\(name) \(counter)"
             counter += 1
         }
         alreadyUsed.insert(candidate.lowercased())
-        return directory.appendingPathComponent(candidate + ".pro")
+        return directory.appendingPathComponent(candidate).appendingPathExtension(fileExtension)
     }
 
     // MARK: Songs from the web

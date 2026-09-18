@@ -10,6 +10,21 @@
     <StackPanel Width="420" Spacing="14">
 
         <ComboBox
+            x:Name="ExportTargetCombo"
+            HorizontalAlignment="Stretch"
+            Header="Write files for"
+            SelectionChanged="OnExportTargetChanged">
+            <ComboBoxItem Content="ProPresenter 7 (.pro)" Tag="propresenter" />
+            <ComboBoxItem Content="FreeShow (.show)" Tag="freeshow" />
+        </ComboBox>
+
+        <TextBlock
+            x:Name="ExportTargetNote"
+            Foreground="{ThemeResource PcciSecondaryTextBrush}"
+            Style="{StaticResource CaptionTextBlockStyle}"
+            TextWrapping="Wrap" />
+
+        <ComboBox
             x:Name="ChordDeliveryCombo"
             HorizontalAlignment="Stretch"
             Header="How chords reach the stage screen"
@@ -22,15 +37,24 @@
             <ComboBoxItem Content="No chords" Tag="none" />
         </ComboBox>
 
+        <!-- Shown when the chosen route asks for something the chosen format cannot
+             do: FreeShow has no chord-chart element. -->
+        <InfoBar
+            x:Name="UnsupportedRoute"
+            IsClosable="False"
+            IsOpen="False"
+            Severity="Warning"
+            Title="This route does nothing here" />
+
         <!-- Shown only for the two routes that write chords into the slide's own
              text. That is the only route ProPresenter's own Chords element reads, and
              the only one that can transpose. Drawing them is a separate switch because
              on a real stage it painted them onto the audience output too. -->
         <StackPanel x:Name="InlinePanel" Spacing="8" Visibility="Collapsed">
             <InfoBar
+                x:Name="InlineInfo"
                 IsClosable="False"
                 IsOpen="True"
-                Message="The chords are stored on the words, which is what ProPresenter's Chords stage element reads. Turn the Chords element on in the stage layout editor to see them."
                 Severity="Informational"
                 Title="Read by the Chords stage element" />
 

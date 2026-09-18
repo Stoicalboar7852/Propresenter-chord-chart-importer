@@ -14,6 +14,22 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ### Added
 
+- **FreeShow as well as ProPresenter.** One setting, **Write files for**, and the same
+  chart comes out as a `.show` instead of a `.pro` — written natively, not exported
+  through some common subset: the same named groups in your own FreeShow colours, a
+  long section as a parent slide with children, a repeated chorus as one slide played
+  three times, and the chords stored on the words for FreeShow's own Chords stage
+  element. Its slide notes work too. It has no chord-chart element, and the settings
+  screen says so rather than writing nothing and leaving you to find out. FreeShow will
+  even show the chords of an intro, which ProPresenter cannot: there are no words there
+  to attach them to. Every claim about the format is read out of FreeShow's own source
+  and written down in `docs/FORMAT_NOTES.md` §6.
+- **A list of every domain the program contacts**, in
+  [docs/NETWORK.md](docs/NETWORK.md), for anyone whose school or office blocks the
+  search. It says what each one is for, which are optional, what is sent (the words you
+  typed, and nothing else), and has the list in a block you can paste into a ticket. A
+  test keeps it honest: a source added to the engine without its domain in that file
+  fails the build.
 - **A Settings window on macOS** (⌘,). The Mac app had none — chord delivery was fixed
   in code — so the routes below could only be chosen from the command line.
 - **Search filters**: artist, album and year, in both apps. The artist is not only a
@@ -21,10 +37,10 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
   never reaches.
 - **Show more results.** Search stopped at one batch with no way to go further, so a
   song further down the list was simply unreachable.
-- **`--chords inline`**, an opt-in third route that writes chords into the slide's own
-  text so ProPresenter's built-in **Chords** stage element can read them — the only
-  route that can transpose or switch to Nashville numbers. Off by default. See
-  `docs/STAGE_SETUP.md`.
+- **`--chords inline`**, a third route that writes chords into the slide's own text so
+  the built-in **Chords** stage element can read them — the only route that can
+  transpose or switch to Nashville numbers. Now part of the default; see Changed below
+  and `docs/STAGE_SETUP.md`.
 - **A plus button at the top of the song list.** The search box and the drop target
   only show with nothing selected, so adding a second song used to mean clearing the
   first. On Windows the file picker moved to Ctrl+O, where it was going to be looked
@@ -34,6 +50,13 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - **Musixmatch** as an optional source. It needs your own API key in
   `PCCI_MUSIXMATCH_KEY`, and its free plan returns only part of each song — the import
   tells you when that has happened rather than handing over a third of the words.
+
+### Changed
+
+- **The Chords stage element is now the default**, together with the slide notes
+  (`--chords inline+notes`). It was `notes` and a rendered chord chart, which meant
+  choosing the good route by hand every time and a folder of PNGs nobody asked for.
+  Both defaults are stage-only; nothing reaches the audience screen either way.
 
 ### Fixed
 

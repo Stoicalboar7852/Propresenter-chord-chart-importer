@@ -1,8 +1,11 @@
 # ProPresenter Chord Chart Importer (`pcci`)
 
 Turn a worship chord chart — Word, PDF, plain text, ChordPro, RTF, ODT, HTML — into a
-ProPresenter 7 `.pro` presentation with named, colour-coded groups, an arrangement, and
-the chords carried through to the stage screen without ever reaching audience output.
+presentation with named, colour-coded groups, an arrangement, and the chords carried
+through to the stage screen without ever reaching audience output.
+
+Two formats, both written natively: **ProPresenter 7** (`.pro`) and **FreeShow**
+(`.show`). Pick one in Settings; everything else works the same either way.
 
 Four ways to get a song in:
 
@@ -38,9 +41,10 @@ about the unsigned-app warning on first launch.
 |---|---|
 | **macOS** | **[docs/INSTALL_MACOS.md](docs/INSTALL_MACOS.md)** — needs full Xcode for the app, Python 3.12+ for the engine. Right-click → Open the first time. |
 | **Windows** | **[docs/INSTALL_WINDOWS.md](docs/INSTALL_WINDOWS.md)** — needs the .NET 8 SDK for the app, Python 3.12+ for the engine. x64 and ARM64. |
-| **Stage screen** | **[docs/STAGE_SETUP.md](docs/STAGE_SETUP.md)** — the ProPresenter side: getting the chords onto a stage display and nowhere near the audience. |
+| **Stage screen** | **[docs/STAGE_SETUP.md](docs/STAGE_SETUP.md)** — the ProPresenter and FreeShow side: getting the chords onto a stage display and nowhere near the audience. |
+| **Blocked at school?** | **[docs/NETWORK.md](docs/NETWORK.md)** — every domain the search feature contacts, and what each is for. Written to be handed to an IT department. |
 | **Checking a build** | **[docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)** — the manual pass before you trust it on a Sunday. |
-| **The file format** | **[docs/FORMAT_NOTES.md](docs/FORMAT_NOTES.md)** — what is actually inside a `.pro`, every claim read out of a real export. |
+| **The file formats** | **[docs/FORMAT_NOTES.md](docs/FORMAT_NOTES.md)** — what is actually inside a `.pro` and a `.show`, every claim read out of a real export or out of FreeShow's own source. |
 | **What changed** | **[CHANGELOG.md](CHANGELOG.md)** — every release, and what went into it. |
 | **The original brief** | **[docs/BUILD_PROMPT.md](docs/BUILD_PROMPT.md)** — the plan this was built from. |
 
@@ -195,16 +199,21 @@ core/.venv/bin/python scripts/dump_pro.py <file> --cue 12     # one slide, full 
 
 ## Where the format knowledge comes from
 
-`docs/FORMAT_NOTES.md`. Every claim in it is read out of a real export from
+`docs/FORMAT_NOTES.md`. Every claim about `.pro` is read out of a real export from
 ProPresenter 21.4 and is reproducible with the command above. The protobuf definitions
 are vendored from a schema generated from the same build — see
 `core/pcci/propresenter/proto/PROVENANCE.md`.
+
+FreeShow is open source, so section 6 of the same document cites its source instead:
+the types, the importer that shows what FreeShow itself writes, and the renderer that
+decides what a chord's position means.
 
 ## Status
 
 | Part | State |
 |---|---|
 | Format reconnaissance | Done. All three reference exports round-trip byte-identically; findings in `docs/FORMAT_NOTES.md`. |
+| FreeShow export | Written and verified against FreeShow's own source and its importer's rules; not yet opened in FreeShow. |
 | Engine | Done. Every format, detection, slide planning, writer, verifier, CLI. |
 | Songs from the web | Search, a pasted link and the clipboard, in the engine and both apps. Offline tests against recorded shapes; a weekly job checks the live sites. |
 | macOS app | Written and compiling; not yet run on a Mac. |

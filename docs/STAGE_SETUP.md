@@ -1,22 +1,28 @@
 # Getting the chords onto your stage screen
 
-`pcci` puts the chords into your presentation twice, by two different routes. Both are
-invisible to the congregation. You only need to set up the one you prefer, and you can
-set up both.
+`pcci` can put the chords into your presentation by three different routes, and out of
+the box it uses two of them at once. All of them are invisible to the congregation. You
+only need to set up the one you prefer.
 
 | Route | What it is | Set-up |
 |---|---|---|
-| **Slide notes** | A monospaced chord-over-lyric block in each slide's notes | One stage-layout element. Nothing to copy. |
-| **Chord chart** | The whole chart as page images, attached to the slides | One stage-layout element, plus copying the images into ProPresenter once. |
+| **Chords element** | The chord stored on the word it is played on | One stage-layout element. Default, with the notes. |
+| **Slide notes** | A monospaced chord-over-lyric block in each slide's notes | One stage-layout element. Nothing to copy. Default, with the above. |
+| **Chord chart** | The whole chart as page images, attached to the slides | One stage-layout element, plus copying the images into ProPresenter once. ProPresenter only. |
 
-Neither route puts anything on the audience output. `pcci` never hides chords in an
+No route puts anything on the audience output. `pcci` never hides chords in an
 off-screen or transparent text box — that leaks the moment somebody edits the slide.
+
+**Using FreeShow instead of ProPresenter?** Set **Write files for** to FreeShow in
+Settings and read [FreeShow](#freeshow) at the bottom. The Chords element and the slide
+notes both work there; the chord chart does not exist.
 
 ---
 
-## Route A — Slide notes (start here)
+## Route A — Slide notes (on by default)
 
-This is the route that works everywhere, with nothing to install or copy.
+This is the route that works everywhere, with nothing to install or copy. A conversion
+writes it unless you turn it off, alongside Route C.
 
 1. In ProPresenter, open **Screens → Stage Layouts** (or the Stage tab of the
    Screens window).
@@ -60,7 +66,7 @@ Amazing grace how sweet the sound
 
 ---
 
-## Route C — The Chords element (opt-in)
+## Route C — The Chords element (on by default)
 
 ProPresenter also has a **Chords** stage element, with a Notation menu offering Chords,
 Numbers, Numerals and Do-Re-Mi. That element does not read the notes or the chart. It
@@ -68,15 +74,17 @@ reads chords stored *inside the slide's own text* — each chord attached to the
 is played on — which is the only one of the three routes that can transpose or
 renotate, because the chords are data rather than a picture or a block of text.
 
-`pcci` can write that:
+`pcci` writes that by default, together with the notes of Route A, so a stage layout
+with either element on it gets the chords:
 
 ```bash
-pcci convert "My Song.docx" -o "My Song.pro" --chords inline
-pcci convert "My Song.docx" -o "My Song.pro" --chords inline+notes   # belt and braces
+pcci convert "My Song.docx" -o "My Song.pro"                       # inline+notes
+pcci convert "My Song.docx" -o "My Song.pro" --chords inline       # this route alone
 ```
 
-Then add the **Chords** element to your stage layout instead of Current Slide Notes.
-In the desktop apps this is the **In the slide text (Chords element)** setting.
+Then add the **Chords** element to your stage layout. In the desktop apps the setting is
+**In the slide text, and slide notes**, with **In the slide text (Chords element)** for
+this route on its own.
 
 ### Keeping them off the audience screen
 
@@ -103,7 +111,7 @@ the chords: the Chords stage element reads the stored chords either way.
 across the whole word it belongs to, so under either reading it lands on the right word
 — but that is reasoning, not observation.
 
-Neither `--chords both` nor the default does any of this. You have to ask for it.
+`--chords notes`, `chart` or `both` writes none of this, if you would rather it did not.
 
 ## Route B — The chord chart
 
@@ -157,3 +165,43 @@ unaffected, which is why Route A is the default and the one to rely on.
 
 If the chords look misaligned on the stage screen, the notes element is not using a
 monospaced font. That is the cause almost every time.
+
+---
+
+## FreeShow
+
+FreeShow has the same two stage-only routes, under different names, and `pcci` writes a
+`.show` file for it with **Write files for → FreeShow** in Settings (`--target
+freeshow` from the command line). Import it with **File → Import → FreeShow**, or
+drop the `.show` file on the window.
+
+What arrives: one group per section, coloured the way your own group settings colour
+them, in the order the chart is written in — a chorus sung three times is one slide
+played three times.
+
+### The chords element
+
+1. Open the **Stage** tab and pick the layout your musicians look at.
+2. Add a **Slide Text** item, or select the one already there.
+3. In its settings, turn **Chords** on. Size and colour are next to the switch.
+
+The chords are stored on the words, so this is the route that can be transposed, and
+there is nothing to turn on in the show itself. As in ProPresenter, the switch that
+would draw them on the *audience* output is a separate one on the slide, and `pcci`
+leaves it off unless you ask (**Draw them on the slide**).
+
+FreeShow will also show the chords of an **instrumental line** — an intro, a
+turnaround — which ProPresenter cannot, because there are no words there to attach
+them to. Nothing appears on the audience screen for those lines.
+
+### The slide notes
+
+Add a **Slide Notes** item to the stage layout instead, or as well. Same block of
+monospaced chords over lyrics as ProPresenter gets, and the same advice: use a
+monospaced font or nothing lines up.
+
+### What FreeShow has no answer for
+
+There is no chord-chart element and nothing to point one at, so the **Chord chart** and
+**Notes and chart** routes have nothing to write there. Settings says so when you pick
+one; the notes half of "Notes and chart" still arrives.

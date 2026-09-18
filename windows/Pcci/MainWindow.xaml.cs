@@ -228,7 +228,12 @@ public sealed partial class MainWindow : Window
             SuggestedFileName = suggestedName,
             SuggestedStartLocation = PickerLocationId.DocumentsLibrary
         };
-        picker.FileTypeChoices.Add("ProPresenter presentation", new List<string> { ".pro" });
+        // Only the format being written: a picker offering both would let somebody
+        // save a FreeShow show as .pro, and the engine would rename it anyway.
+        var extension = AppState.ExtensionFor(State.ExportTarget);
+        var label = $"{AppState.NameFor(State.ExportTarget)} "
+                    + (extension == ".show" ? "show" : "presentation");
+        picker.FileTypeChoices.Add(label, new List<string> { extension });
         InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
         var file = await picker.PickSaveFileAsync();
         return file?.Path;

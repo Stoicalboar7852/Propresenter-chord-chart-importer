@@ -102,6 +102,12 @@ if [[ -f "$SAMPLE" ]]; then
     "$BINARY" convert "$SAMPLE" -o "$WORK/smoke.pro" --json > /dev/null
     [[ -s "$WORK/smoke.pro" ]] || { echo "conversion smoke test wrote nothing" >&2; exit 1; }
     echo "  conversion smoke test passed"
+
+    # The other writer, for the same reason the clipboard route is checked below: a
+    # frozen binary only contains the modules the freezer noticed.
+    "$BINARY" convert "$SAMPLE" -o "$WORK/smoke.show" --target freeshow --json > /dev/null
+    [[ -s "$WORK/smoke.show" ]] || { echo "FreeShow smoke test wrote nothing" >&2; exit 1; }
+    echo "  FreeShow smoke test passed"
 fi
 
 # The clipboard route, which is the one the apps drive over stdin. Worth its own check:
