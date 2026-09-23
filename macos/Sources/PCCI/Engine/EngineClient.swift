@@ -125,6 +125,7 @@ actor EngineClient {
     private func configArguments(_ config: EngineConfig) -> [String] {
         [
             "-n", String(config.linesPerSlide),
+            "--target", config.exportTarget.rawValue,
             config.balanceLastSlide ? "--balance" : "--no-balance",
             "--chords", config.chordDelivery.rawValue,
             "--chord-placement", config.chordPlacement.rawValue,

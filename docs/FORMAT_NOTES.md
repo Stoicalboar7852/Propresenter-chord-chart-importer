@@ -1,8 +1,11 @@
-# ProPresenter `.pro` format notes
+# Presentation format notes
 
-Everything here was read out of real files exported from ProPresenter **21.4 (build
-352583705)** on macOS 27, plus one older export from **20.0.1 (build 335544583)** on
-macOS 26.3.1. Nothing in this document is inferred from documentation or memory: each
+Sections 1 to 5 are ProPresenter's `.pro`. Section 6 is FreeShow's `.show`, which pcci
+also writes.
+
+Everything about `.pro` was read out of real files exported from ProPresenter **21.4
+(build 352583705)** on macOS 27, plus one older export from **20.0.1 (build 335544583)**
+on macOS 26.3.1. Nothing in this document is inferred from documentation or memory: each
 claim names the reference file it came from, and every dump is reproducible with
 
 ```
@@ -336,3 +339,89 @@ build.
 4. Repeated sections reuse one group preset via `application_group_identifier`.
 5. Every reference file round-trips byte-identically, so `verify.py` re-parsing our
    output is a meaningful check rather than a formality.
+
+## 6. FreeShow `.show`
+
+FreeShow is open source, so this section cites source files rather than hex dumps. The
+tree read is `github.com/ChurchApps/freeshow` at `95d5709`; every path below is relative
+to that repository.
+
+### 6.1 The file
+
+A show is saved as `JSON.stringify([id, show])` — a two-element array of the show's id
+and the show itself (`src/electron/data/save.ts`). The importer takes either that pair
+or a bare show object (`src/frontend/converters/importHelpers.ts`), and runs
+`fixShowIssues` over whatever it gets, which **silently repairs** a malformed show
+rather than refusing it. That is why pcci verifies its own output against the same
+rules: a show that imports with half its slides quietly dropped looks like a success.
+
+The shape, from `src/types/Show.ts`:
+
+```
+Show { name, category, settings { activeLayout, template }, timestamps, meta,
+       slides { id: Slide }, layouts { id: Layout }, media }
+Slide { group, color, globalGroup?, children?, settings, notes, items: Item[] }
+Item  { style, lines: Line[], chords? { enabled, color, size, offsetY } }
+Line  { align, text: [{ value, style }], chords?: Chords[] }
+Chords { id, pos, key }
+```
+
+### 6.2 Chords — **answer: on the line, indexed into the words**
+
+`Chords.pos` is a character index into the line's plain text and `key` is the chord
+name. This is not read off the type: it is what FreeShow's own ChordPro importer writes
+(`src/frontend/converters/chordpro.ts` counts `letterIndex` over the characters outside
+the brackets), and what the renderer reads back
+(`src/frontend/components/slide/TextboxLines.svelte` walks the letters and emits a chord
+span where `pos` matches the index). Two behaviours there are worth knowing:
+
+* **A chord past the end of the line still shows.** Leftovers are emitted as trailing
+  chords after the words, with spacing reserved for them.
+* **A line with chords and no text renders as a chord-only line**, spaced out by `pos`.
+  An intro's chords can therefore reach a FreeShow stage, which is something the `.pro`
+  format cannot do — chords there are anchored to lyric text, and an instrumental line
+  has none.
+
+### 6.3 Where chords are drawn — **the same trap as ProPresenter, and the same answer**
+
+Two separate switches, and they are not the same switch:
+
+| Switch | Lives on | Read by |
+|---|---|---|
+| `Item.chords.enabled` | the show's own slide | the **output** layer — `src/frontend/components/output/layers/SlideContent.svelte` passes `chords={item.chords?.enabled}` straight to the textbox |
+| `StageItem.chords.enabled` | the stage layout | the **stage** — `src/frontend/components/stage/Stagebox.svelte` |
+
+So the chords are stored on the line either way, the stage draws them when the stage
+layout says to, and the show's own flag is what would put them on the audience screen.
+pcci leaves that flag out entirely unless `--chords-on-slide` asks for it. FreeShow's
+own ChordPro importer does not write it either.
+
+### 6.4 Groups
+
+FreeShow ships eight groups — break, bridge, chorus, intro, outro, pre_chorus, tag,
+verse (`src/electron/data/defaults.ts`), each with a colour. When a slide names one in
+`globalGroup`, FreeShow **overwrites** that slide's `group` and `color` from its own
+settings (`src/frontend/components/helpers/show.ts`). So pcci writes the global group
+for the seven section types that are the same thing, and writes FreeShow's own default
+colour so the file already looks right; for a Post-Chorus or a Vamp, which FreeShow has
+no group for, it keeps pcci's label and colour instead.
+
+Group names are also numbered dynamically: two slides with the same `group` display as
+"Verse 1" and "Verse 2", and the same slide played twice in a layout displays as
+"Chorus (1)" and "Chorus (2)" (`getGroupName`, same file). That is why pcci writes one
+slide per distinct section and lets the layout repeat it, rather than writing a chorus
+three times.
+
+### 6.5 Long sections
+
+A section too long for one slide becomes a parent slide carrying the group, with the
+rest as `children` — the layout lists only the parent (`src/frontend/converters/txt.ts`).
+A slide that is neither in the layout nor a child of something in it is **deleted** on
+import, which pcci's verifier checks for by name.
+
+### 6.6 What FreeShow has no answer for
+
+There is no per-slide chord-chart image: nothing in `Slide` or `Item` points at a
+rendered page of the chart the way ProPresenter's `presentation.chord_chart` does. The
+`chart` and `both` routes therefore have nothing to write, and pcci says so rather than
+rendering PNGs nobody will see.

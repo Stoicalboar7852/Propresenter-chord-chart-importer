@@ -62,9 +62,11 @@ struct ReviewPane: View {
     }
 
     private func exportPanel() {
+        let target = state.config.exportTarget
         let panel = NSSavePanel()
-        panel.nameFieldStringValue = (document.plan?.song.title ?? document.url.deletingPathExtension().lastPathComponent) + ".pro"
-        panel.message = "Where should the ProPresenter file go?"
+        let name = document.plan?.song.title ?? document.url.deletingPathExtension().lastPathComponent
+        panel.nameFieldStringValue = "\(name).\(target.fileExtension)"
+        panel.message = "Where should the \(target.title) file go?"
         panel.canCreateDirectories = true
         if panel.runModal() == .OK, let url = panel.url {
             Task { await state.export(document, to: url) }

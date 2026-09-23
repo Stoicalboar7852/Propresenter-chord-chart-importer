@@ -42,7 +42,7 @@ param(
     [ValidateSet('win-x64', 'win-arm64')]
     [string]$Architecture = 'win-x64',
 
-    [string]$Version = '0.2.0'
+    [string]$Version = '0.3.1'
 )
 
 $ErrorActionPreference = 'Stop'

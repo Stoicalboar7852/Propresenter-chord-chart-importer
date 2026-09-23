@@ -150,6 +150,7 @@ public sealed class EngineClient
     private static IEnumerable<string> ConfigArguments(EngineConfig config) => new[]
     {
         "-n", config.LinesPerSlide.ToString(),
+        "--target", config.ExportTarget,
         config.BalanceLastSlide ? "--balance" : "--no-balance",
         "--chords", config.ChordDelivery,
         "--chord-placement", config.ChordPlacement,

@@ -8,32 +8,17 @@ than no file at all.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import Any
 
 from pcci.errors import VerificationFailedError
 from pcci.propresenter.bindings import load_bindings
 from pcci.slides import SlidePlan
+from pcci.verification import VerificationReport
+
+__all__ = ["VerificationReport", "verify_bytes", "verify_or_raise"]
 
 UUID_LENGTH = 36
 ZERO_UUID = "00000000-0000-0000-0000-000000000000"
-
-
-@dataclass
-class VerificationReport:
-    """What verification found. ``ok`` is the only thing callers must check."""
-
-    checks: list[str] = field(default_factory=list)
-    failures: list[str] = field(default_factory=list)
-
-    @property
-    def ok(self) -> bool:
-        return not self.failures
-
-    def check(self, description: str, condition: bool, detail: str = "") -> None:
-        self.checks.append(description)
-        if not condition:
-            self.failures.append(f"{description}: {detail}" if detail else description)
 
 
 def verify_bytes(payload: bytes, plan: SlidePlan) -> VerificationReport:

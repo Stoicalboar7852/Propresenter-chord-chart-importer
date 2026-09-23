@@ -20,17 +20,46 @@ MIN_LINES_PER_SLIDE = 1
 MAX_LINES_PER_SLIDE = 10
 
 
+class ExportTarget(StrEnum):
+    """Which program the presentation is written for.
+
+    Both are real formats with a stage screen and a chords element, and pcci writes
+    each one natively rather than exporting a lowest common denominator: a ``.pro`` is
+    Protocol Buffers built from ProPresenter's own schema, a ``.show`` is the JSON
+    FreeShow saves. What differs is documented in docs/FORMAT_NOTES.md.
+    """
+
+    PROPRESENTER = "propresenter"
+    FREESHOW = "freeshow"
+
+    @property
+    def extension(self) -> str:
+        return ".show" if self is ExportTarget.FREESHOW else ".pro"
+
+    @property
+    def display_name(self) -> str:
+        return "FreeShow" if self is ExportTarget.FREESHOW else "ProPresenter"
+
+    @property
+    def renders_chart_pages(self) -> bool:
+        """Whether the format can point a slide at a rendered page of the chart.
+
+        ProPresenter can (that is what its Chord Chart stage element reads). FreeShow
+        has no equivalent, so ``CHART`` has nothing to attach there.
+        """
+        return self is ExportTarget.PROPRESENTER
+
+
 class ChordDelivery(StrEnum):
     """How chords reach the stage screen.
 
-    ``INLINE`` is the newer route and is **not** part of ``BOTH``. It writes the chords
-    into the slide's own text so ProPresenter's built-in Chords stage element can read
-    them - which would also give transposition and Nashville numbers, neither of which
-    the other routes can do. It is opt-in for one reason: in ProPresenter's own export
-    the switch that turns it on sits on the *audience* lyric element, so there is a
-    real possibility it draws the chords on the main output as well as the stage. That
-    has never been observed either way, and it is the one outcome this project exists
-    to prevent, so nobody gets it without asking. See docs/STAGE_SETUP.md.
+    ``INLINE`` is the route both programs' own chords elements read: the chord is
+    stored against the word it is played on, in the slide's own text, which is also
+    the only route that can transpose or renotate. It is the default.
+
+    Storing the chords and *drawing* them are separate things, and the second one is
+    what ``chords_on_slide`` governs - see that field. Drawing is off by default in
+    both formats, because in both of them the switch is on the audience text.
     """
 
     NONE = "none"
@@ -185,20 +214,30 @@ class ConversionConfig(BaseModel):
         default=DEFAULT_LINES_PER_SLIDE, ge=MIN_LINES_PER_SLIDE, le=MAX_LINES_PER_SLIDE
     )
     balance_last_slide: bool = True
-    chord_delivery: ChordDelivery = ChordDelivery.BOTH
+    #: Which program the file is for. The writer, the extension and what a chord route
+    #: can do all follow from this.
+    export_target: ExportTarget = ExportTarget.PROPRESENTER
+    #: Chords into the slide text for the Chords stage element, *and* into the slide
+    #: notes. The notes are the belt to the inline route's braces: both are stage-only,
+    #: neither costs anything on the audience screen, and if a stage layout has only
+    #: one of the two elements on it the chords still arrive.
+    chord_delivery: ChordDelivery = ChordDelivery.INLINE_NOTES
     chord_placement: ChordPlacementStyle = ChordPlacementStyle.CHORDS_ONLY
     include_annotations_in_notes: bool = True
-    #: Whether ProPresenter *draws* the inline chords on the text element itself.
+    #: Whether the program *draws* the inline chords on the text element itself.
     #:
-    #: Observed, on a real stage: with this on, the Chords stage element shows the
-    #: chords correctly - and so does the audience output, which is the one thing this
-    #: project exists to prevent. The chords are not in the text (the editor's text box
-    #: is just the words), so this flag is what makes ProPresenter paint them over
-    #: whichever screen that element appears on.
+    #: Observed on a real stage, in ProPresenter: with this on, the Chords stage
+    #: element shows the chords correctly - and so does the audience output, which is
+    #: the one thing this project exists to prevent. The chords are not in the text
+    #: (the editor's text box is just the words), so the flag is purely "paint these
+    #: wherever this element is shown".
     #:
-    #: Off by default, on the reading that the flag governs drawing and the stage
-    #: element reads the stored chords regardless. Only turn it on to get the chords
-    #: back on the audience screen deliberately.
+    #: FreeShow is the same shape and can be read from its source: the output layer
+    #: passes ``item.chords.enabled`` straight through, while the stage reads its own
+    #: stage item's chords setting. So in both formats the chords are stored either
+    #: way, and this only decides whether they are painted.
+    #:
+    #: Off by default. Only turn it on to put chords on the audience screen on purpose.
     chords_on_slide: bool = False
     category: str = "Song"
     style: SlideStyle = Field(default_factory=SlideStyle)

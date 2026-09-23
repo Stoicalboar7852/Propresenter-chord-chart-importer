@@ -102,7 +102,9 @@ public sealed class EngineConfig
 {
     [JsonPropertyName("lines_per_slide")] public int LinesPerSlide { get; set; } = 4;
     [JsonPropertyName("balance_last_slide")] public bool BalanceLastSlide { get; set; } = true;
-    [JsonPropertyName("chord_delivery")] public string ChordDelivery { get; set; } = "both";
+    /// <summary>Which program the file is for: "propresenter" (.pro) or "freeshow" (.show).</summary>
+    [JsonPropertyName("export_target")] public string ExportTarget { get; set; } = "propresenter";
+    [JsonPropertyName("chord_delivery")] public string ChordDelivery { get; set; } = "inline+notes";
     [JsonPropertyName("chord_placement")] public string ChordPlacement { get; set; } = "chords_only";
     [JsonPropertyName("chords_on_slide")] public bool ChordsOnSlide { get; set; }
 }

@@ -211,7 +211,10 @@ def test_a_failed_verification_writes_nothing(tmp_path: Path, plan, monkeypatch)
 
 def test_convert_writes_everything(tmp_path: Path, fixtures_dir: Path) -> None:
     output = tmp_path / "Goodbye Yesterday.pro"
-    result = convert(fixtures_dir / CHART, output, ConversionConfig(), write_chordpro=True)
+    # BOTH rather than the default: chart pages are the one part of a conversion that
+    # has to be asked for, because they are files on somebody's disk.
+    config = ConversionConfig(chord_delivery=ChordDelivery.BOTH)
+    result = convert(fixtures_dir / CHART, output, config, write_chordpro=True)
     assert output.exists()
     assert result.chordpro_path is not None and result.chordpro_path.exists()
     assert len(result.chart_pages) == 3
@@ -221,7 +224,7 @@ def test_convert_writes_everything(tmp_path: Path, fixtures_dir: Path) -> None:
 
 def test_chart_pages_are_referenced_by_both_paths(tmp_path: Path, fixtures_dir: Path) -> None:
     output = tmp_path / "song.pro"
-    convert(fixtures_dir / CHART, output, ConversionConfig())
+    convert(fixtures_dir / CHART, output, ConversionConfig(chord_delivery=ChordDelivery.BOTH))
     presentation = load_bindings().presentation.Presentation()
     presentation.ParseFromString(output.read_bytes())
     charts = [
@@ -230,7 +233,7 @@ def test_chart_pages_are_referenced_by_both_paths(tmp_path: Path, fixtures_dir: 
         for action in cue.actions
         if action.slide.presentation.HasField("chord_chart")
     ]
-    assert charts, "chord chart references should be written by default"
+    assert charts, "the chart route should write a chord chart reference"
     first = charts[0]
     assert first.absolute_string.startswith("file://")
     assert first.local.root == 10  # ROOT_SHOW

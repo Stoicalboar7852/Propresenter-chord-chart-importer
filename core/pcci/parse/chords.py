@@ -258,6 +258,39 @@ CHORD_LINE_MIN_RATIO: Final[float] = 0.75
 CHORD_LINE_MAX_MEDIAN_LENGTH: Final[int] = 6
 INLINE_LYRIC_GAP: Final[int] = 2
 
+# A token built like a chord, even though the grammar cannot read it. Charts have
+# typos: one real chart writes "Dmd/E" on a line where every sibling line carries a
+# plain Dm, F or B/E. The grammar is right to refuse it - it is not a chord - but
+# calling the line a lyric puts "Dmd/E" on the audience screen, which is the one
+# outcome this project exists to prevent.
+_CHORD_SHAPE_RE: Final[re.Pattern[str]] = re.compile(
+    r"^[A-G1-7][A-Za-z0-9#b/+\-\u00b0\u00f8.]{1,7}$"
+)
+#: A slash bass is a note and nothing else, which is what tells "Dmd/E" from "God/Man".
+_SLASH_BASS_RE: Final[re.Pattern[str]] = re.compile(r"/[A-G1-7][#b]?$")
+#: Marks English does not put inside a word.
+_CHORD_EVIDENCE_RE: Final[re.Pattern[str]] = re.compile(r"[0-9#+\u00b0\u00f8]")
+
+
+def is_chord_shaped(token: str) -> bool:
+    """True for a token that is built like a chord but does not parse as one.
+
+    Deliberately narrow. The token has to start on a root, be short, and carry a mark
+    that English does not put inside a word - a slash followed by a bare note, an
+    accidental, an extension number. "Dmd/E" qualifies; "Bed", "Cab" and "God/Man" do
+    not. It is never enough on its own: ``classify_line`` only uses it for a line whose
+    every token is a chord or chord-shaped, and the caller is told in a warning that
+    pcci did not recognise what it kept.
+    """
+    stripped = token.strip().strip(",")
+    if not stripped or is_chord_token(stripped):
+        return False
+    if not _CHORD_SHAPE_RE.match(stripped):
+        return False
+    if _SLASH_BASS_RE.search(stripped):
+        return True
+    return bool(_CHORD_EVIDENCE_RE.search(stripped[1:]))
+
 
 class LineClass(StrEnum):
     """What a line looks like on its own, before context is considered."""
@@ -287,9 +320,18 @@ def classify_line(text: str) -> LineClass:
     tokens = [token for token, _ in tokenise(text)]
     if not tokens:
         return LineClass.BLANK
-    if chord_line_score(text) < CHORD_LINE_MIN_RATIO:
-        return LineClass.LYRIC
+
+    # Every token is a chord, or built like one and nothing else. Neither the length
+    # guard nor the ratio below gets a say here: nothing about "Bbsus4/D" makes it a
+    # word, and a line reading "Dmd/E" is a chart with a typo in it, not a lyric.
+    if all(is_chord_token(token) or is_chord_shaped(token) for token in tokens):
+        if all(token.strip(",") in AMBIGUOUS_WORDS for token in tokens):
+            return LineClass.AMBIGUOUS
+        return LineClass.CHORD
+
     if statistics.median(len(token) for token in tokens) > CHORD_LINE_MAX_MEDIAN_LENGTH:
+        return LineClass.LYRIC
+    if chord_line_score(text) < CHORD_LINE_MIN_RATIO:
         return LineClass.LYRIC
     if all(token.strip(",") in AMBIGUOUS_WORDS for token in tokens):
         return LineClass.AMBIGUOUS

@@ -123,6 +123,13 @@ if (Test-Path $sample) {
     & $binary convert $sample -o $smoke --json | Out-Null
     if (-not (Test-Path $smoke)) { Write-Error 'conversion smoke test wrote nothing' }
     Write-Host '  conversion smoke test passed'
+
+    # The other writer, for the same reason the clipboard route is checked below: a
+    # frozen binary only contains the modules the freezer noticed.
+    $show = Join-Path $work 'smoke.show'
+    & $binary convert $sample -o $show --target freeshow --json | Out-Null
+    if (-not (Test-Path $show)) { Write-Error 'FreeShow smoke test wrote nothing' }
+    Write-Host '  FreeShow smoke test passed'
 }
 
 # The clipboard route, which is the one the app drives over stdin. Worth its own check:

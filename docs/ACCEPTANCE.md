@@ -63,6 +63,16 @@ tell you is whether a real search finds the songs your team actually sings.
 - [ ] With `--chords inline`, a stage layout with a **Chords** element shows the chords
       over the words — and the audience output still shows none. Turning **Draw them on
       the slide** on is the one case where they are meant to appear on both.
+
+### FreeShow, if you use it
+
+- [ ] A `.show` written with **Write files for → FreeShow** imports through
+      **File → Import → FreeShow** with no repair warning, and the slide count matches.
+- [ ] The groups are named and coloured, a long section is one group with child slides,
+      and a repeated chorus appears once in the slide list.
+- [ ] A **Slide Text** stage item with **Chords** turned on shows the chords over the
+      words; the audience output shows none.
+- [ ] An intro's chords appear on the stage screen even though that slide has no words.
 - [ ] Text is legible from the back of the room: font, size and outline came through as
       configured.
 

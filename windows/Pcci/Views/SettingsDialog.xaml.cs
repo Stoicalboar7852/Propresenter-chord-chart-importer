@@ -16,6 +16,7 @@ public sealed partial class SettingsDialog : ContentDialog
         InitializeComponent();
         _state = state;
 
+        Select(ExportTargetCombo, state.ExportTarget);
         Select(ChordDeliveryCombo, state.ChordDelivery);
         ChordsOnSlideToggle.IsOn = state.ChordsOnSlide;
         UpdateInlineWarning();
@@ -39,6 +40,16 @@ public sealed partial class SettingsDialog : ContentDialog
     private static string TagOf(ComboBox combo) =>
         (combo.SelectedItem as ComboBoxItem)?.Tag as string ?? "";
 
+    private void OnExportTargetChanged(object sender, SelectionChangedEventArgs args)
+    {
+        UpdateInlineWarning();
+        if (_loading) return;
+        _state.ExportTarget = TagOf(ExportTargetCombo);
+        // The target is baked into the plan an export sends back, like everything else
+        // here, so a chart already read has to be re-planned.
+        _ = _state.ReplanAllAsync();
+    }
+
     private void OnChordDeliveryChanged(object sender, SelectionChangedEventArgs args)
     {
         UpdateInlineWarning();
@@ -52,7 +63,31 @@ public sealed partial class SettingsDialog : ContentDialog
     private void UpdateInlineWarning()
     {
         var delivery = TagOf(ChordDeliveryCombo);
+        var target = TagOf(ExportTargetCombo);
+        var freeshow = target == "freeshow";
         var inline = delivery is "inline" or "inline+notes";
+
+        ExportTargetNote.Text = freeshow
+            ? "A .show file for FreeShow, with the same groups and the chords on its own "
+              + "Chords stage element. FreeShow has no chord-chart element, so that one "
+              + "route has nothing to write there."
+            : "A .pro presentation: named groups, an arrangement, and the chords on the "
+              + "stage screen.";
+
+        // FreeShow keeps no per-slide chart image, so a route that asks for one leaves
+        // the stage with nothing on it.
+        var unsupported = freeshow && delivery is "chart" or "both";
+        UnsupportedRoute.IsOpen = unsupported;
+        UnsupportedRoute.Message = delivery == "chart"
+            ? "FreeShow has no chord-chart element, so nothing would reach the stage. "
+              + "Pick one of the other routes."
+            : "Only the notes half of this reaches FreeShow: it has no chord-chart element.";
+
+        InlineInfo.Message =
+            $"The chords are stored on the words, which is what {AppState.NameFor(target)}'s "
+            + "Chords stage element reads. Turn the Chords element on in the stage layout "
+            + "editor to see them.";
+
         InlinePanel.Visibility = inline ? Visibility.Visible : Visibility.Collapsed;
         AudienceWarning.IsOpen = inline && ChordsOnSlideToggle.IsOn;
     }

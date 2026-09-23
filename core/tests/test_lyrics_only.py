@@ -208,7 +208,9 @@ def test_a_chart_with_chords_still_gets_its_chart_page(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    result = convert(path, tmp_path / "out" / "chords.pro")
+    result = convert(
+        path, tmp_path / "out" / "chords.pro", ConversionConfig(chord_delivery=ChordDelivery.BOTH)
+    )
 
     assert result.plan.song.chord_count == 2
     assert result.chart_pages, "a song with chords still gets a chord chart"

@@ -395,6 +395,146 @@ _INSTRUCTION_WORDS: Final[frozenset[str]] = frozenset(
     }
 )
 
+#: Words that make a line a sentence rather than a label. A performance note names a
+#: thing to do - "Drum break", "Repeat until fade", "HOLD G X 8 BARS" - and has nobody
+#: doing it; a lyric almost always has a person, a thing, or a preposition tying two
+#: of them together. One of these is enough to settle it, at any length: "We break the
+#: power of death" is a line of a song, and "Hold me now" is another.
+_SENTENCE_WORDS: Final[frozenset[str]] = frozenset(
+    {
+        "i",
+        "im",
+        "ive",
+        "id",
+        "ill",
+        "me",
+        "my",
+        "mine",
+        "we",
+        "weve",
+        "were",
+        "well",
+        "us",
+        "our",
+        "ours",
+        "you",
+        "youre",
+        "youve",
+        "your",
+        "yours",
+        "he",
+        "hes",
+        "him",
+        "his",
+        "she",
+        "shes",
+        "her",
+        "hers",
+        "they",
+        "theyre",
+        "them",
+        "their",
+        "theirs",
+        "it",
+        "its",
+        "the",
+        "a",
+        "an",
+        "this",
+        "that",
+        "these",
+        "those",
+        "of",
+        "to",
+        "and",
+        "is",
+        "are",
+        "was",
+        "be",
+        "been",
+        "am",
+        "every",
+        "each",
+        "any",
+        "no",
+        "not",
+        "never",
+        "nothing",
+        "everything",
+        "something",
+        "anything",
+        "someone",
+        "everyone",
+        "nobody",
+        # Contractions reach here with the apostrophe already stripped.
+        "cant",
+        "dont",
+        "wont",
+        "aint",
+        "isnt",
+        "arent",
+        "didnt",
+        "wasnt",
+        "werent",
+        "havent",
+        "hasnt",
+        "couldnt",
+        "wouldnt",
+        "shouldnt",
+    }
+)
+
+#: Weaker: common enough in prose to count, common enough in a note ("no click", "to
+#: the top") not to count on its own. They only speak up on a line long enough to be
+#: a sentence.
+_PROSE_WORDS: Final[frozenset[str]] = frozenset(
+    {
+        "in",
+        "on",
+        "at",
+        "for",
+        "with",
+        "from",
+        "by",
+        "into",
+        "over",
+        "through",
+        "who",
+        "what",
+        "when",
+        "where",
+        "there",
+        "here",
+        "all",
+        "so",
+        "but",
+        "as",
+        "will",
+        "can",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+    }
+)
+
+#: A note that carries one of these is a note whatever else is on the line: no lyric
+#: says them.
+_ALWAYS_INSTRUCTION: Final[frozenset[str]] = frozenset(
+    {"tacet", "acappella", "cappella", "rit", "fermata", "downbeat", "modulate", "spont"}
+)
+
+#: The entries above that are two words. A single-word scan never matches those, so
+#: they are looked for in the line as a whole.
+_INSTRUCTION_PHRASES: Final[frozenset[str]] = frozenset(
+    phrase for phrase in _INSTRUCTION_WORDS if " " in phrase
+)
+
+#: "x3", "3x", "X 4" - a whole line of it and nothing else.
+_BARE_REPEAT_RE: Final[re.Pattern[str]] = re.compile(r"^[xX]\s?\d{1,2}$|^\d{1,2}\s?[xX]$")
+
 _TRAILING_PAREN_RE: Final[re.Pattern[str]] = re.compile(r"\s+\(([^()]{1,30})\)\s*$")
 _TRAILING_COUNT_RE: Final[re.Pattern[str]] = re.compile(r"\s+([xX]\s?\d{1,2})\s*$")
 _WRAPPED_RE: Final[re.Pattern[str]] = re.compile(r"^\s*[\(\[]([^()\[\]]{1,40})[\)\]]\s*$")
@@ -429,20 +569,42 @@ class ClassifiedLine:
 
 
 def is_instruction(text: str) -> bool:
-    """A performance note ("Hold G X 8 BARS"), not a lyric and not a chord."""
+    """A performance note ("Hold G X 8 BARS"), not a lyric and not a chord.
+
+    One word off the list is not enough on its own, and finding that out cost somebody
+    a line of a song: "We break the power of death" contains "break", and went into the
+    notes instead of onto the screen. So a line that reads as a *sentence* is a lyric
+    whatever words it contains - a pronoun or an article says somebody is doing
+    something, which a performance note never does.
+    """
     stripped = text.strip()
     if not stripped:
         return False
     wrapped = _WRAPPED_RE.match(stripped)
     if wrapped:
         stripped = wrapped.group(1).strip()
-    words = re.findall(r"[A-Za-z]+", stripped.lower())
+    # A bare repeat marker has no words in it at all, so it has to be caught before
+    # the word tests. On its own line, "(x3)" is furniture, not something to sing.
+    if _BARE_REPEAT_RE.match(stripped):
+        return True
+    words = [word.replace("'", "") for word in re.findall(r"[A-Za-z']+", stripped.lower())]
     if not words or len(words) > 8:
         return False
+    if any(word in _ALWAYS_INSTRUCTION for word in words):
+        return True
+    if len(stripped) > 40:
+        # "Bars of gold" is a lyric; an instruction is short and mostly not prose.
+        return False
+    # A two-word note says what it is: nothing sings "key change" or "no click", so
+    # the sentence test below does not get to argue with one.
+    joined = " ".join(words)
+    if any(phrase in joined for phrase in _INSTRUCTION_PHRASES):
+        return True
     if not any(word in _INSTRUCTION_WORDS for word in words):
         return False
-    # "Bars of gold" is a lyric; an instruction is short and mostly not prose.
-    return len(stripped) <= 40
+    if any(word in _SENTENCE_WORDS for word in words):
+        return False
+    return not (len(words) >= 4 and any(word in _PROSE_WORDS for word in words))
 
 
 def split_trailing_instruction(text: str) -> tuple[str, str]:

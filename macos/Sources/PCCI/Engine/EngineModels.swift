@@ -155,22 +155,35 @@ enum ChordDelivery: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var explanation: String {
+    func explanation(for target: ExportTarget) -> String {
         switch self {
         case .none:
             return "The presentation carries the words only."
         case .notes:
-            return "A chord-over-lyric block in each slide's notes. Add a Current Slide "
-                + "Notes element to your stage layout."
+            return "A chord-over-lyric block in each slide's notes. Add a "
+                + (target == .freeshow ? "Slide Notes" : "Current Slide Notes")
+                + " element to your stage layout."
         case .chart:
-            return "The whole chart as page images. Add a Chord Chart element."
+            return target == .freeshow
+                ? "FreeShow has no chord-chart element, so this route writes nothing. "
+                    + "Pick one of the others."
+                : "The whole chart as page images. Add a Chord Chart element."
         case .both:
-            return "Both of the above, so either stage element works."
+            return target == .freeshow
+                ? "Only the notes half of this reaches FreeShow: it has no chord-chart "
+                    + "element."
+                : "Both of the above, so either stage element works."
         case .inline, .inlineAndNotes:
-            return "Chords attached to the words themselves, which ProPresenter's own "
+            return "Chords attached to the words themselves, which \(target.title)'s own "
                 + "Chords element reads - and the only way it can transpose them or "
                 + "show Nashville numbers."
         }
+    }
+
+    /// Whether the chosen format can do what this route asks of it.
+    func isSupported(by target: ExportTarget) -> Bool {
+        guard self == .chart || self == .both else { return true }
+        return target.rendersChartPages
     }
 
     /// Whether this route writes chords into the slide's own text.
@@ -184,13 +197,54 @@ enum ChordDelivery: String, Codable, CaseIterable, Identifiable {
         self == .notes || self == .both || self == .inlineAndNotes
     }
 
-    /// What has not been established about it, or nil when there is nothing to warn about.
-    var caution: String? {
+    /// What is worth knowing before picking it, or nil when there is nothing to say.
+    func caution(for target: ExportTarget) -> String? {
         guard isExperimental else { return nil }
-        return "The chords are stored on the words, which is what ProPresenter's Chords "
+        return "The chords are stored on the words, which is what \(target.title)'s Chords "
             + "stage element reads. Leave \u{201C}Draw them on the slide\u{201D} off "
             + "unless you want them on the audience screen as well."
     }
+}
+
+/// Which program the file is being written for.
+///
+/// Both formats are written natively rather than through a common subset: a `.pro` is
+/// ProPresenter's own Protocol Buffers, a `.show` is the JSON FreeShow saves. They are
+/// not the same set of features, which is what `rendersChartPages` is about.
+enum ExportTarget: String, Codable, CaseIterable, Identifiable {
+    case propresenter
+    case freeshow
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .propresenter: return "ProPresenter 7"
+        case .freeshow: return "FreeShow"
+        }
+    }
+
+    var fileExtension: String {
+        switch self {
+        case .propresenter: return "pro"
+        case .freeshow: return "show"
+        }
+    }
+
+    var explanation: String {
+        switch self {
+        case .propresenter:
+            return "A .pro presentation: named groups, an arrangement, and the chords "
+                + "on the stage screen."
+        case .freeshow:
+            return "A .show file for FreeShow, with the same groups and the chords on "
+                + "its own Chords stage element. FreeShow has no chord-chart element, "
+                + "so that one route has nothing to write there."
+        }
+    }
+
+    /// Whether this format can point a slide at a rendered page of the chart.
+    var rendersChartPages: Bool { self == .propresenter }
 }
 
 enum ChordPlacementStyle: String, Codable, CaseIterable, Identifiable {
@@ -225,6 +279,8 @@ enum ChordPlacementStyle: String, Codable, CaseIterable, Identifiable {
 struct EngineConfig: Codable, Hashable {
     var linesPerSlide: Int
     var balanceLastSlide: Bool
+    /// Which program the file is for. Decides the writer and the file extension.
+    var exportTarget: ExportTarget = .propresenter
     var chordDelivery: ChordDelivery
     var chordPlacement: ChordPlacementStyle
     /// Whether ProPresenter paints the inline chords onto the text element - which is
@@ -237,6 +293,7 @@ struct EngineConfig: Codable, Hashable {
         case chordDelivery = "chord_delivery"
         case chordPlacement = "chord_placement"
         case chordsOnSlide = "chords_on_slide"
+        case exportTarget = "export_target"
     }
 
     init(
@@ -244,13 +301,15 @@ struct EngineConfig: Codable, Hashable {
         balanceLastSlide: Bool,
         chordDelivery: ChordDelivery,
         chordPlacement: ChordPlacementStyle,
-        chordsOnSlide: Bool = false
+        chordsOnSlide: Bool = false,
+        exportTarget: ExportTarget = .propresenter
     ) {
         self.linesPerSlide = linesPerSlide
         self.balanceLastSlide = balanceLastSlide
         self.chordDelivery = chordDelivery
         self.chordPlacement = chordPlacement
         self.chordsOnSlide = chordsOnSlide
+        self.exportTarget = exportTarget
     }
 
     /// Written out rather than synthesised so that a plan from an engine predating
@@ -262,6 +321,8 @@ struct EngineConfig: Codable, Hashable {
         chordDelivery = try values.decode(ChordDelivery.self, forKey: .chordDelivery)
         chordPlacement = try values.decode(ChordPlacementStyle.self, forKey: .chordPlacement)
         chordsOnSlide = try values.decodeIfPresent(Bool.self, forKey: .chordsOnSlide) ?? false
+        exportTarget = try values.decodeIfPresent(ExportTarget.self, forKey: .exportTarget)
+            ?? .propresenter
     }
 }
 

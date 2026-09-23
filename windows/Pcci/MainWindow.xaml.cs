@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
@@ -17,6 +18,16 @@ namespace Pcci;
 public sealed partial class MainWindow : Window
 {
     public AppState State { get; } = new();
+
+    /// <summary>
+    /// The document whose own notifications this window is listening to.
+    ///
+    /// The panes are driven from AppState, but a chart can change underneath it: the
+    /// Back to review button on the exported screen sets the document's stage and
+    /// nothing else, so without this the window kept showing the exported screen and
+    /// the button looked broken.
+    /// </summary>
+    private ChartDocument? _watched;
 
     public MainWindow()
     {
@@ -63,8 +74,27 @@ public sealed partial class MainWindow : Window
         if (System.IO.File.Exists(icon)) AppWindow.SetIcon(icon);
     }
 
+    private void WatchSelectedDocument()
+    {
+        var document = State.Selected;
+        if (ReferenceEquals(_watched, document)) return;
+        if (_watched is not null) _watched.PropertyChanged -= OnSelectedDocumentChanged;
+        _watched = document;
+        if (_watched is not null) _watched.PropertyChanged += OnSelectedDocumentChanged;
+    }
+
+    private void OnSelectedDocumentChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName is nameof(ChartDocument.Stage) or nameof(ChartDocument.Plan)
+            or nameof(ChartDocument.Result) or nameof(ChartDocument.Error))
+        {
+            UpdatePanes();
+        }
+    }
+
     private void UpdatePanes()
     {
+        WatchSelectedDocument();
         var document = State.Selected;
         TitleText.Text = document?.Title ?? "";
 
@@ -228,7 +258,12 @@ public sealed partial class MainWindow : Window
             SuggestedFileName = suggestedName,
             SuggestedStartLocation = PickerLocationId.DocumentsLibrary
         };
-        picker.FileTypeChoices.Add("ProPresenter presentation", new List<string> { ".pro" });
+        // Only the format being written: a picker offering both would let somebody
+        // save a FreeShow show as .pro, and the engine would rename it anyway.
+        var extension = AppState.ExtensionFor(State.ExportTarget);
+        var label = $"{AppState.NameFor(State.ExportTarget)} "
+                    + (extension == ".show" ? "show" : "presentation");
+        picker.FileTypeChoices.Add(label, new List<string> { extension });
         InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
         var file = await picker.PickSaveFileAsync();
         return file?.Path;

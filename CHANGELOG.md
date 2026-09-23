@@ -12,8 +12,38 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.3.1] — 2026-09-23
+
+### Fixed
+
+- **Back to review did nothing on Windows.** The button set the chart back to the
+  review stage, but the window only watched the app's own settings for changes, not
+  the chart's, so it went on showing the export screen. It watches the chart now,
+  which also covers anything else that changes one behind the window's back. The Mac
+  app was never affected.
+
+## [0.3.0] — 2026-09-23
+
 ### Added
 
+- **FreeShow as well as ProPresenter.** One setting, **Write files for**, and the same
+  chart comes out as a `.show` instead of a `.pro` — written natively, not exported
+  through some common subset: the same named groups in your own FreeShow colours, a
+  long section as a parent slide with children, a repeated chorus as one slide played
+  three times, and the chords stored on the words for FreeShow's own Chords stage
+  element. Its slide notes work too. It has no chord-chart element, and the settings
+  screen says so rather than writing nothing and leaving you to find out. FreeShow will
+  even show the chords of an intro, which ProPresenter cannot: there are no words there
+  to attach them to. Every claim about the format is read out of FreeShow's own source
+  and written down in `docs/FORMAT_NOTES.md` §6.
+- **A list of every domain the program contacts**, in
+  [docs/NETWORK.md](https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/blob/main/docs/NETWORK.md),
+  for anyone whose school or office blocks the search. It says what each one is for, which are optional, what is sent (the words you
+  typed, and nothing else), and has the list in a block you can paste into a ticket. A
+  test keeps it honest: a source added to the engine without its domain in that file
+  fails the build.
 - **A Settings window on macOS** (⌘,). The Mac app had none — chord delivery was fixed
   in code — so the routes below could only be chosen from the command line.
 - **Search filters**: artist, album and year, in both apps. The artist is not only a
@@ -21,10 +51,10 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
   never reaches.
 - **Show more results.** Search stopped at one batch with no way to go further, so a
   song further down the list was simply unreachable.
-- **`--chords inline`**, an opt-in third route that writes chords into the slide's own
-  text so ProPresenter's built-in **Chords** stage element can read them — the only
-  route that can transpose or switch to Nashville numbers. Off by default. See
-  `docs/STAGE_SETUP.md`.
+- **`--chords inline`**, a third route that writes chords into the slide's own text so
+  the built-in **Chords** stage element can read them — the only route that can
+  transpose or switch to Nashville numbers. Now part of the default; see Changed below
+  and `docs/STAGE_SETUP.md`.
 - **A plus button at the top of the song list.** The search box and the drop target
   only show with nothing selected, so adding a second song used to mean clearing the
   first. On Windows the file picker moved to Ctrl+O, where it was going to be looked
@@ -35,8 +65,34 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
   `PCCI_MUSIXMATCH_KEY`, and its free plan returns only part of each song — the import
   tells you when that has happened rather than handing over a third of the words.
 
+### Changed
+
+- **The Chords stage element is now the default**, together with the slide notes
+  (`--chords inline+notes`). It was `notes` and a rendered chord chart, which meant
+  choosing the good route by hand every time and a folder of PNGs nobody asked for.
+  Both defaults are stage-only; nothing reaches the audience screen either way.
+
 ### Fixed
 
+- **A line of the song was read as a note to the band and never reached a slide.**
+  Any short line containing one word off the performance-instruction list - "break",
+  "hold", "stop", "times" - was treated as an instruction, so "We break the power of
+  death" went into the notes instead of onto the screen. A line that reads as a
+  sentence is now a lyric whatever words it contains: a pronoun, an article or a
+  determiner says somebody is doing something, which "Drum break" and "HOLD G X 8
+  BARS" never do. Capitals no longer outvote that, because some charts are typed
+  entirely in capitals.
+- **A mistyped chord was projected as a lyric.** One real chart writes `Dmd/E` on a
+  line where every sibling line carries a plain `Dm`, `F` or `B/E`. It is not a chord,
+  so the line was read as words and the typo went on the audience screen. A line whose
+  every token is *built* like a chord - starting on a root, short, carrying a slash
+  bass or an accidental or an extension number - is a chart with a typo in it, and is
+  kept exactly as written with a warning naming what pcci did not recognise. `God/Man`
+  and `Bed` are still words.
+- **A long chord was projected as a lyric.** `Bbsus4/D` and `Cmaj7/G` are longer than
+  the guard that stops long English words being read as chords, so a line of nothing
+  but those went to the audience screen. Length cannot make a chord into a word.
+- A line reading only `(x3)` was projected. It is furniture, not something to sing.
 - An imported song could come back **missing its first section**. Lyrics sites run
   their own page furniture — a contributor count and the song's name — straight into
   the first heading with no line break, so the heading was really the tail of a long
@@ -138,6 +194,8 @@ First release.
 - A Windows installer that asks where to install and offers a desktop shortcut, plus a
   portable zip.
 
-[Unreleased]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.1.2...v0.3.0
 [0.2.0]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/releases/tag/v0.1.0
