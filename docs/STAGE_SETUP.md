@@ -6,8 +6,8 @@ only need to set up the one you prefer.
 
 | Route | What it is | Set-up |
 |---|---|---|
-| **Chords element** | The chord stored on the word it is played on | One stage-layout element. Default, with the notes. |
-| **Slide notes** | A monospaced chord-over-lyric block in each slide's notes | One stage-layout element. Nothing to copy. Default, with the above. |
+| **Chords element** | The chord stored on the word it is played on | One stage-layout element. This is the default. |
+| **Slide notes** | A monospaced chord-over-lyric block in each slide's notes | One stage-layout element. Nothing to copy. |
 | **Chord chart** | The whole chart as page images, attached to the slides | One stage-layout element, plus copying the images into ProPresenter once. ProPresenter only. |
 
 No route puts anything on the audience output. `pcci` never hides chords in an
@@ -19,10 +19,11 @@ notes both work there; the chord chart does not exist.
 
 ---
 
-## Route A — Slide notes (on by default)
+## Route A — Slide notes
 
-This is the route that works everywhere, with nothing to install or copy. A conversion
-writes it unless you turn it off, alongside Route C.
+The route that works everywhere, with nothing to install or copy. Ask for it with
+`--chords notes`, or **Slide notes only** in the apps; `--chords inline+notes` writes it
+alongside Route C, for a stage layout that has both elements on it.
 
 1. In ProPresenter, open **Screens → Stage Layouts** (or the Stage tab of the
    Screens window).
@@ -66,7 +67,7 @@ Amazing grace how sweet the sound
 
 ---
 
-## Route C — The Chords element (on by default)
+## Route C — The Chords element (the default)
 
 ProPresenter also has a **Chords** stage element, with a Notation menu offering Chords,
 Numbers, Numerals and Do-Re-Mi. That element does not read the notes or the chart. It
@@ -74,17 +75,16 @@ reads chords stored *inside the slide's own text* — each chord attached to the
 is played on — which is the only one of the three routes that can transpose or
 renotate, because the chords are data rather than a picture or a block of text.
 
-`pcci` writes that by default, together with the notes of Route A, so a stage layout
-with either element on it gets the chords:
+`pcci` writes that by default:
 
 ```bash
-pcci convert "My Song.docx" -o "My Song.pro"                       # inline+notes
-pcci convert "My Song.docx" -o "My Song.pro" --chords inline       # this route alone
+pcci convert "My Song.docx" -o "My Song.pro"                          # this route
+pcci convert "My Song.docx" -o "My Song.pro" --chords inline+notes    # and the notes
 ```
 
 Then add the **Chords** element to your stage layout. In the desktop apps the setting is
-**In the slide text, and slide notes**, with **In the slide text (Chords element)** for
-this route on its own.
+**In the slide text (Chords element)**, with **In the slide text, and slide notes** for
+both at once.
 
 ### Keeping them off the audience screen
 

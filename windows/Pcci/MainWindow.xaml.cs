@@ -192,6 +192,7 @@ public sealed partial class MainWindow : Window
     private async void OnConvertAll(object sender, RoutedEventArgs args)
     {
         if (State.Documents.Count == 0) return;
+        if (!await SettingsDialog.ConfirmAsync(State, RootGrid.XamlRoot)) return;
 
         var picker = new FolderPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
         // A FolderPicker with no filter returns nothing at all, which looks like a

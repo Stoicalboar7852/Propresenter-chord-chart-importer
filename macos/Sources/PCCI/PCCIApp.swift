@@ -49,7 +49,7 @@ struct PCCIApp: App {
                     Task { await state.importFromClipboard() }
                 }
                 .keyboardShortcut("v", modifiers: [.command, .shift])
-                Button("Convert All…") { state.chooseFolderAndConvertAll() }
+                Button("Convert All…") { state.beginConvertAll() }
                     .keyboardShortcut("e", modifiers: [.command, .shift])
                     .disabled(state.documents.isEmpty)
             }

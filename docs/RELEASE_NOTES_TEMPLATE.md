@@ -50,10 +50,11 @@ button in the top right) says what it saw, and issues are welcome.
 
 ## Setting up your stage screen
 
-Chords never appear on the audience output. To see them on stage, add a **Chords** or a
-**Current Slide Notes** element to your stage layout — a conversion feeds both of those
-out of the box. In FreeShow they are a **Slide Text** item with Chords turned on, and a
-**Slide Notes** item. `docs/STAGE_SETUP.md` has the steps for either program.
+Chords never appear on the audience output. To see them on stage, add a **Chords**
+element to your stage layout — that is the route a conversion writes out of the box. In
+FreeShow it is a **Slide Text** item with Chords turned on. There is a slide-notes route
+as well, for a layout built around that instead; `docs/STAGE_SETUP.md` has the steps for
+either program.
 
 ## Blocked at school or work?
 

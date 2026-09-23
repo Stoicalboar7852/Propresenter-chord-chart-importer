@@ -7,107 +7,127 @@
     CloseButtonText="Done"
     DefaultButton="Close">
 
-    <StackPanel Width="420" Spacing="14">
+    <!-- Scrolling, because the list grew: without this the last setting and the engine
+         path sat below the bottom of the dialog with no way to reach them. The height
+         is capped rather than fitted so the dialog stays the same size on a small
+         laptop screen as on a large one. -->
+    <ScrollViewer
+        MaxHeight="460"
+        HorizontalScrollMode="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <StackPanel Width="400" Padding="0,0,12,0" Spacing="14">
 
-        <ComboBox
-            x:Name="ExportTargetCombo"
-            HorizontalAlignment="Stretch"
-            Header="Write files for"
-            SelectionChanged="OnExportTargetChanged">
-            <ComboBoxItem Content="ProPresenter 7 (.pro)" Tag="propresenter" />
-            <ComboBoxItem Content="FreeShow (.show)" Tag="freeshow" />
-        </ComboBox>
-
-        <TextBlock
-            x:Name="ExportTargetNote"
-            Foreground="{ThemeResource PcciSecondaryTextBrush}"
-            Style="{StaticResource CaptionTextBlockStyle}"
-            TextWrapping="Wrap" />
-
-        <ComboBox
-            x:Name="ChordDeliveryCombo"
-            HorizontalAlignment="Stretch"
-            Header="How chords reach the stage screen"
-            SelectionChanged="OnChordDeliveryChanged">
-            <ComboBoxItem Content="Notes and chart" Tag="both" />
-            <ComboBoxItem Content="Slide notes only" Tag="notes" />
-            <ComboBoxItem Content="Chord chart only" Tag="chart" />
-            <ComboBoxItem Content="In the slide text (Chords element)" Tag="inline" />
-            <ComboBoxItem Content="In the slide text, and slide notes" Tag="inline+notes" />
-            <ComboBoxItem Content="No chords" Tag="none" />
-        </ComboBox>
-
-        <!-- Shown when the chosen route asks for something the chosen format cannot
-             do: FreeShow has no chord-chart element. -->
-        <InfoBar
-            x:Name="UnsupportedRoute"
-            IsClosable="False"
-            IsOpen="False"
-            Severity="Warning"
-            Title="This route does nothing here" />
-
-        <!-- Shown only for the two routes that write chords into the slide's own
-             text. That is the only route ProPresenter's own Chords element reads, and
-             the only one that can transpose. Drawing them is a separate switch because
-             on a real stage it painted them onto the audience output too. -->
-        <StackPanel x:Name="InlinePanel" Spacing="8" Visibility="Collapsed">
-            <InfoBar
-                x:Name="InlineInfo"
-                IsClosable="False"
-                IsOpen="True"
-                Severity="Informational"
-                Title="Read by the Chords stage element" />
-
-            <ToggleSwitch
-                x:Name="ChordsOnSlideToggle"
-                Header="Draw them on the slide"
-                Toggled="OnChordsOnSlideToggled" />
+            <ComboBox
+                x:Name="ExportTargetCombo"
+                HorizontalAlignment="Stretch"
+                Header="Write files for"
+                SelectionChanged="OnExportTargetChanged">
+                <ComboBoxItem Content="ProPresenter 7 (.pro)" Tag="propresenter" />
+                <ComboBoxItem Content="FreeShow (.show)" Tag="freeshow" />
+            </ComboBox>
 
             <TextBlock
+                x:Name="ExportTargetNote"
                 Foreground="{ThemeResource PcciSecondaryTextBrush}"
                 Style="{StaticResource CaptionTextBlockStyle}"
-                Text="This paints the chords onto the lyric text, which puts them on the audience screen as well as the stage. Off is what you want unless the congregation is meant to see them."
                 TextWrapping="Wrap" />
 
+            <ComboBox
+                x:Name="ChordDeliveryCombo"
+                HorizontalAlignment="Stretch"
+                Header="How chords reach the stage screen"
+                SelectionChanged="OnChordDeliveryChanged">
+                <ComboBoxItem Content="Notes and chart" Tag="both" />
+                <ComboBoxItem Content="Slide notes only" Tag="notes" />
+                <ComboBoxItem Content="Chord chart only" Tag="chart" />
+                <ComboBoxItem Content="In the slide text (Chords element)" Tag="inline" />
+                <ComboBoxItem Content="In the slide text, and slide notes" Tag="inline+notes" />
+                <ComboBoxItem Content="No chords" Tag="none" />
+            </ComboBox>
+
+            <!-- Shown when the chosen route asks for something the chosen format cannot
+                 do: FreeShow has no chord-chart element. -->
             <InfoBar
-                x:Name="AudienceWarning"
+                x:Name="UnsupportedRoute"
                 IsClosable="False"
                 IsOpen="False"
-                Message="Chords will be drawn wherever this slide appears, including the audience output."
                 Severity="Warning"
-                Title="Not just the stage" />
+                Title="This route does nothing here" />
+
+            <!-- Shown only for the two routes that write chords into the slide's own
+                 text. That is the only route ProPresenter's own Chords element reads, and
+                 the only one that can transpose. Drawing them is a separate switch because
+                 on a real stage it painted them onto the audience output too. -->
+            <StackPanel x:Name="InlinePanel" Spacing="8" Visibility="Collapsed">
+                <InfoBar
+                    x:Name="InlineInfo"
+                    IsClosable="False"
+                    IsOpen="True"
+                    Severity="Informational"
+                    Title="Read by the Chords stage element" />
+
+                <ToggleSwitch
+                    x:Name="ChordsOnSlideToggle"
+                    Header="Draw them on the slide"
+                    Toggled="OnChordsOnSlideToggled" />
+
+                <TextBlock
+                    Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="This paints the chords onto the lyric text, which puts them on the audience screen as well as the stage. Off is what you want unless the congregation is meant to see them."
+                    TextWrapping="Wrap" />
+
+                <InfoBar
+                    x:Name="AudienceWarning"
+                    IsClosable="False"
+                    IsOpen="False"
+                    Message="Chords will be drawn wherever this slide appears, including the audience output."
+                    Severity="Warning"
+                    Title="Not just the stage" />
+            </StackPanel>
+
+            <ComboBox
+                x:Name="ChordPlacementCombo"
+                HorizontalAlignment="Stretch"
+                Header="What the slide notes contain"
+                SelectionChanged="OnChordPlacementChanged">
+                <ComboBoxItem Content="Chords, aligned to the words" Tag="chords_only" />
+                <ComboBoxItem Content="Chords in one row (largest on stage)" Tag="chords_inline" />
+                <ComboBoxItem Content="Chords above the lyrics" Tag="above" />
+                <ComboBoxItem Content="Chords below the lyrics" Tag="below" />
+            </ComboBox>
+
+            <ToggleSwitch
+                x:Name="ChordProToggle"
+                Header="Also write a ChordPro (.cho) file"
+                Toggled="OnChordProToggled" />
+
+            <ToggleSwitch
+                x:Name="AskToggle"
+                Header="Ask for these before every export"
+                Toggled="OnAskToggled" />
+
+            <TextBlock
+                x:Name="AskNote"
+                Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                TextWrapping="Wrap" />
+
+            <ComboBox
+                x:Name="ThemeCombo"
+                HorizontalAlignment="Stretch"
+                Header="Appearance"
+                SelectionChanged="OnThemeChanged">
+                <ComboBoxItem Content="Follow the system" Tag="default" />
+                <ComboBoxItem Content="Light" Tag="light" />
+                <ComboBoxItem Content="Dark" Tag="dark" />
+            </ComboBox>
+
+            <TextBlock
+                x:Name="EngineText"
+                Foreground="{ThemeResource PcciSecondaryTextBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                TextWrapping="Wrap" />
         </StackPanel>
-
-        <ComboBox
-            x:Name="ChordPlacementCombo"
-            HorizontalAlignment="Stretch"
-            Header="What the slide notes contain"
-            SelectionChanged="OnChordPlacementChanged">
-            <ComboBoxItem Content="Chords, aligned to the words" Tag="chords_only" />
-            <ComboBoxItem Content="Chords in one row (largest on stage)" Tag="chords_inline" />
-            <ComboBoxItem Content="Chords above the lyrics" Tag="above" />
-            <ComboBoxItem Content="Chords below the lyrics" Tag="below" />
-        </ComboBox>
-
-        <ToggleSwitch
-            x:Name="ChordProToggle"
-            Header="Also write a ChordPro (.cho) file"
-            Toggled="OnChordProToggled" />
-
-        <ComboBox
-            x:Name="ThemeCombo"
-            HorizontalAlignment="Stretch"
-            Header="Appearance"
-            SelectionChanged="OnThemeChanged">
-            <ComboBoxItem Content="Follow the system" Tag="default" />
-            <ComboBoxItem Content="Light" Tag="light" />
-            <ComboBoxItem Content="Dark" Tag="dark" />
-        </ComboBox>
-
-        <TextBlock
-            x:Name="EngineText"
-            Foreground="{ThemeResource PcciSecondaryTextBrush}"
-            Style="{StaticResource CaptionTextBlockStyle}"
-            TextWrapping="Wrap" />
-    </StackPanel>
+    </ScrollViewer>
 </ContentDialog>

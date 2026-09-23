@@ -125,9 +125,11 @@ def test_text_element_style_follows_the_config(parsed) -> None:
     assert not element.fill.enable, "a filled box would paint over the background"
 
 
-def test_notes_hold_the_chord_block(parsed) -> None:
-    """By default the notes carry chords only — the lyrics are already on the slide."""
-    notes = parsed.cues[0].actions[0].slide.presentation.notes.rtf_data.decode()
+def test_notes_hold_the_chord_block(fixtures_dir: Path) -> None:
+    """The notes carry chords only — the lyrics are already on the slide."""
+    config = ConversionConfig(chord_delivery=ChordDelivery.INLINE_NOTES)
+    presentation = build_presentation(plan_slides(analyze(fixtures_dir / CHART), config))
+    notes = presentation.cues[0].actions[0].slide.presentation.notes.rtf_data.decode()
     assert notes.startswith("{\\rtf1")
     assert "fmodern" in notes, "notes must use a fixed-pitch font or chords misalign"
     assert "Asus" in notes
@@ -135,7 +137,10 @@ def test_notes_hold_the_chord_block(parsed) -> None:
 
 
 def test_notes_can_include_the_lyrics(fixtures_dir: Path) -> None:
-    config = ConversionConfig(chord_placement=ChordPlacementStyle.ABOVE)
+    config = ConversionConfig(
+        chord_delivery=ChordDelivery.INLINE_NOTES,
+        chord_placement=ChordPlacementStyle.ABOVE,
+    )
     plan = plan_slides(analyze(fixtures_dir / CHART), config)
     presentation = build_presentation(plan)
     notes = presentation.cues[0].actions[0].slide.presentation.notes.rtf_data.decode()

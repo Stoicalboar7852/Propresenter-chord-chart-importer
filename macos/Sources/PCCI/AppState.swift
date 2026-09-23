@@ -52,21 +52,37 @@ final class ChartDocument: Identifiable {
 
 /// The whole app's state. Everything the views read lives here, and every engine call
 /// goes through it so no view ever touches a process.
+/// An export that has been asked for and is waiting on the settings screen.
+enum PendingExport: Equatable {
+    case single(ChartDocument.ID)
+    case all
+}
+
 @MainActor
 @Observable
 final class AppState {
     var documents: [ChartDocument] = []
     var selectedID: ChartDocument.ID?
-    // Chords into the slide text for the Chords stage element, and into the notes as
-    // well: both are stage-only, and a layout with one of the two elements on it still
-    // gets the chords.
+    // Chords into the slide text, which is what both programs' Chords stage element
+    // reads. Stage-only: the switch that would draw them on the audience screen is
+    // `chordsOnSlide`, and it is off. Overwritten from the saved settings at launch.
     var config = EngineConfig(
         linesPerSlide: 4,
         balanceLastSlide: true,
-        chordDelivery: .inlineAndNotes,
+        chordDelivery: .inline,
         chordPlacement: .chordsOnly
-    )
-    var writeChordPro = false
+    ) {
+        didSet { remember() }
+    }
+    var writeChordPro = false {
+        didSet { remember() }
+    }
+    /// Whether an export stops to show the settings first.
+    var askBeforeExport = true {
+        didSet { remember() }
+    }
+    /// The export waiting on that screen, or nil when nothing is waiting.
+    var pendingExport: PendingExport?
     var logLines: [EngineLogLine] = []
     var showLog = false
     var banner: EngineError?
@@ -301,6 +317,36 @@ final class AppState {
         Task { await replan(document) }
     }
 
+    init() {
+        let saved = Preferences.load()
+        loadingPreferences = true
+        config.exportTarget = saved.exportTarget
+        config.chordDelivery = saved.chordDelivery
+        config.chordPlacement = saved.chordPlacement
+        config.chordsOnSlide = saved.chordsOnSlide
+        config.linesPerSlide = saved.linesPerSlide
+        writeChordPro = saved.writeChordPro
+        askBeforeExport = saved.askBeforeExport
+        loadingPreferences = false
+    }
+
+    /// Guards the setters above while the saved settings are being read in, so that
+    /// loading does not immediately write back what it just read.
+    private var loadingPreferences = false
+
+    private func remember() {
+        guard !loadingPreferences else { return }
+        Preferences(
+            exportTarget: config.exportTarget,
+            chordDelivery: config.chordDelivery,
+            chordPlacement: config.chordPlacement,
+            chordsOnSlide: config.chordsOnSlide,
+            writeChordPro: writeChordPro,
+            linesPerSlide: config.linesPerSlide,
+            askBeforeExport: askBeforeExport
+        ).save()
+    }
+
     /// Lines per slide is one setting for the whole queue, not a per-chart one, so
     /// changing it re-plans every chart already read. Previews and a batch export then
     /// cannot disagree about what a slide holds.
@@ -346,6 +392,69 @@ final class AppState {
     }
 
     // MARK: Converting the whole queue
+
+    // MARK: Exporting
+
+    /// Start an export of one chart: the settings first, if they are being asked for.
+    func beginExport(_ document: ChartDocument) {
+        guard askBeforeExport else {
+            chooseDestinationAndExport(document)
+            return
+        }
+        pendingExport = .single(document.id)
+    }
+
+    /// The same for the whole queue.
+    func beginConvertAll() {
+        guard !documents.isEmpty else { return }
+        guard askBeforeExport else {
+            chooseFolderAndConvertAll()
+            return
+        }
+        pendingExport = .all
+    }
+
+    /// The settings screen was accepted. `remember` is the user asking not to be
+    /// stopped again, and is only acted on here - somebody who ticks the box and then
+    /// cancels has agreed to nothing.
+    func confirmPendingExport(remember: Bool) {
+        let pending = pendingExport
+        pendingExport = nil
+        if remember { askBeforeExport = false }
+        guard let pending else { return }
+        // On the next turn of the run loop: a modal panel opened while the sheet is
+        // still going away gets a window that is on its way out.
+        Task { @MainActor in
+            switch pending {
+            case .single(let id):
+                guard let document = documents.first(where: { $0.id == id }) else { return }
+                chooseDestinationAndExport(document)
+            case .all:
+                chooseFolderAndConvertAll()
+            }
+        }
+    }
+
+    func cancelPendingExport() {
+        pendingExport = nil
+    }
+
+    /// Ask where one presentation should go, then write it.
+    ///
+    /// The panel lives here rather than in a view for the same reason the folder one
+    /// does: more than one place offers the action, and the file name and the message
+    /// both depend on settings this object owns.
+    func chooseDestinationAndExport(_ document: ChartDocument) {
+        let target = config.exportTarget
+        let panel = NSSavePanel()
+        let name =
+            document.plan?.song.title ?? document.url.deletingPathExtension().lastPathComponent
+        panel.nameFieldStringValue = "\(name).\(target.fileExtension)"
+        panel.message = "Where should the \(target.title) file go?"
+        panel.canCreateDirectories = true
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        Task { await export(document, to: url) }
+    }
 
     /// Ask where the batch should go, then convert the whole queue into it.
     ///

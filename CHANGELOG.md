@@ -12,7 +12,30 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **An export asks what it is about to write.** The settings decide what reaches a
+  stage screen and were invisible the rest of the time, so pressing Export now shows
+  them first, with the song or the number of songs it is about to write. **Use these
+  every time** makes it stop asking; **Ask for these before every export** in Settings
+  turns it back on. Cancelling writes nothing, and ticking the box and then cancelling
+  agrees to nothing either.
+- **Settings survive a restart.** Nothing was remembered before, so every launch began
+  on the defaults. The seven that matter are now kept in `%LOCALAPPDATA%\PCCI\
+  settings.json` on Windows and in the usual place on a Mac. A file that cannot be read
+  or written means the defaults, never an error.
+
+### Changed
+
+- **The default is the Chords stage element alone**, without the slide notes beside it
+  (`--chords inline`). Both halves were stage-only, so this changes nothing about what
+  the audience sees; it writes the one route that can transpose, and leaves the notes
+  to anyone whose stage layout is built around them.
+
+### Fixed
+
+- The Windows settings dialog was cut off at the bottom: the last setting and the
+  engine path sat below the edge with no way to reach them. It scrolls now.
 
 ## [0.3.1] — 2026-09-23
 

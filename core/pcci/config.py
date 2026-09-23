@@ -217,11 +217,10 @@ class ConversionConfig(BaseModel):
     #: Which program the file is for. The writer, the extension and what a chord route
     #: can do all follow from this.
     export_target: ExportTarget = ExportTarget.PROPRESENTER
-    #: Chords into the slide text for the Chords stage element, *and* into the slide
-    #: notes. The notes are the belt to the inline route's braces: both are stage-only,
-    #: neither costs anything on the audience screen, and if a stage layout has only
-    #: one of the two elements on it the chords still arrive.
-    chord_delivery: ChordDelivery = ChordDelivery.INLINE_NOTES
+    #: Chords into the slide text, where both programs' own Chords stage element reads
+    #: them. Stage-only: the switch that would draw them on the audience screen is
+    #: ``chords_on_slide``, and it is off.
+    chord_delivery: ChordDelivery = ChordDelivery.INLINE
     chord_placement: ChordPlacementStyle = ChordPlacementStyle.CHORDS_ONLY
     include_annotations_in_notes: bool = True
     #: Whether the program *draws* the inline chords on the text element itself.

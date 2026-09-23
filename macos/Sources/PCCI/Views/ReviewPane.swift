@@ -1,4 +1,3 @@
-import AppKit
 import SwiftUI
 
 /// The screen that matters: what the parser guessed, and the chance to fix it.
@@ -48,7 +47,7 @@ struct ReviewPane: View {
             .padding(.vertical, 7)
             .glassPanel(cornerRadius: 10)
 
-            Button("Export…") { exportPanel() }
+            Button("Export…") { state.beginExport(document) }
                 .buttonStyle(GoldenGateButtonStyle())
                 .disabled(state.isBusy || document.plan == nil)
         }
@@ -61,17 +60,6 @@ struct ReviewPane: View {
         return guessed == 0 ? base : "\(base) · \(guessed) guessed, worth a look"
     }
 
-    private func exportPanel() {
-        let target = state.config.exportTarget
-        let panel = NSSavePanel()
-        let name = document.plan?.song.title ?? document.url.deletingPathExtension().lastPathComponent
-        panel.nameFieldStringValue = "\(name).\(target.fileExtension)"
-        panel.message = "Where should the \(target.title) file go?"
-        panel.canCreateDirectories = true
-        if panel.runModal() == .OK, let url = panel.url {
-            Task { await state.export(document, to: url) }
-        }
-    }
 }
 
 /// The detected sections, reorderable and editable.

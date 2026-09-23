@@ -126,6 +126,9 @@ public sealed partial class ReviewView : UserControl
         if (_state is null || _document is null) return;
         var window = (App.Current as App)?.MainWindowInstance;
         if (window is null) return;
+        // The settings decide what reaches a stage screen, so they get one last look
+        // before anything is written - unless the user has said not to ask.
+        if (!await SettingsDialog.ConfirmAsync(_state, XamlRoot)) return;
         var suggested = SanitiseFileName(_document.Title);
         var destination = await window.PickDestinationAsync(suggested);
         if (destination is null) return;

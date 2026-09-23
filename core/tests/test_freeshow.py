@@ -204,14 +204,16 @@ def test_a_repeated_section_is_played_twice_not_written_twice() -> None:
     assert layout["slides"][0]["id"] == layout["slides"][1]["id"]
 
 
-def test_notes_carry_the_chord_block(show) -> None:
+def test_notes_carry_the_chord_block(fixtures_dir: Path) -> None:
+    config = freeshow_config(chord_delivery=ChordDelivery.INLINE_NOTES)
+    _, show = build_show(plan_slides(analyze(fixtures_dir / CHART), config))
     with_notes = [slide for slide in show["slides"].values() if slide["notes"].strip()]
-    assert with_notes, "the default route also writes the notes a stage layout can show"
+    assert with_notes, "the notes a stage layout can show are written too"
 
 
-def test_the_notes_are_left_out_when_nobody_asked(plan) -> None:
-    config = freeshow_config(chord_delivery=ChordDelivery.INLINE)
-    _, show = build_show(plan_slides(plan.song, config))
+def test_the_notes_are_left_out_by_default(plan) -> None:
+    """The default route feeds the Chords element and nothing else."""
+    _, show = build_show(plan)
     assert all(not slide["notes"].strip() for slide in show["slides"].values())
 
 

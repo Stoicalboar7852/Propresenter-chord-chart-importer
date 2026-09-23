@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -104,10 +105,16 @@ public sealed partial class AppState : ObservableObject
     [ObservableProperty] private int linesPerSlide = 4;
     /// <summary>Which program the files are written for. Decides the writer and the extension.</summary>
     [ObservableProperty] private string exportTarget = "propresenter";
-    // Chords into the slide text for the Chords stage element, and into the notes as
-    // well: both are stage-only, and a layout with one of the two elements on it still
-    // gets the chords.
-    [ObservableProperty] private string chordDelivery = "inline+notes";
+    // Chords into the slide text, which is what both programs' Chords stage element
+    // reads. Stage-only: the switch that would draw them on the audience screen is
+    // ChordsOnSlide, and it is off.
+    [ObservableProperty] private string chordDelivery = "inline";
+    /// <summary>
+    /// Whether an export stops to show the settings first. On until somebody says
+    /// otherwise: these settings decide what reaches a stage screen, and the export is
+    /// the moment to find that out.
+    /// </summary>
+    [ObservableProperty] private bool askBeforeExport = true;
     [ObservableProperty] private string chordPlacement = "chords_only";
     /// <summary>
     /// Whether ProPresenter paints the inline chords onto the text element itself.
@@ -145,6 +152,52 @@ public sealed partial class AppState : ObservableObject
     public ObservableCollection<SongMatch> SearchResults { get; } = new();
     /// <summary>What the sources had to say for themselves, and what an import warned.</summary>
     public ObservableCollection<string> SearchNotes { get; } = new();
+
+    /// <summary>The settings that are written to disk and read back on the next launch.</summary>
+    private static readonly HashSet<string> Remembered = new()
+    {
+        nameof(ExportTarget), nameof(ChordDelivery), nameof(ChordPlacement),
+        nameof(ChordsOnSlide), nameof(WriteChordPro), nameof(LinesPerSlide),
+        nameof(AskBeforeExport)
+    };
+
+    private bool _loadingPreferences;
+
+    public AppState()
+    {
+        _loadingPreferences = true;
+        var saved = Preferences.Load();
+        ExportTarget = saved.ExportTarget;
+        ChordDelivery = saved.ChordDelivery;
+        ChordPlacement = saved.ChordPlacement;
+        ChordsOnSlide = saved.ChordsOnSlide;
+        WriteChordPro = saved.WriteChordPro;
+        LinesPerSlide = saved.LinesPerSlide;
+        AskBeforeExport = saved.AskBeforeExport;
+        _loadingPreferences = false;
+    }
+
+    /// <summary>
+    /// Every change to a remembered setting writes the file. There are seven of them
+    /// and the file is a few hundred bytes, so there is nothing to be gained by being
+    /// clever about when.
+    /// </summary>
+    protected override void OnPropertyChanged(PropertyChangedEventArgs args)
+    {
+        base.OnPropertyChanged(args);
+        if (_loadingPreferences || args.PropertyName is null) return;
+        if (!Remembered.Contains(args.PropertyName)) return;
+        new Preferences
+        {
+            ExportTarget = ExportTarget,
+            ChordDelivery = ChordDelivery,
+            ChordPlacement = ChordPlacement,
+            ChordsOnSlide = ChordsOnSlide,
+            WriteChordPro = WriteChordPro,
+            LinesPerSlide = LinesPerSlide,
+            AskBeforeExport = AskBeforeExport
+        }.Save();
+    }
 
     public static bool Accepts(string path) => Accepted.Contains(Path.GetExtension(path));
 

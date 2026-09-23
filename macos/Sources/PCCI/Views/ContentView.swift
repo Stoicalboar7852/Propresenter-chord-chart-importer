@@ -28,7 +28,7 @@ struct ContentView: View {
                 // to miss, and an SF Symbol the running system does not have draws
                 // nothing at all.
                 Button {
-                    state.chooseFolderAndConvertAll()
+                    state.beginConvertAll()
                 } label: {
                     Label("Convert All", systemImage: "tray.and.arrow.down")
                         .labelStyle(.titleAndIcon)
@@ -52,6 +52,7 @@ struct ContentView: View {
 
     @ViewBuilder
     private var detail: some View {
+        @Bindable var state = state
         VStack(spacing: 0) {
             if let error = state.banner {
                 ErrorBanner(error: error) { state.banner = nil }
@@ -61,6 +62,16 @@ struct ContentView: View {
             } else {
                 StartPane()
             }
+        }
+        // On the detail pane rather than the window, because the log console already
+        // has the window's sheet and two of them on one view do not take turns.
+        .sheet(
+            isPresented: Binding(
+                get: { state.pendingExport != nil },
+                set: { showing in if !showing { state.cancelPendingExport() } }
+            )
+        ) {
+            ExportSettingsSheet()
         }
     }
 }
@@ -143,7 +154,7 @@ struct QueueSidebar: View {
                 .font(.caption)
 
                 Button {
-                    state.chooseFolderAndConvertAll()
+                    state.beginConvertAll()
                 } label: {
                     Text("Convert All\u{2026}")
                         .frame(maxWidth: .infinity)

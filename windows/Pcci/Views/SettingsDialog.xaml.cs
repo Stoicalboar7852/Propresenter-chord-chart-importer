@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Pcci.Services;
@@ -9,12 +10,39 @@ namespace Pcci;
 public sealed partial class SettingsDialog : ContentDialog
 {
     private readonly AppState _state;
+    private readonly bool _beforeExport;
     private bool _loading = true;
 
-    public SettingsDialog(AppState state)
+    /// <param name="beforeExport">
+    /// True when this is the stop on the way to an export rather than the Settings
+    /// menu. The settings are the same either way; what changes is that there is
+    /// something to cancel, and that the switch offers to stop asking rather than to
+    /// start.
+    /// </param>
+    public SettingsDialog(AppState state, bool beforeExport = false)
     {
         InitializeComponent();
         _state = state;
+        _beforeExport = beforeExport;
+
+        if (beforeExport)
+        {
+            Title = "Check these before exporting";
+            PrimaryButtonText = "Export";
+            CloseButtonText = "Cancel";
+            DefaultButton = ContentDialogButton.Primary;
+            AskToggle.Header = "Use these every time";
+            AskNote.Text = "Exporting will not stop to ask again. You can turn it back "
+                           + "on in Settings whenever you like.";
+            // Not settings for an export: how the app looks, and where its engine is.
+            ThemeCombo.Visibility = Visibility.Collapsed;
+            EngineText.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            AskNote.Text = "The settings decide what reaches your stage screen, so an "
+                           + "export offers them one last time before it writes anything.";
+        }
 
         Select(ExportTargetCombo, state.ExportTarget);
         Select(ChordDeliveryCombo, state.ChordDelivery);
@@ -22,12 +50,37 @@ public sealed partial class SettingsDialog : ContentDialog
         UpdateInlineWarning();
         Select(ChordPlacementCombo, state.ChordPlacement);
         ChordProToggle.IsOn = state.WriteChordPro;
+        // In the Settings menu the switch says whether the app asks; on the way to an
+        // export it offers to stop, so it starts off and reads the other way round.
+        AskToggle.IsOn = beforeExport ? !state.AskBeforeExport : state.AskBeforeExport;
         Select(ThemeCombo, "default");
 
         EngineText.Text = EngineClient.FindEngine() is { } path
             ? $"Engine: {path}"
             : "Engine: not found. PCCI cannot convert anything until it is reinstalled.";
         _loading = false;
+    }
+
+    /// <summary>
+    /// Show the settings on the way to an export. True means go ahead; false means the
+    /// user cancelled and nothing should be written.
+    /// </summary>
+    public static async Task<bool> ConfirmAsync(AppState state, XamlRoot root)
+    {
+        if (!state.AskBeforeExport) return true;
+        var dialog = new SettingsDialog(state, beforeExport: true) { XamlRoot = root };
+        var answer = await dialog.ShowAsync();
+        if (answer != ContentDialogResult.Primary) return false;
+        // Only once the export is actually going ahead: somebody who ticks the box and
+        // then cancels has not agreed to anything.
+        if (dialog.AskToggle.IsOn) state.AskBeforeExport = false;
+        return true;
+    }
+
+    private void OnAskToggled(object sender, RoutedEventArgs args)
+    {
+        if (_loading || _beforeExport) return;
+        _state.AskBeforeExport = AskToggle.IsOn;
     }
 
     private static void Select(ComboBox combo, string tag)

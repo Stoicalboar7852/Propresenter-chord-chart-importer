@@ -134,7 +134,7 @@ def _plan_options(function: Callable[..., Any]) -> Callable[..., Any]:
         "--chords",
         type=click.Choice([choice.value for choice in ChordDelivery]),
         default=None,
-        help="How chords reach the stage screen (default inline+notes).",
+        help="How chords reach the stage screen (default inline).",
     )(function)
     function = click.option(
         "--chords-on-slide/--no-chords-on-slide",

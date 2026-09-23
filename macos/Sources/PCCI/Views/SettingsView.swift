@@ -1,18 +1,17 @@
 import SwiftUI
 
-/// The settings window, on ⌘, where a Mac user looks for it.
+/// Everything that decides what a conversion writes.
 ///
-/// Until now these were fixed in code: notes *and* a chord chart, chords aligned under
-/// the words. Those are still the defaults, and they are still the right ones for most
-/// people — but the route that feeds ProPresenter's own Chords element can only be
-/// chosen deliberately, so there has to be somewhere to choose it.
+/// Sections rather than a whole screen, because two places show them: the settings
+/// window, and the screen an export stops at on its way to the file panel. One copy of
+/// them means the two cannot drift apart.
 @MainActor
-struct SettingsView: View {
+struct ConversionSettingsSections: View {
     @Environment(AppState.self) private var state
 
     var body: some View {
         @Bindable var state = state
-        Form {
+        Group {
             Section("Export") {
                 Picker(
                     "Write files for",
@@ -117,8 +116,95 @@ struct SettingsView: View {
                     .foregroundStyle(Theme.secondaryText)
             }
         }
+    }
+}
+
+/// The settings window, on ⌘, where a Mac user looks for it.
+@MainActor
+struct SettingsView: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        @Bindable var state = state
+        Form {
+            ConversionSettingsSections()
+
+            Section("Exporting") {
+                Toggle("Ask for these before every export", isOn: $state.askBeforeExport)
+                Text(
+                    "These settings decide what reaches your stage screen, so an export "
+                        + "offers them one last time before it writes anything."
+                )
+                .font(.caption)
+                .foregroundStyle(Theme.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+            }
+        }
         .formStyle(.grouped)
         .frame(width: 460)
         .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// The same settings, on the way to an export.
+///
+/// The point of stopping here is that the settings are invisible the rest of the time
+/// and they decide what a congregation sees. Anyone who would rather not be stopped
+/// says so with one switch, and can say the opposite again in Settings.
+@MainActor
+struct ExportSettingsSheet: View {
+    @Environment(AppState.self) private var state
+    @State private var remember = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Check these before exporting")
+                    .font(.headline)
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(Theme.secondaryText)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 8)
+
+            Form {
+                ConversionSettingsSections()
+            }
+            .formStyle(.grouped)
+
+            Divider()
+
+            HStack(spacing: 12) {
+                Toggle("Use these every time", isOn: $remember)
+                    .help("Export without stopping here again. Settings can turn it back on.")
+                Spacer()
+                Button("Cancel") { state.cancelPendingExport() }
+                    .keyboardShortcut(.cancelAction)
+                Button("Export\u{2026}") { state.confirmPendingExport(remember: remember) }
+                    .keyboardShortcut(.defaultAction)
+                    .buttonStyle(GoldenGateButtonStyle())
+            }
+            .padding(16)
+        }
+        .frame(width: 520, height: 640)
+    }
+}
+
+extension ExportSettingsSheet {
+    /// What is about to be written, so the screen is about this export and not settings
+    /// in the abstract.
+    private var title: String {
+        switch state.pendingExport {
+        case .all:
+            let count = state.documents.count
+            return count == 1 ? "One song" : "\(count) songs"
+        case .single(let id):
+            return state.documents.first { $0.id == id }?.name ?? "One song"
+        case nil:
+            return ""
+        }
     }
 }
