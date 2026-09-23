@@ -14,6 +14,16 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 Nothing yet.
 
+## [0.3.1] — 2026-09-23
+
+### Fixed
+
+- **Back to review did nothing on Windows.** The button set the chart back to the
+  review stage, but the window only watched the app's own settings for changes, not
+  the chart's, so it went on showing the export screen. It watches the chart now,
+  which also covers anything else that changes one behind the window's back. The Mac
+  app was never affected.
+
 ## [0.3.0] — 2026-09-23
 
 ### Added
@@ -184,7 +194,8 @@ First release.
 - A Windows installer that asks where to install and offers a desktop shortcut, plus a
   portable zip.
 
-[Unreleased]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.1.2...v0.3.0
 [0.2.0]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/releases/tag/v0.1.0

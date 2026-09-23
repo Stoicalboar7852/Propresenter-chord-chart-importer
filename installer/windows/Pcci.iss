@@ -28,7 +28,7 @@
   #define OutputName "PCCI-setup"
 #endif
 #ifndef AppVersion
-  #define AppVersion "0.3.0"
+  #define AppVersion "0.3.1"
 #endif
 #ifndef Arch
   #define Arch "x64"

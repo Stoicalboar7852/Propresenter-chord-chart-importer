@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pcci"
-version = "0.3.0"
+version = "0.3.1"
 description = "ProPresenter Chord Chart Importer engine: chord charts in any common document format to ProPresenter 7 .pro presentations"
 readme = "README.md"
 requires-python = ">=3.12"
