@@ -8,12 +8,17 @@ UIs must never have to parse prose.
 from __future__ import annotations
 
 import json
+import os
 import shutil
+import subprocess
+import sys
 from pathlib import Path
+from unittest import mock
 
 import pytest
 from click.testing import CliRunner
 
+from pcci import cli as cli_module
 from pcci.cli import EXIT_INTERNAL, EXIT_UNSUPPORTED, EXIT_USER_INPUT, cli
 from pcci.propresenter.bindings import load_bindings
 
@@ -189,6 +194,55 @@ def test_logs_go_to_stderr_as_json_lines(
     for line in lines:
         payload = json.loads(line)
         assert set(payload) >= {"level", "msg", "ts"}
+
+
+def test_non_ascii_survives_a_legacy_code_page(tmp_path: Path) -> None:
+    """A song title with an accent or a Japanese character used to kill the run.
+
+    This has to be a real process: on Windows a pipe hands the engine the machine's
+    legacy code page, and a CliRunner writes into a string that has no encoding to get
+    wrong. PYTHONIOENCODING is how that is reproduced anywhere else.
+    """
+    chart = tmp_path / "chart.txt"
+    chart.write_text(
+        "Caf\u00e9 \u5343\n\nVerse 1\nG\nSinging in the caf\u00e9 tonight\n",
+        encoding="utf-8",
+    )
+    result = subprocess.run(
+        [sys.executable, "-m", "pcci.cli", "analyze", str(chart), "--json"],
+        capture_output=True,
+        env={**os.environ, "PYTHONIOENCODING": "cp1252"},
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr.decode("utf-8", "replace")
+    payload = json.loads(result.stdout.decode("utf-8"))
+    assert payload["title"] == "Caf\u00e9 \u5343"
+
+
+def test_pasted_text_survives_a_legacy_code_page(tmp_path: Path) -> None:
+    """The same for the way in: the apps write UTF-8 down the engine's standard input."""
+    pasted = "Caf\u00e9 \u5343\n\nVerse 1\nG\nSinging in the caf\u00e9 tonight\n"
+    result = subprocess.run(
+        [sys.executable, "-m", "pcci.cli", "paste", "-d", str(tmp_path), "--json"],
+        input=pasted.encode("utf-8"),
+        capture_output=True,
+        env={**os.environ, "PYTHONIOENCODING": "cp1252"},
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr.decode("utf-8", "replace")
+    payload = json.loads(result.stdout.decode("utf-8"))
+    assert payload["title"] == "Caf\u00e9 \u5343"
+
+
+def test_streams_that_cannot_be_reconfigured_are_left_alone() -> None:
+    """Somebody else's stream is somebody else's business."""
+
+    class Stubborn:
+        def reconfigure(self, **_: object) -> None:
+            raise ValueError("not this one")
+
+    with mock.patch.object(cli_module.sys, "stdout", Stubborn()):
+        cli_module.use_utf8_streams()  # must not raise
 
 
 def test_unsupported_format_exits_three(runner: CliRunner, tmp_path: Path) -> None:

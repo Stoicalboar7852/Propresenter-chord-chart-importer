@@ -56,11 +56,11 @@ jobs:
       || inputs.targets == 'windows-x64'
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "8.0.x"
 
@@ -70,7 +70,7 @@ jobs:
       - name: The engine inside it runs
         run: build\windows\win-x64\engine\pcci.exe doctor
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: PCCI-windows-x64
           path: |
@@ -86,11 +86,11 @@ jobs:
       || inputs.targets == 'windows-arm64'
     runs-on: ${{ inputs.windows_arm_runner || 'windows-11-arm' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "8.0.x"
 
@@ -100,7 +100,7 @@ jobs:
       - name: The engine inside it runs
         run: build\windows\win-arm64\engine\pcci.exe doctor
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: PCCI-windows-arm64
           path: |
@@ -119,8 +119,8 @@ jobs:
     # is that a Mac running 26 gets real glass rather than the fallback.
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -130,7 +130,7 @@ jobs:
       - name: The engine inside it runs
         run: build/macos/PCCI.app/Contents/Resources/engine/pcci doctor
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: PCCI-macos-arm64
           path: build/macos/PCCI.dmg

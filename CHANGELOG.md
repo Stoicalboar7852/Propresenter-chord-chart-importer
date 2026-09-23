@@ -34,6 +34,11 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ### Fixed
 
+- **A search could fail with "UnicodeEncodeError: 'charmap' codec can't encode".**
+  Windows hands a program whose output is a pipe the machine's legacy code page, and
+  one character outside it - an accent, an em dash, a Japanese title - killed the run.
+  The engine now reads and writes UTF-8 whatever the code page says, which also fixes
+  pasted text quietly arriving mangled.
 - The Windows settings dialog was cut off at the bottom: the last setting and the
   engine path sat below the edge with no way to reach them. It scrolls now.
 

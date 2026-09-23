@@ -12,6 +12,7 @@ internal error. The front-ends must never parse human-readable text.
 
 from __future__ import annotations
 
+import contextlib
 import json
 import sys
 from collections.abc import Callable
@@ -49,6 +50,27 @@ EXIT_OK = 0
 EXIT_USER_INPUT = 2
 EXIT_UNSUPPORTED = 3
 EXIT_INTERNAL = 4
+
+
+def use_utf8_streams() -> None:
+    """Read and write UTF-8 whatever the console's code page says.
+
+    On Windows a program whose output is a pipe gets the machine's legacy code page -
+    cp1252 on most of them - and one character outside it kills the run:
+    ``UnicodeEncodeError: 'charmap' codec can't encode``. A search that finds a song
+    with an accent, an em dash or a Japanese title is enough, which is exactly what
+    happened.
+
+    Everything on the other end of these pipes reads and writes UTF-8: both apps set it
+    explicitly, and every other platform already uses it.
+    """
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        # A stream that refuses belongs to somebody else: leave it as it is.
+        with contextlib.suppress(ValueError, OSError):
+            reconfigure(encoding="utf-8", errors="replace")
 
 
 def emit(payload: dict[str, Any], *, as_json: bool, human: Callable[[], None]) -> None:
@@ -816,6 +838,7 @@ def doctor_command(context: click.Context, /, as_json: bool) -> None:
 
 def main() -> None:
     """Console-script entry point."""
+    use_utf8_streams()
     cli(obj={}, standalone_mode=True)
 
 
