@@ -60,6 +60,25 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ### Fixed
 
+- **A line of the song was read as a note to the band and never reached a slide.**
+  Any short line containing one word off the performance-instruction list - "break",
+  "hold", "stop", "times" - was treated as an instruction, so "We break the power of
+  death" went into the notes instead of onto the screen. A line that reads as a
+  sentence is now a lyric whatever words it contains: a pronoun, an article or a
+  determiner says somebody is doing something, which "Drum break" and "HOLD G X 8
+  BARS" never do. Capitals no longer outvote that, because some charts are typed
+  entirely in capitals.
+- **A mistyped chord was projected as a lyric.** One real chart writes `Dmd/E` on a
+  line where every sibling line carries a plain `Dm`, `F` or `B/E`. It is not a chord,
+  so the line was read as words and the typo went on the audience screen. A line whose
+  every token is *built* like a chord - starting on a root, short, carrying a slash
+  bass or an accidental or an extension number - is a chart with a typo in it, and is
+  kept exactly as written with a warning naming what pcci did not recognise. `God/Man`
+  and `Bed` are still words.
+- **A long chord was projected as a lyric.** `Bbsus4/D` and `Cmaj7/G` are longer than
+  the guard that stops long English words being read as chords, so a line of nothing
+  but those went to the audience screen. Length cannot make a chord into a word.
+- A line reading only `(x3)` was projected. It is furniture, not something to sing.
 - An imported song could come back **missing its first section**. Lyrics sites run
   their own page furniture — a contributor count and the song's name — straight into
   the first heading with no line break, so the heading was really the tail of a long

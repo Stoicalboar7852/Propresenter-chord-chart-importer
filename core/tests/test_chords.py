@@ -10,6 +10,7 @@ from pcci.parse.chords import (
     LineClass,
     classify_line,
     find_inline_lyric_start,
+    is_chord_shaped,
     is_chord_token,
     normalise_chord,
     parse_chord,
@@ -103,6 +104,50 @@ def test_real_lyric_lines_are_not_chord_lines(line: str) -> None:
 )
 def test_real_chord_lines_are_chord_lines(line: str) -> None:
     assert classify_line(line) is LineClass.CHORD
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        # Real charts have typos in them. Reading one as a lyric puts it on the
+        # audience screen, which is the one thing that must never happen.
+        "Dmd/E",
+        "F#maj77",
+        "Am7 Dmd/E G",
+        # And a chord can simply be longer than an English word.
+        "Cmaj7/G",
+        "Bbsus4/D  Cmaj7/G",
+    ],
+)
+def test_a_chart_with_a_typo_in_it_is_still_a_chord_line(line: str) -> None:
+    assert classify_line(line) is LineClass.CHORD
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        # A slash between two words is not a slash chord: the bass has to be a note.
+        "God/Man",
+        "Do/Re",
+        # No mark English does not use, so these are words.
+        "Bed",
+        "Cab",
+        "Face",
+    ],
+)
+def test_a_word_is_not_a_mistyped_chord(line: str) -> None:
+    assert classify_line(line) is LineClass.LYRIC
+
+
+@pytest.mark.parametrize("token", ["Dmd/E", "F#maj77", "Gm7b"])
+def test_chord_shaped_tokens(token: str) -> None:
+    assert is_chord_shaped(token)
+
+
+@pytest.mark.parametrize("token", ["God/Man", "Bed", "Cab", "Am", "G", "free", "Do/Re"])
+def test_tokens_that_are_not_chord_shaped(token: str) -> None:
+    # A real chord is not "chord shaped": it is a chord, which the grammar already has.
+    assert not is_chord_shaped(token)
 
 
 @pytest.mark.parametrize("line", ["A", "Am", "Do"])

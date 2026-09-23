@@ -185,10 +185,76 @@ def test_repeated_sections_share_an_identity(fixtures_dir: Path) -> None:
         ("Goodbye yesterday", False),
         ("I have decided", False),
         ("The world behind, the cross before", False),
+        # A label, with nobody doing anything: a note.
+        ("Drum break", True),
+        ("Repeat until fade", True),
+        ("Key change", True),
+        ("Key change to D", True),
+        ("Tacet", True),
+        # A sentence, whatever word it happens to contain: a line of the song. Each of
+        # these was read as a performance note once, and never reached a slide.
+        ("We break the silence with a song", False),
+        ("Hold me in the storm", False),
+        ("Nothing can stop this joy", False),
+        ("Break every chain", False),
+        ("Times of refreshing", False),
+        # Upper case is how charts write notes, but it cannot outvote a sentence: some
+        # charts are typed entirely in capitals.
+        ("WE BREAK THE SILENCE WITH A SONG", False),
     ],
 )
 def test_instruction_detection(text: str, expected: bool) -> None:
     assert is_instruction(text) is expected
+
+
+def test_a_lyric_with_an_instruction_word_still_reaches_the_slide() -> None:
+    """The bug this guards: one word off the list took a whole line off the screen."""
+    chart = (
+        "Hymn\n\n"
+        "Verse 1\n"
+        "G              C\n"
+        "We break the silence with a song\n"
+        "         D\n"
+        "Hold me in the storm\n"
+    )
+    song = _song_from(chart)
+    lyrics = [line.lyrics for section in song.sections for line in section.lines]
+    assert lyrics == ["We break the silence with a song", "Hold me in the storm"]
+    assert all(line.annotation is None for section in song.sections for line in section.lines)
+
+
+def test_a_mistyped_chord_never_becomes_a_lyric() -> None:
+    """A real chart wrote "Dmd/E" where every other line of the section had a chord."""
+    chart = (
+        "Hymn\n\n"
+        "Verse 1\n"
+        "            Dm\n"
+        "Amazing grace how sweet the sound\n"
+        "           Dmd/E\n"
+        "That saved a wretch like me\n"
+    )
+    song = _song_from(chart)
+    lyrics = [line.lyrics for section in song.sections for line in section.lines]
+    assert lyrics == ["Amazing grace how sweet the sound", "That saved a wretch like me"]
+
+    chords = [
+        placement.chord
+        for section in song.sections
+        for line in section.lines
+        for placement in line.chords
+    ]
+    assert chords == ["Dm", "Dmd/E"], "kept exactly as the chart wrote it"
+    assert any("Dmd/E" in warning for warning in song.warnings), "and said so"
+
+
+def _song_from(chart: str) -> Song:
+    """Parse a chart written inline, the way a text ingester would hand it over."""
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / "chart.txt"
+        path.write_text(chart, encoding="utf-8")
+        return analyze(path)
 
 
 def test_trailing_instructions_are_split_off_lyrics() -> None:

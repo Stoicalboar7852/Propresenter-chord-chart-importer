@@ -21,6 +21,7 @@ from pcci.ingest import ingest
 from pcci.ingest.chordpro import parse_chordpro
 from pcci.ir import Line, PositionedLine, RawDocument, Section, SectionType, Song
 from pcci.parse.align import align_chords, split_inline_line
+from pcci.parse.chords import is_chord_token
 from pcci.parse.metadata import extract_metadata
 from pcci.parse.sections import (
     CONFIDENCE_FALLBACK,
@@ -74,6 +75,15 @@ def build_song(document: RawDocument) -> Song:
     assign_section_numbers(sections)
 
     warnings = list(document.warnings) + metadata.warnings
+    unrecognised = _unrecognised_chords(sections)
+    if unrecognised:
+        # Kept, not corrected. A chart that says "Dmd/E" has a typo in it and the band
+        # can see what was written; guessing at what was meant would be worse, and
+        # calling it a lyric would put it on the audience screen.
+        warnings.append(
+            "These are not chords pcci recognises, and were kept exactly as the chart "
+            "wrote them: " + ", ".join(unrecognised) + "."
+        )
     low_confidence = [s.label for s in sections if s.confidence < 0.9]
     if low_confidence:
         warnings.append(
@@ -94,6 +104,18 @@ def build_song(document: RawDocument) -> Song:
         source_path=document.source_path,
         source_format=document.source_format,
     )
+
+
+def _unrecognised_chords(sections: list[Section]) -> list[str]:
+    """Chord tokens that were kept on a chord line without parsing as chords."""
+    found = {
+        placement.raw
+        for section in sections
+        for line in section.lines
+        for placement in line.chords
+        if not is_chord_token(placement.raw)
+    }
+    return sorted(found)
 
 
 def _prepend_title_line_chords(sections: list[Section], chord_text: str) -> None:

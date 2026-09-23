@@ -404,20 +404,20 @@
           "annotation": null
         },
         {
-          "lyrics": "",
+          "lyrics": "Nothing can stop this joy",
           "chords": [
             {
               "chord": "A",
-              "char_index": 0,
+              "char_index": 12,
               "raw": "A"
             },
             {
               "chord": "F#m",
-              "char_index": 0,
+              "char_index": 25,
               "raw": "F#m"
             }
           ],
-          "annotation": "Nothing can stop this joy"
+          "annotation": null
         },
         {
           "lyrics": "We're dancing in the streets",
