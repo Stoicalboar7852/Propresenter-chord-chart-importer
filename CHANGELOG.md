@@ -12,6 +12,10 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.3.0] — 2026-09-23
+
 ### Added
 
 - **FreeShow as well as ProPresenter.** One setting, **Write files for**, and the same
@@ -25,8 +29,8 @@ version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
   to attach them to. Every claim about the format is read out of FreeShow's own source
   and written down in `docs/FORMAT_NOTES.md` §6.
 - **A list of every domain the program contacts**, in
-  [docs/NETWORK.md](docs/NETWORK.md), for anyone whose school or office blocks the
-  search. It says what each one is for, which are optional, what is sent (the words you
+  [docs/NETWORK.md](https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/blob/main/docs/NETWORK.md),
+  for anyone whose school or office blocks the search. It says what each one is for, which are optional, what is sent (the words you
   typed, and nothing else), and has the list in a block you can paste into a ticket. A
   test keeps it honest: a source added to the engine without its domain in that file
   fails the build.
@@ -180,6 +184,7 @@ First release.
 - A Windows installer that asks where to install and offers a desktop shortcut, plus a
   portable zip.
 
-[Unreleased]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.1.2...v0.3.0
 [0.2.0]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Stoicalboar7852/Propresenter-chord-chart-importer/releases/tag/v0.1.0

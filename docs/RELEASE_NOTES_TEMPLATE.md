@@ -19,6 +19,9 @@
 | A Windows PC, Intel or AMD | `PCCI-win-x64-setup.exe` |
 | A Windows PC on ARM (Snapdragon, Surface Pro 11) | `PCCI-win-arm64-setup.exe` |
 
+The same app writes for **ProPresenter 7** and for **FreeShow** — one setting decides
+which, and there is nothing extra to download for either.
+
 Not sure which Windows you have? **Settings → System → About → System type**. The
 `.zip` files are the same apps as a folder, for anyone who would rather not run an
 installer.
@@ -37,16 +40,23 @@ Neither build is signed, so each system will question it once.
 
 ## How tested is this
 
-The conversion engine is covered by 400-odd tests and is checked on Linux, macOS and
+The conversion engine is covered by 500-odd tests and is checked on Linux, macOS and
 Windows on every change, including a real conversion through the frozen copy that ships
-inside each app. Both apps are compiled and packaged by the same automation that
-produced these files.
+inside each app — in both formats. Both apps are compiled and packaged by the same
+automation that produced these files.
 
 What has *not* happened yet is a Sunday. If something misbehaves, the engine log (the
 button in the top right) says what it saw, and issues are welcome.
 
 ## Setting up your stage screen
 
-Chords never appear on the audience output. To see them on stage, add a **Current Slide
-Notes** or **Chord Chart** element to your stage layout — `docs/STAGE_SETUP.md` has the
-steps.
+Chords never appear on the audience output. To see them on stage, add a **Chords** or a
+**Current Slide Notes** element to your stage layout — a conversion feeds both of those
+out of the box. In FreeShow they are a **Slide Text** item with Chords turned on, and a
+**Slide Notes** item. `docs/STAGE_SETUP.md` has the steps for either program.
+
+## Blocked at school or work?
+
+The song search talks to a handful of public music and lyrics sites. `docs/NETWORK.md`
+lists every domain, says what each one is for, and has the list in a block you can paste
+into a ticket. Converting a file you already have needs no network at all.
