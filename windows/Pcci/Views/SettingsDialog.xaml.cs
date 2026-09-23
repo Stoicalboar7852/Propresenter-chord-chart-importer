@@ -1,3 +1,7 @@
+// `using System;` is load-bearing: the awaiter for a WinRT IAsyncOperation - which is
+// what ShowAsync returns - comes from WindowsRuntimeSystemExtensions in the System
+// namespace, so without it the await fails to compile with CS4036.
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
